@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Input } from "../components/Input";
-import { Button } from "../components/Button";
-import { Tabs, TabsList, TabsTrigger } from "../components/Tabs";
-import { Checkbox } from "../components/Checkbox";
-import { Label } from "../components/Label";
-import { Spinner } from "../components/Spinner";
+import { Input } from "../components/ui/Input";
+import { Button } from "../components/ui/Button";
+import { Tabs, TabsList, TabsTrigger } from "../components/ui/Tabs";
+import { Checkbox } from "../components/ui/Checkbox";
+import { Label } from "../components/ui/Label";
+import { Spinner } from "../components/ui/Spinner";
+import { useNavigate } from "react-router-dom";
+import LoadingScreen from "../components/ui/LoadingScreen";
 
 export default function SignUpForm() {
   const [role, setRole] = useState("user");
@@ -13,6 +15,9 @@ export default function SignUpForm() {
   const [formLoading, setFormLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
+  const [showRedirect, setShowRedirect] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -23,10 +28,13 @@ export default function SignUpForm() {
       setFormLoading(false);
 
       setTimeout(() => {
-        setFormSubmitted(false);
-        // Optional: redirect or toast
-      }, 2000);
-    }, 2000);
+        setShowRedirect(true);
+
+        setTimeout(() => {
+          navigate(role === "user" ? "/dashboard/user" : "/dashboard/doctor");
+        }, 1500);
+      }, 1000);
+    }, 1500);
   };
 
   const handleSendOTP = () => {
@@ -43,7 +51,7 @@ export default function SignUpForm() {
       initial={{ opacity: 0, y: -40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="max-w-md mx-auto mt-10 p-6 border border-secondary rounded-lg shadow-md bg-background text-text"
+      className="max-w-md mx-auto mt-10 p-6 border border-secondary rounded-lg shadow-md bg-background text-text relative"
     >
       <h2 className="text-2xl font-semibold mb-4 text-center">Sign Up</h2>
 
@@ -178,6 +186,10 @@ export default function SignUpForm() {
             </p>
           </motion.form>
         )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showRedirect && <LoadingScreen message="Redirecting to your dashboard..." />}
       </AnimatePresence>
     </motion.div>
   );

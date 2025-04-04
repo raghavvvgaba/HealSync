@@ -94,7 +94,7 @@ export default function Hero() {
         }}
         className="absolute bottom-10 z-10 text-accent"
       >
-        <a href="#features">
+        <a href="features">
           <svg
             className="w-6 h-6 animate-bounce"
             fill="none"
