@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { FiSun, FiMoon } from "react-icons/fi";
+import { useUser } from "../context/UserContext";
 
 const Navbar = () => {
-  const [theme, setTheme] = useState(
-    localStorage.getItem("theme") || "light"
-  );
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+  const [showMenu, setShowMenu] = useState(false);
+  const { user, setUser } = useUser();
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.documentElement.classList.remove("light", "dark");
@@ -16,6 +18,11 @@ const Navbar = () => {
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    navigate("/");
   };
 
   return (
@@ -31,25 +38,63 @@ const Navbar = () => {
           HealSync
         </motion.div>
 
-        {/* Navigation Links */}
+        {/* Navigation Links or Profile Section */}
         <motion.div
-          className="flex items-center gap-4"
+          className="flex items-center gap-4 relative"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <Link
-            to="/signup"
-            className="text-sm md:text-base px-4 py-2 rounded-xl bg-primary dark:bg-secondary text-text hover:scale-105 transition-all"
-          >
-            Sign Up
-          </Link>
-          <Link
-            to="/login"
-            className="text-sm md:text-base px-4 py-2 rounded-xl bg-accent text-text hover:scale-105 transition-all"
-          >
-            Login
-          </Link>
+          {user ? (
+            <div
+              className="relative"
+              onMouseEnter={() => setShowMenu(true)}
+              onMouseLeave={() => setShowMenu(false)}
+            >
+              {/* Profile Circle */}
+              <div className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-background font-bold text-lg cursor-pointer">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+
+              {/* Hover Dropdown */}
+              <AnimatePresence>
+                {showMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 mt-2 w-48 bg-background border border-secondary rounded-xl shadow-xl z-50 p-4 text-sm"
+                  >
+                    <div className="font-semibold text-text mb-3">
+                      {user.name}
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-3 py-2 rounded-md bg-accent text-background hover:opacity-90 transition"
+                    >
+                      Logout
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <>
+              <Link
+                to="/signup"
+                className="text-sm md:text-base px-4 py-2 rounded-xl bg-primary dark:bg-secondary text-text hover:scale-105 transition-all"
+              >
+                Sign Up
+              </Link>
+              <Link
+                to="/login"
+                className="text-sm md:text-base px-4 py-2 rounded-xl bg-accent text-text hover:scale-105 transition-all"
+              >
+                Login
+              </Link>
+            </>
+          )}
 
           {/* Theme Toggle */}
           <button

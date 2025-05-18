@@ -9,7 +9,7 @@ const MedicalHistoryModal = ({ records, onClose }) => {
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-primary hover:text-accent"
+          className="absolute top-4 pt-5 right-4 text-primary hover:text-accent"
         >
           <FiX size={22} />
         </button>

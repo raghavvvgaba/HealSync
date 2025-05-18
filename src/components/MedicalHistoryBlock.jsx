@@ -4,7 +4,7 @@ import MedicalHistoryModal from './MedicalHistoryModal';
 
 const MedicalHistoryBlock = ({ records }) => {
   const [showModal, setShowModal] = useState(false);
-  const previewCount = 3;
+  const previewCount = 1;
 
   return (
     <>

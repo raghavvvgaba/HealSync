@@ -1,47 +1,133 @@
 import React from 'react';
-import { FaFilePdf, FaImage } from 'react-icons/fa';
-import { MdLocalHospital, MdMedication } from 'react-icons/md';
+import {
+  FaHeartbeat,
+  FaNotesMedical,
+  FaFilePdf,
+  FaImage,
+} from 'react-icons/fa';
+import {
+  MdMedicalServices,
+  MdOutlineDateRange,
+  MdPerson,
+} from 'react-icons/md';
+import { GiMedicines, GiTestTubes } from 'react-icons/gi';
 
 const MedicalRecordCard = ({ record }) => {
-    const { diagnosis, medicines, fileName, fileType, fileUrl } = record;
+  const {
+    diagnosis,
+    medicines,
+    symptoms,
+    fileName,
+    fileType,
+    fileUrl,
+    visitDate,
+    doctor,
+    followUpNotes,
+    prescribedTests,
+  } = record;
 
-    return (
-        <div className="bg-surface rounded-xl p-4 shadow text-text border border-gray-600/20">
-            <div className="mb-2 flex items-center gap-2">
-                <MdLocalHospital className="text-accent" />
-                <span className="font-semibold">Diagnosis:</span>
-                <span>{diagnosis}</span>
-            </div>
+  const hoverBoxStyle =
+    'bg-surface rounded-xl p-3 shadow border-2 border-accent break-words w-full sm:w-auto transition-colors duration-200 hover:bg-accent-30';
 
-            <div className="mb-2 flex items-start gap-2">
-                <MdMedication className="text-accent mt-1" />
-                <div>
-                    <span className="font-semibold">Medicines:</span>
-                    <ul className="list-disc ml-5 text-sm">
-                        {medicines.map((med, idx) => (
-                            <li key={idx}>{med}</li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
+  return (
+    <div className="bg-surface w-full p-3 sm:p-4 shadow text-text border border-gray-600/20 flex flex-col gap-4 sm:gap-6 rounded-xl text-sm sm:text-base">
+      
+      {/* Visit Date */}
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 font-medium">
+        <MdOutlineDateRange className="text-accent shrink-0" />
+        <span className="break-words">{new Date(visitDate).toDateString()}</span>
+      </div>
 
-            <div className="mt-3 flex items-center gap-2">
-                {fileType === 'pdf' ? (
-                    <FaFilePdf className="text-red-500" />
-                ) : (
-                    <FaImage className="text-blue-400" />
-                )}
-                <a
-                    href={fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary underline text-sm"
-                >
-                    {fileName}
-                </a>
-            </div>
+      {/* Doctor Info */}
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 font-medium">
+        <MdPerson className="text-accent shrink-0" />
+        <span className="break-words">{doctor?.name} (ID: {doctor?.id})</span>
+      </div>
+
+      {/* Symptoms */}
+      <div className="flex flex-col sm:flex-row sm:items-start gap-1.5 sm:gap-4 font-medium">
+        <div className="flex items-center gap-2">
+          <FaHeartbeat className="text-accent" />
+          <h4 className="min-w-[90px] sm:min-w-[100px]">Symptoms</h4>
         </div>
-    );
+        <div className={hoverBoxStyle}>
+          {symptoms?.join(', ') || 'N/A'}
+        </div>
+      </div>
+
+      {/* Diagnosis */}
+      <div className="flex flex-col sm:flex-row sm:items-start gap-1.5 sm:gap-4 font-medium">
+        <div className="flex items-center gap-2">
+          <MdMedicalServices className="text-accent" />
+          <h4 className="min-w-[90px] sm:min-w-[100px]">Diagnosis</h4>
+        </div>
+        <div className={hoverBoxStyle}>
+          {diagnosis || 'N/A'}
+        </div>
+      </div>
+
+      {/* Medicines */}
+      <div className="flex flex-col sm:flex-row sm:items-start gap-1.5 sm:gap-4 font-medium">
+        <div className="flex items-center gap-2">
+          <GiMedicines className="text-accent" />
+          <h4 className="min-w-[90px] sm:min-w-[100px]">Medicines</h4>
+        </div>
+        <div className={hoverBoxStyle}>
+          {medicines?.join(', ') || 'N/A'}
+        </div>
+      </div>
+
+      {/* Prescribed Tests */}
+      {prescribedTests?.length > 0 && (
+        <div className="flex flex-col sm:flex-row sm:items-start gap-1.5 sm:gap-4 font-medium">
+          <div className="flex items-center gap-2">
+            <GiTestTubes className="text-accent" />
+            <h4 className="min-w-[90px] sm:min-w-[100px]">Tests</h4>
+          </div>
+          <div className={hoverBoxStyle}>
+            {prescribedTests.join(', ')}
+          </div>
+        </div>
+      )}
+
+      {/* Follow-up Notes */}
+      {followUpNotes && (
+        <div className="flex flex-col sm:flex-row sm:items-start gap-1.5 sm:gap-4 font-medium">
+          <div className="flex items-center gap-2">
+            <FaNotesMedical className="text-accent" />
+            <h4 className="min-w-[90px] sm:min-w-[100px]">Follow-up</h4>
+          </div>
+          <div className={hoverBoxStyle}>
+            {followUpNotes}
+          </div>
+        </div>
+      )}
+
+      {/* File Section */}
+      {fileUrl && (
+        <div className="flex flex-col sm:flex-row sm:items-start gap-1.5 sm:gap-4 font-medium">
+          <div className="flex items-center gap-2">
+            {fileType === 'pdf' ? (
+              <FaFilePdf className="text-accent" />
+            ) : (
+              <FaImage className="text-accent" />
+            )}
+            <h4 className="min-w-[90px] sm:min-w-[100px]">File</h4>
+          </div>
+          <div className={`${hoverBoxStyle} break-all`}>
+            <a
+              href={fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline hover:text-accent"
+            >
+              {fileName || 'View File'}
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default MedicalRecordCard;

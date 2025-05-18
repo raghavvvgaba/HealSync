@@ -3,6 +3,7 @@ import { FiMenu, FiX } from 'react-icons/fi';
 import ProfileBlock from '../../components/ProfileBlock';
 import MedicalRecordCard from '../../components/MedicalRecordCard';
 import MedicalHistoryBlock from '../../components/MedicalHistoryBlock';
+import { SharedWithBlock } from '../../components/SharedWithBlock';
 
 const dummyUser = {
     firstName: 'Ravi',
@@ -10,61 +11,83 @@ const dummyUser = {
     height: 172,
     bloodGroup: 'B+',
     diseases: ['Diabetes', 'High BP', 'Wears Specs'],
-  };
-  const dummyRecords = [
+};
+const dummyRecords = [
     {
-      diagnosis: 'Migraine',
-      medicines: ['Paracetamol 500mg', 'Sumatriptan'],
-      fileName: 'migraine_report.pdf',
-      fileType: 'pdf',
-      fileUrl: '/files/migraine_report.pdf',
+        visitDate: "2025-05-16",
+        doctor: {
+            name: "Dr. Priya Mehta",
+            id: "D-4562"
+        },
+        symptoms: ["Headaches", "Nausea", "Vomiting"],
+        diagnosis: "Migraine",
+        medicines: ["Paracetamol 500mg", "Sumatriptan"],
+        prescribedTests: ["MRI Brain", "Blood Test"],
+        followUpNotes: "Follow-up in 2 weeks if symptoms persist.",
+        fileName: "migraine-prescription.pdf",
+        fileType: "pdf",
+        fileUrl: "https://example.com/record.pdf"
     },
     {
-      diagnosis: 'Eye Checkup',
-      medicines: ['Lubricant drops'],
-      fileName: 'eye_checkup.jpeg',
-      fileType: 'image',
-      fileUrl: '/files/eye_checkup.jpeg',
+        symptoms: ['Headaches', 'Nausea', 'Vomiting'],
+        diagnosis: 'Migraine',
+        medicines: ['Paracetamol 500mg', 'Sumatriptan'],
+        fileName: 'migraine_report.pdf',
+        fileType: 'pdf',
+        fileUrl: '/files/migraine_report.pdf',
     },
     {
+        symptoms: ['Headaches', 'Nausea', 'Vomiting'],
         diagnosis: 'Eye Checkup',
         medicines: ['Lubricant drops'],
         fileName: 'eye_checkup.jpeg',
         fileType: 'image',
         fileUrl: '/files/eye_checkup.jpeg',
-      },
-      {
+    },
+    {
+        symptoms: ['Headaches', 'Nausea', 'Vomiting'],
         diagnosis: 'Eye Checkup',
         medicines: ['Lubricant drops'],
         fileName: 'eye_checkup.jpeg',
         fileType: 'image',
         fileUrl: '/files/eye_checkup.jpeg',
-      },
-      {
+    },
+    {
+        symptoms: ['Headaches', 'Nausea', 'Vomiting'],
+        diagnosis: 'Eye Checkup',
+        medicines: ['Lubricant drops'],
+        fileName: 'eye_checkup.jpeg',
+        fileType: 'image',
+        fileUrl: '/files/eye_checkup.jpeg',
+    },
+    {
+        symptoms: ['Headaches', 'Nausea', 'Vomiting'],
         diagnosis: 'Migraine',
         medicines: ['Paracetamol 500mg', 'Sumatriptan'],
         fileName: 'migraine_report.pdf',
         fileType: 'pdf',
         fileUrl: '/files/migraine_report.pdf',
-      },
-      {
+    },
+    {
+        symptoms: ['Headaches', 'Nausea', 'Vomiting'],
         diagnosis: 'Migraine',
         medicines: ['Paracetamol 500mg', 'Sumatriptan'],
         fileName: 'migraine_report.pdf',
         fileType: 'pdf',
         fileUrl: '/files/migraine_report.pdf',
-      },
-      {
+    },
+    {
+        symptoms: ['Headaches', 'Nausea', 'Vomiting'],
         diagnosis: 'Migraine',
         medicines: ['Paracetamol 500mg', 'Sumatriptan'],
         fileName: 'migraine_report.pdf',
         fileType: 'pdf',
         fileUrl: '/files/migraine_report.pdf',
-      },
-  ];
-  
-  
-  
+    },
+];
+
+
+
 
 const UserDashboard = () => {
     const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
@@ -103,10 +126,10 @@ const UserDashboard = () => {
   `}
             >
 
-                    <div className='p-6'>
-                <div className="flex items-center justify-between mb-6 text-text">
-                    <h1 className="text-xl font-bold">HealSync</h1>
-                </div>
+                <div className='p-6'>
+                    <div className="flex items-center justify-between mb-6 text-text">
+                        <h1 className="text-xl font-bold">HealSync</h1>
+                    </div>
                     {!isDesktop && (
                         <button onClick={() => setSidebarOpen(false)}>
                             <FiX size={20} />
@@ -139,22 +162,17 @@ const UserDashboard = () => {
                 )}
 
                 {/* Page Heading */}
-                <h2 className="text-2xl font-semibold mb-6">Welcome back,    {dummyUser.firstName}</h2>
+                <h2 className="text-2xl font-semibold mb-6">Welcome back, {dummyUser.firstName}</h2>
 
                 {/* Dashboard Blocks */}
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    <ProfileBlock user={dummyUser}/>
+                <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-6">
+                    <ProfileBlock user={dummyUser} />
+                    <SharedWithBlock />
                     <MedicalHistoryBlock records={dummyRecords} />
-                    <div className="bg-surface rounded-2xl h-40 p-4 shadow text-text">
-                        Shared With
-                    </div>
+
                 </div>
 
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-surface rounded-2xl h-60 p-4 shadow text-text col-span-2">
-                        Recent Records
-                    </div>
-                </div>
+
             </div>
 
         </div>
