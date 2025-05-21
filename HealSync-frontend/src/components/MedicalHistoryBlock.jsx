@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
 import MedicalRecordCard from './MedicalRecordCard';
-import MedicalHistoryModal from './MedicalHistoryModal';
+import MedicalHistoryPage from './MedicalHistoryPage';
+import { Link } from 'react-router-dom';
 
 const MedicalHistoryBlock = ({ records }) => {
-  const [showModal, setShowModal] = useState(false);
   const previewCount = 1;
+  console.log(records + "from block");
 
   return (
     <>
@@ -19,20 +19,17 @@ const MedicalHistoryBlock = ({ records }) => {
 
         {records.length > previewCount && (
           <div className="mt-4 text-center">
-            <button
-              onClick={() => setShowModal(true)}
+            <Link
+              to="medical-history"
+              state={{ records }}
               className="text-primary hover:underline text-sm font-medium"
             >
               View All Records
-            </button>
+            </Link>
           </div>
         )}
       </div>
 
-      {/* Modal Overlay */}
-      {showModal && (
-        <MedicalHistoryModal records={records} onClose={() => setShowModal(false)} />
-      )}
     </>
   );
 };

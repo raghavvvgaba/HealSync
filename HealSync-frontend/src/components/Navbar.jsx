@@ -29,14 +29,17 @@ const Navbar = () => {
     <nav className="w-full px-6 py-4 bg-background dark:bg-background shadow-md text-text dark:text-text sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo / Project Name */}
-        <motion.div
-          className="text-2xl font-bold text-primary dark:text-primary"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          HealSync
-        </motion.div>
+        <Link
+          to='/'>
+          <motion.div
+            className="text-2xl font-bold text-primary dark:text-primary"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            HealSync
+          </motion.div>
+        </Link>
 
         {/* Navigation Links or Profile Section */}
         <motion.div
