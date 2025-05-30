@@ -8,6 +8,8 @@ import { useEffect, useRef, useState } from 'react';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 
+// https://www.hover.dev/components/navigation Use this for prebuilt components
+
 const App = () => {
   const location = useLocation();
 

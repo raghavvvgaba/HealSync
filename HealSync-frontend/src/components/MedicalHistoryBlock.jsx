@@ -1,6 +1,7 @@
 import MedicalRecordCard from './MedicalRecordCard';
 import MedicalHistoryPage from './MedicalHistoryPage';
 import { Link } from 'react-router-dom';
+import { FaArrowRight } from 'react-icons/fa'
 
 const MedicalHistoryBlock = ({ records }) => {
   const previewCount = 1;
@@ -8,26 +9,13 @@ const MedicalHistoryBlock = ({ records }) => {
 
   return (
     <>
-      <div className="bg-surface text-text rounded-2xl p-6 shadow-md w-full">
-        <h2 className="text-xl font-semibold mb-4">Medical History</h2>
-
-        <div className="space-y-4">
-          {records.slice(0, previewCount).map((rec, idx) => (
-            <MedicalRecordCard key={idx} record={rec} />
-          ))}
-        </div>
-
-        {records.length > previewCount && (
-          <div className="mt-4 text-center">
-            <Link
-              to="medical-history"
-              state={{ records }}
-              className="text-primary hover:underline text-sm font-medium"
-            >
-              View All Records
-            </Link>
-          </div>
-        )}
+      <div className="bg-surface h-48 text-text rounded-2xl p-6 shadow-md">
+        <h1 className='text-xl font-semibold mb-4'>Medical History</h1>
+        <button className='text-sm md:text-base px-4 py-2 rounded-xl bg-primary dark:bg-secondary text-text hover:scale-105 transition-all flex gap-2 group'>
+         <Link to='medical-history'
+          >View Medical History</Link>
+        <FaArrowRight className='translate-y-1 group-hover:animate-pulse transition-all duration-500'/>
+        </button>
       </div>
 
     </>
