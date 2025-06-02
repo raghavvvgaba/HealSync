@@ -29,7 +29,7 @@ export default function Login() {
     try {
       const { user } = await signInWithEmailAndPassword(auth, form.email, form.password);
       console.log("Login successful:", user);
-
+      console.log(user?.email);
       if (form.role === "doctor") {
         navigate("/doctor");
       } else {
@@ -40,6 +40,7 @@ export default function Login() {
       console.error("Login failed:", error.message);
     }
   };
+  
 
   return (
     <motion.div

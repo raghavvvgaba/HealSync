@@ -7,6 +7,8 @@ import MedicalHistoryPage from './components/MedicalHistoryPage';
 import { useEffect, useRef, useState } from 'react';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
+import PrivateRoute from './components/PrivateRoute';
+import UserLayout from './pages/User/UserLayout';
 
 // https://www.hover.dev/components/navigation Use this for prebuilt components
 
@@ -31,10 +33,16 @@ const App = () => {
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/User" element={<UserDashboard />} />
-          <Route path="/User/medical-history" element={<MedicalHistoryPage direction={direction} />}/>
-          <Route path='/login' element={<Login/>}/>
-          <Route path='/signup' element={<Signup/>}/>
+          <Route path="/User" element={
+            <PrivateRoute>
+              <UserLayout />
+            </PrivateRoute>
+          } >
+            <Route path='medical-history' element={<MedicalHistoryPage />} />
+          </Route>
+
+          <Route path='/login' element={<Login />} />
+          <Route path='/signup' element={<Signup />} />
         </Routes>
       </AnimatePresence>
     </div>

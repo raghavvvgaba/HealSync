@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaUser, FaEnvelope, FaLock, FaUserMd, FaUserAlt } from "react-icons/fa";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaUserMd, FaUserAlt, FaEye, FaEyeSlash } from "react-icons/fa";
+import { useAuth } from "../context/authContext";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../config/firebase";
 
 export default function Signup() {
     const navigate = useNavigate();
+    const { signup } = useAuth();
+
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -37,10 +39,9 @@ export default function Signup() {
         setPasswordStrength(evaluatePasswordStrength(val));
     };
 
-
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
-        setFormError(""); // Clear error on typing
+        setFormError("");
     };
 
     const handleRoleSelect = (role) => {
@@ -51,32 +52,51 @@ export default function Signup() {
         e.preventDefault();
 
         if (passwordStrength === "weak") {
-            setFormError(
-                "Please choose a stronger password (include uppercase, numbers, symbols)."
-            );
+            setFormError("Please choose a stronger password (include uppercase, numbers, symbols).");
             return;
         }
 
         try {
-            const { user } = await createUserWithEmailAndPassword(
-                auth,
-                form.email,
-                form.password
-            );
-            await updateProfile(user, { displayName: form.name });
+            // Step 1: Create user
+            const cred = await createUserWithEmailAndPassword(auth, form.email, form.password);
 
+            // Step 2: Update profile name
+            await updateProfile(cred.user, { displayName: form.name });
+
+            // Step 3: Get ID token
+            const token = await cred.user.getIdToken();
+
+            // Step 4: Save profile to backend
+            const response = await fetch("http://localhost:3000/api/user/profile", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    name: form.name,
+                    email: form.email,
+                    role: form.role,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to save profile to backend");
+            }
+
+            // Step 5: Redirect user
             if (form.role === "doctor") {
                 navigate("/doctor");
             } else {
                 navigate("/user");
             }
         } catch (error) {
+            console.error("Signup failed:", error.message);
             if (error.code === "auth/email-already-in-use") {
                 setFormError("An account with this email already exists.");
             } else {
                 setFormError("Signup failed. Please try again.");
             }
-            console.error("Signup failed:", error.message);
         }
     };
 
@@ -87,38 +107,26 @@ export default function Signup() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
         >
-            <form
-                onSubmit={handleSignup}
-                className="w-full max-w-md bg-white dark:bg-accent-20 border border-accent p-6 rounded-2xl shadow-lg space-y-5"
-            >
+            <form onSubmit={handleSignup} className="w-full max-w-md bg-white dark:bg-accent-20 border border-accent p-6 rounded-2xl shadow-lg space-y-5">
                 <h2 className="text-2xl font-bold text-primary text-center">Create Account</h2>
 
                 {/* Role Tabs */}
                 <div className="flex justify-center gap-4 mb-4">
-                    <button
-                        type="button"
-                        onClick={() => handleRoleSelect("user")}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full border transition ${form.role === "user"
-                            ? "bg-primary text-white"
-                            : "border-primary text-primary hover:bg-primary/10"
-                            }`}
-                    >
-                        <FaUserAlt /> User
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() => handleRoleSelect("doctor")}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full border transition ${form.role === "doctor"
-                            ? "bg-primary text-white"
-                            : "border-primary text-primary hover:bg-primary/10"
-                            }`}
-                    >
-                        <FaUserMd /> Doctor
-                    </button>
+                    {["user", "doctor"].map((role) => (
+                        <button
+                            key={role}
+                            type="button"
+                            onClick={() => handleRoleSelect(role)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full border transition ${form.role === role
+                                ? "bg-primary text-white"
+                                : "border-primary text-primary hover:bg-primary/10"
+                                }`}
+                        >
+                            {role === "user" ? <FaUserAlt /> : <FaUserMd />} {role.charAt(0).toUpperCase() + role.slice(1)}
+                        </button>
+                    ))}
                 </div>
 
-                {/* Error Message */}
                 {formError && (
                     <div className="bg-red-100 text-red-700 text-sm px-4 py-2 rounded-md">
                         {formError}
@@ -175,7 +183,6 @@ export default function Signup() {
                         </button>
                     </div>
 
-                    {/* Conditionally show strength bar only when password is not empty */}
                     {form.password && (
                         <>
                             <div className="h-1 mt-1 rounded overflow-hidden bg-gray-200">
@@ -194,7 +201,6 @@ export default function Signup() {
                         </>
                     )}
                 </div>
-
 
                 <button
                     type="submit"
