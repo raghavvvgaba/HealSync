@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* :root {
+  --text: #020008;
+  --background: #F0F0F0;
+  --primary: #1D719D;
+  --secondary: #2C394C;
+  --accent: #eb743d;
+}
+
+.dark {
+  --text: #efedeb;
+  --background: #000000;
+  --primary: #64dbfc;
+  --secondary: #1c6f9b;
+  --accent: #eb743d;
+} */
+/* button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    var(--color-accent),
+    var(--color-primary),
+    var(--color-secondary)
+  );
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 0;
+  pointer-events: none;
+}
+
+button:hover::before {
+  opacity: 0.5;
+  transform: translateY(0);
+} */
+
