@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiSun, FiMoon } from "react-icons/fi";
-import { useUser } from "../context/UserContext";
+import { useAuth } from "../context/authContext";
 
 const Navbar = () => {
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
   const [showMenu, setShowMenu] = useState(false);
-  const { user, setUser } = useUser();
+  const {user, logout} = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,9 +20,15 @@ const Navbar = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+            await logout();
+            console.log("Logged out");
+            navigate('/login');
+        } catch (err) {
+            console.log(err);
+            console.log("Didn't logout");
+        }
   };
 
   return (
@@ -56,7 +62,7 @@ const Navbar = () => {
             >
               {/* Profile Circle */}
               <div className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-background font-bold text-lg cursor-pointer">
-                {user.name.charAt(0).toUpperCase()}
+                {user?.displayName.charAt(0).toUpperCase()}
               </div>
 
               {/* Hover Dropdown */}
@@ -70,7 +76,7 @@ const Navbar = () => {
                     className="absolute right-0 mt-2 w-48 bg-background border border-secondary rounded-xl shadow-xl z-50 p-4 text-sm"
                   >
                     <div className="font-semibold text-text mb-3">
-                      {user.name}
+                      {user?.displayName}
                     </div>
                     <button
                       onClick={handleLogout}

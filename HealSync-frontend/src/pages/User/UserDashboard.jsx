@@ -96,17 +96,12 @@ const dummyRecords = [
 const UserDashboard = () => {
     const { logout }  = useAuth();
     const navigate = useNavigate();
-    const handleLogout = async() => {
-        await logout();
-        navigate('/login');
-    }
 
     return (
         <>
             <div className='h-[calc(100vh-64px)] grid grid-cols-6 gap-3'>
                 <div className='bg-yellow-800 col-span-1 h-full p-2'>
-                    <SidebarItem icon={FaHome} title="Home" description='Lets go home baby' />
-                    <button onClick={handleLogout} className='w-20 bg-slate-900 text-red-600 hover:scale-105 duration-300 rounded-lg'>Logout</button>
+                    <SidebarItem icon={FaHome} title="Home" description='Lets go home baby'/>
                 </div>
                 <div className='col-span-5 p-5 overflow-auto'>
                     <div className='flex flex-col gap-4 md:grid md:grid-cols-2'>

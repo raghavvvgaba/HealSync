@@ -8,7 +8,6 @@ import { auth } from "../config/firebase";
 
 export default function Signup() {
     const navigate = useNavigate();
-    const { signup } = useAuth();
 
     const [form, setForm] = useState({
         name: "",

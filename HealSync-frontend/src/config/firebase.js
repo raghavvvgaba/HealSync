@@ -11,5 +11,4 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-console.log(import.meta.env)
 export const auth = getAuth(app);
