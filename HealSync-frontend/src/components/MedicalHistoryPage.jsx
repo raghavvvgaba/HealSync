@@ -81,7 +81,6 @@ const records = [
 
 const MedicalHistoryPage = ({ direction = 1 }) => {
   const navigate = useNavigate();
-  const location = useLocation();
   return (
     <motion.div
       className="min-h-screen bg-background text-text px-4 py-6 sm:px-6"
@@ -99,7 +98,6 @@ const MedicalHistoryPage = ({ direction = 1 }) => {
           <span className="text-base font-medium">Back</span>
         </button>
       </div>
-
 
       <h1 className="text-2xl font-bold mb-6">Your Full Medical History</h1>
 

@@ -1,4 +1,5 @@
 const admin = require("../config/firebase");
+const User = require("../models/User");
 
 const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -11,7 +12,14 @@ const authenticate = async (req, res, next) => {
 
   try {
     const decoded = await admin.auth().verifyIdToken(token);
-    req.user = decoded;
+    // Get user from database to verify role
+    const user = await User.findOne({ uid: decoded.uid });
+    if (!user) {
+      return res.status(403).json({ message: "User not found" });
+    }
+    
+    // Add role to the request
+    req.user = { ...decoded, role: user.role };
     next();
   } catch (err) {
     console.error("Token verification failed:", err);

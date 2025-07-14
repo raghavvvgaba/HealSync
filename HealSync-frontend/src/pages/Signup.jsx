@@ -5,6 +5,7 @@ import { FaUser, FaEnvelope, FaLock, FaUserMd, FaUserAlt, FaEye, FaEyeSlash } fr
 import { useAuth } from "../context/authContext";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../config/firebase";
+import Navbar from "../components/Navbar";
 
 export default function Signup() {
     const navigate = useNavigate();
@@ -101,120 +102,123 @@ export default function Signup() {
 
 
     return (
-        <motion.div
-            className="min-h-screen flex items-center justify-center bg-background text-text"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-        >
-            <form onSubmit={handleSignup} className="w-full max-w-md bg-white dark:bg-accent-20 border border-accent p-6 rounded-2xl shadow-lg space-y-5">
-                <h2 className="text-2xl font-bold text-primary text-center">Create Account</h2>
+        <>
+            <Navbar />
+            <motion.div
+                className="min-h-screen w-full bg-background flex items-center justify-center p-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+            >
+                <form onSubmit={handleSignup} className="w-full max-w-md bg-white dark:bg-accent-20 border border-accent p-6 rounded-2xl shadow-lg space-y-5">
+                    <h2 className="text-2xl font-bold text-primary text-center">Create Account</h2>
 
-                {/* Role Tabs */}
-                <div className="flex justify-center gap-4 mb-4">
-                    {["user", "doctor"].map((role) => (
-                        <button
-                            key={role}
-                            type="button"
-                            onClick={() => handleRoleSelect(role)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-full border transition ${form.role === role
-                                ? "bg-primary text-white"
-                                : "border-primary text-primary hover:bg-primary/10"
-                                }`}
-                        >
-                            {role === "user" ? <FaUserAlt /> : <FaUserMd />} {role.charAt(0).toUpperCase() + role.slice(1)}
-                        </button>
-                    ))}
-                </div>
-
-                {formError && (
-                    <div className="bg-red-100 text-red-700 text-sm px-4 py-2 rounded-md">
-                        {formError}
+                    {/* Role Tabs */}
+                    <div className="flex justify-center gap-4 mb-4">
+                        {["user", "doctor"].map((role) => (
+                            <button
+                                key={role}
+                                type="button"
+                                onClick={() => handleRoleSelect(role)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-full border transition ${form.role === role
+                                    ? "bg-primary text-white"
+                                    : "border-primary text-primary hover:bg-primary/10"
+                                    }`}
+                            >
+                                {role === "user" ? <FaUserAlt /> : <FaUserMd />} {role.charAt(0).toUpperCase() + role.slice(1)}
+                            </button>
+                        ))}
                     </div>
-                )}
 
-                {/* Name Input */}
-                <div className="flex items-center border border-text px-3 py-2 rounded-md">
-                    <FaUser className="mr-2 text-text" />
-                    <input
-                        name="name"
-                        type="text"
-                        placeholder="Full Name"
-                        required
-                        value={form.name}
-                        onChange={handleChange}
-                        className="bg-transparent w-full outline-none"
-                    />
-                </div>
+                    {formError && (
+                        <div className="bg-red-100 text-red-700 text-sm px-4 py-2 rounded-md">
+                            {formError}
+                        </div>
+                    )}
 
-                {/* Email Input */}
-                <div className="flex items-center border border-text px-3 py-2 rounded-md">
-                    <FaEnvelope className="mr-2 text-text" />
-                    <input
-                        name="email"
-                        type="email"
-                        placeholder="Email"
-                        required
-                        value={form.email}
-                        onChange={handleChange}
-                        className="bg-transparent w-full outline-none"
-                    />
-                </div>
-
-                {/* Password Input */}
-                <div className="relative">
+                    {/* Name Input */}
                     <div className="flex items-center border border-text px-3 py-2 rounded-md">
-                        <FaLock className="mr-2 text-text" />
+                        <FaUser className="mr-2 text-text" />
                         <input
-                            name="password"
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Password"
+                            name="name"
+                            type="text"
+                            placeholder="Full Name"
                             required
-                            value={form.password}
-                            onChange={handlePasswordChange}
+                            value={form.name}
+                            onChange={handleChange}
                             className="bg-transparent w-full outline-none"
                         />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword((prev) => !prev)}
-                            className="absolute right-3 text-text"
-                        >
-                            {showPassword ? <FaEyeSlash /> : <FaEye />}
-                        </button>
                     </div>
 
-                    {form.password && (
-                        <>
-                            <div className="h-1 mt-1 rounded overflow-hidden bg-gray-200">
-                                <div
-                                    className={`h-full transition-all duration-500 ${passwordStrength === "weak"
-                                        ? "bg-red-500 w-1/3"
-                                        : passwordStrength === "moderate"
-                                            ? "bg-yellow-500 w-2/3"
-                                            : "bg-green-500 w-full"
-                                        }`}
-                                ></div>
-                            </div>
-                            <p className="text-xs mt-1 text-gray-600 capitalize">
-                                Password Strength: <span className="font-semibold">{passwordStrength}</span>
-                            </p>
-                        </>
-                    )}
-                </div>
+                    {/* Email Input */}
+                    <div className="flex items-center border border-text px-3 py-2 rounded-md">
+                        <FaEnvelope className="mr-2 text-text" />
+                        <input
+                            name="email"
+                            type="email"
+                            placeholder="Email"
+                            required
+                            value={form.email}
+                            onChange={handleChange}
+                            className="bg-transparent w-full outline-none"
+                        />
+                    </div>
 
-                <button
-                    type="submit"
-                    className="w-full bg-primary dark:bg-secondary text-white py-2 rounded-lg hover:opacity-90 transition"
-                >
-                    Sign Up as {form.role === "doctor" ? "Doctor" : "User"}
-                </button>
+                    {/* Password Input */}
+                    <div className="relative">
+                        <div className="flex items-center border border-text px-3 py-2 rounded-md">
+                            <FaLock className="mr-2 text-text" />
+                            <input
+                                name="password"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Password"
+                                required
+                                value={form.password}
+                                onChange={handlePasswordChange}
+                                className="bg-transparent w-full outline-none"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword((prev) => !prev)}
+                                className="absolute right-3 text-text"
+                            >
+                                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                            </button>
+                        </div>
 
-                <p className="text-sm text-center text-text">
-                    Already have an account?{" "}
-                    <Link to="/login" className="text-primary underline">
-                        Log in
-                    </Link>
-                </p>
-            </form>
-        </motion.div>
+                        {form.password && (
+                            <>
+                                <div className="h-1 mt-1 rounded overflow-hidden bg-gray-200">
+                                    <div
+                                        className={`h-full transition-all duration-500 ${passwordStrength === "weak"
+                                            ? "bg-red-500 w-1/3"
+                                            : passwordStrength === "moderate"
+                                                ? "bg-yellow-500 w-2/3"
+                                                : "bg-green-500 w-full"
+                                            }`}
+                                    ></div>
+                                </div>
+                                <p className="text-xs mt-1 text-gray-600 capitalize">
+                                    Password Strength: <span className="font-semibold">{passwordStrength}</span>
+                                </p>
+                            </>
+                        )}
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="w-full bg-primary dark:bg-secondary text-white py-2 rounded-lg hover:opacity-90 transition"
+                    >
+                        Sign Up as {form.role === "doctor" ? "Doctor" : "User"}
+                    </button>
+
+                    <p className="text-sm text-center text-text">
+                        Already have an account?{" "}
+                        <Link to="/login" className="text-primary underline">
+                            Log in
+                        </Link>
+                    </p>
+                </form>
+            </motion.div>
+        </>
     );
 }

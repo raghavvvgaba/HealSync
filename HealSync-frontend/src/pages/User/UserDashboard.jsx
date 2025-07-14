@@ -1,12 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { FiMenu, FiX } from 'react-icons/fi';
-import { FaHome } from 'react-icons/fa';
 import ProfileBlock from '../../components/ProfileBlock';
 import MedicalHistoryBlock from '../../components/MedicalHistoryBlock';
-import { SharedWithBlock } from '../../components/SharedWithBlock';
-import SidebarItem from '../../components/SidebarItem';
-import { useAuth } from '../../context/authContext';
 import { useNavigate } from 'react-router';
+import { useAuth } from '../../context/authContext';
 
 
 const dummyUser = {
@@ -94,22 +89,16 @@ const dummyRecords = [
 
 
 const UserDashboard = () => {
-    const { logout }  = useAuth();
     const navigate = useNavigate();
 
     return (
         <>
             <div className='h-[calc(100vh-64px)] grid grid-cols-6 gap-3'>
-                <div className='bg-yellow-800 col-span-1 h-full p-2'>
-                    <SidebarItem icon={FaHome} title="Home" description='Lets go home baby'/>
-                </div>
                 <div className='col-span-5 p-5 overflow-auto'>
                     <div className='flex flex-col gap-4 md:grid md:grid-cols-2'>
-                        <SharedWithBlock />
                         <ProfileBlock user={dummyUser} />
                         <MedicalHistoryBlock records={dummyRecords}/>
                     </div>
-
                 </div>
             </div>
 

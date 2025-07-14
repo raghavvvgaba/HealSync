@@ -25,11 +25,6 @@ const ProfileBlock = ({ user }) => {
                 <p className="text-sm text-gray-400">{firstName + " " + lastName}</p>
               </div>
               <div>
-                <button className='text-sm md:text-base px-4 py-2 rounded-xl bg-primary dark:bg-secondary text-text hover:scale-105 transition-all flex gap-2 group'>
-                  <Link to=''
-                  >Edit Profile</Link>
-                  <FaArrowRight className='translate-y-1 group-hover:animate-pulse transition-all duration-500' />
-                </button>
               </div>
             </div>
           </div>
@@ -79,6 +74,11 @@ const ProfileBlock = ({ user }) => {
             </div>
           </div>
         </div>
+        <button className='text-sm md:text-base px-4 py-2 rounded-xl bg-primary dark:bg-secondary text-text hover:scale-105 transition-all flex gap-2 group mt-5'>
+          <FaArrowRight className='translate-y-1 group-hover:animate-pulse transition-all duration-500' />
+          <Link to='edit-profile'
+          >Edit Profile</Link>
+        </button>
       </div>
     </div>
 
