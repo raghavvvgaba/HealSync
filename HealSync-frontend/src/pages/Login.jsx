@@ -34,7 +34,22 @@ export default function Login() {
       if (form.role === "doctor") {
         navigate("/doctor");
       } else {
-        navigate("/user");
+        // Check onboarding status for regular users
+        const response = await fetch("http://localhost:3000/api/user/onboarding-status", {
+          headers: {
+            "Authorization": `Bearer ${await user.getIdToken()}`
+          }
+        });
+        
+        const onboardingData = await response.json();
+        
+        if (!onboardingData.profileCompleted) {
+          // User hasn't completed onboarding
+          navigate("/user/onboarding");
+        } else {
+          // User has completed onboarding
+          navigate("/user");
+        }
       }
     } catch (error) {
       setFormError("Invalid email or password.");

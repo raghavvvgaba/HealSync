@@ -11,6 +11,7 @@ import UserLayout from './pages/User/UserLayout';
 import DoctorLayout  from './pages/Doctor/DoctorLayout';
 import DoctorDashboard from './pages/Doctor/DoctorDashboard';
 import EditProfile from './pages/User/EditProfile';
+import Onboarding from './components/Onboarding';
 
 // https://www.hover.dev/components/navigation Use this for prebuilt components
 
@@ -38,6 +39,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/user" element={<PrivateRoute><UserLayout /></PrivateRoute>} >
             <Route index element={<UserDashboard />} />
+            <Route path='onboarding' element={<Onboarding/>} />
             <Route path='medical-history' element={<MedicalHistoryPage />} />
             <Route path='edit-profile' element={<EditProfile />} />
           </Route>

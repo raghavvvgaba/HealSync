@@ -57,38 +57,47 @@ export default function Signup() {
         }
 
         try {
-            // Step 1: Create user
-            const cred = await createUserWithEmailAndPassword(auth, form.email, form.password);
+            // Step 1: Create user in Firebase (but don't save to database yet)
+            const tempCred = await createUserWithEmailAndPassword(auth, form.email, form.password);
+            const token = await tempCred.user.getIdToken();
 
-            // Step 2: Update profile name
-            await updateProfile(cred.user, { displayName: form.name });
-
-            // Step 3: Get ID token
-            const token = await cred.user.getIdToken();
-
-            // Step 4: Save profile to backend
-            const response = await fetch("http://localhost:3000/api/user/profile", {
+            // Step 2: Try to save user in our database
+            const response = await fetch("http://localhost:3000/api/user/signup", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                    name: form.name,
+                body: JSON.stringify({                  name: form.name,
                     email: form.email,
                     role: form.role,
                 }),
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error("Failed to save profile to backend");
+                // If database save fails, delete the Firebase user
+                await tempCred.user.delete();
+                
+                if (data.message === "User already exists") {
+                    setFormError("An account with this email already exists.");
+                } else {
+                    setFormError(data.message || "Failed to create account. Please try again.");
+                    console.log(data.message);
+                }
+                return;
             }
 
-            // Step 5: Redirect user
+            // Step 3: If database save is successful, update Firebase profile
+            await updateProfile(tempCred.user, { displayName: form.name });
+
+            // Step 4: Redirect user based on role
             if (form.role === "doctor") {
                 navigate("/doctor");
             } else {
-                navigate("/user");
+                // For regular users, always go to onboarding on first signup
+                navigate("/user/onboarding");
             }
         } catch (error) {
             console.error("Signup failed:", error.message);
