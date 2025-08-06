@@ -3,12 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaUser, FaEnvelope, FaLock, FaUserMd, FaUserAlt, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../context/authContext";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "../config/firebase";
 import Navbar from "../components/Navbar";
 
 export default function Signup() {
     const navigate = useNavigate();
+    const { signup } = useAuth();
 
     const [form, setForm] = useState({
         name: "",
@@ -57,42 +56,10 @@ export default function Signup() {
         }
 
         try {
-            // Step 1: Create user in Firebase (but don't save to database yet)
-            const tempCred = await createUserWithEmailAndPassword(auth, form.email, form.password);
-            const token = await tempCred.user.getIdToken();
+            // Use the signup function from authContext
+            await signup(form.name, form.email, form.password, form.role);
 
-            // Step 2: Try to save user in our database
-            const response = await fetch("http://localhost:3000/api/user/signup", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({                  name: form.name,
-                    email: form.email,
-                    role: form.role,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                // If database save fails, delete the Firebase user
-                await tempCred.user.delete();
-                
-                if (data.message === "User already exists") {
-                    setFormError("An account with this email already exists.");
-                } else {
-                    setFormError(data.message || "Failed to create account. Please try again.");
-                    console.log(data.message);
-                }
-                return;
-            }
-
-            // Step 3: If database save is successful, update Firebase profile
-            await updateProfile(tempCred.user, { displayName: form.name });
-
-            // Step 4: Redirect user based on role
+            // Redirect user based on role
             if (form.role === "doctor") {
                 navigate("/doctor");
             } else {
@@ -101,8 +68,12 @@ export default function Signup() {
             }
         } catch (error) {
             console.error("Signup failed:", error.message);
+            console.error("Full error:", error);
+            
             if (error.code === "auth/email-already-in-use") {
                 setFormError("An account with this email already exists.");
+            } else if (error.code?.startsWith('firestore/')) {
+                setFormError("Account created but profile setup failed. Please try logging in.");
             } else {
                 setFormError("Signup failed. Please try again.");
             }

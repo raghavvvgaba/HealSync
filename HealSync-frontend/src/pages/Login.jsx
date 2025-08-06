@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaEnvelope, FaLock, FaUserMd, FaUserAlt, FaEye, FaEyeSlash } from "react-icons/fa";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../config/firebase";
+import { useAuth } from "../context/authContext";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../config/firebase";
 import Navbar from "../components/Navbar";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -28,28 +30,28 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const { user } = await signInWithEmailAndPassword(auth, form.email, form.password);
+      const { user } = await login(form.email, form.password);
       console.log("Login successful:", user);
-      console.log(user?.email);
-      if (form.role === "doctor") {
-        navigate("/doctor");
-      } else {
-        // Check onboarding status for regular users
-        const response = await fetch("http://localhost:3000/api/user/onboarding-status", {
-          headers: {
-            "Authorization": `Bearer ${await user.getIdToken()}`
-          }
-        });
+      
+      // Get user role from Firestore
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const userRole = userData.role;
         
-        const onboardingData = await response.json();
-        
-        if (!onboardingData.profileCompleted) {
-          // User hasn't completed onboarding
-          navigate("/user/onboarding");
+        // Navigate based on actual role from Firestore, not the selected tab
+        if (userRole === "doctor") {
+          navigate("/doctor");
         } else {
-          // User has completed onboarding
+          // For regular users, navigate to user dashboard
+          // The authContext will handle loading their role
           navigate("/user");
         }
+      } else {
+        // User document doesn't exist in Firestore
+        setFormError("User profile not found. Please contact support.");
       }
     } catch (error) {
       setFormError("Invalid email or password.");
