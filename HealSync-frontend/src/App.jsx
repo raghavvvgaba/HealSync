@@ -12,6 +12,7 @@ import DoctorLayout  from './pages/Doctor/DoctorLayout';
 import DoctorDashboard from './pages/Doctor/DoctorDashboard';
 import EditProfile from './pages/User/EditProfile';
 import Onboarding from './components/Onboarding';
+import { Profile } from './pages/User/Profile';
 
 // https://www.hover.dev/components/navigation Use this for prebuilt components
 
@@ -31,7 +32,7 @@ const App = () => {
   }, [location]);
 
   return (
-    <div className="relative h-[100vh] w-full bg-background text-text overflow-hidden">
+    <div className="relative min-h-[100vh] w-full bg-background text-text">
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<LandingPage />} />
@@ -42,6 +43,7 @@ const App = () => {
             <Route path='onboarding' element={<Onboarding/>} />
             <Route path='medical-history' element={<MedicalHistoryPage />} />
             <Route path='edit-profile' element={<EditProfile />} />
+            <Route path='view-profile' element={<Profile />} />
           </Route>
         </Routes>
       </AnimatePresence>

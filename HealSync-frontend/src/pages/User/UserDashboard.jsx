@@ -96,7 +96,7 @@ const UserDashboard = () => {
             <div className='h-[calc(100vh-64px)] grid grid-cols-6 gap-3'>
                 <div className='col-span-5 p-5 overflow-auto'>
                     <div className='flex flex-col gap-4 md:grid md:grid-cols-2'>
-                        <ProfileBlock user={dummyUser} />
+                        <ProfileBlock />
                         <MedicalHistoryBlock records={dummyRecords}/>
                     </div>
                 </div>
