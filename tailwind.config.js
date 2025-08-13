@@ -50,6 +50,10 @@ export default {
           '--color-accent': '#eb743d',
           '--color-surface': '#1a1f2e',
         },
+        'html, body': {
+          'background-color': 'var(--color-background)',
+          'color': 'var(--color-text)',
+        },
       });
     }),
   ],

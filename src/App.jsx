@@ -32,7 +32,7 @@ const App = () => {
   }, [location]);
 
   return (
-    <div className="relative min-h-[100vh] w-full bg-background text-text">
+    <div className="relative min-h-screen w-full bg-background text-text">
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<LandingPage />} />

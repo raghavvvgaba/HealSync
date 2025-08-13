@@ -1,6 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Fix overscroll white background issue */
+html,
+body {
+  background-color: var(--color-background);
+  overflow-x: hidden;
+  height: 100%;
+}
+
+/* Prevent overscroll bounce on webkit browsers */
+html {
+  overscroll-behavior: none;
+}
+
+body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure root element covers full height */
+#root {
+  min-height: 100vh;
+  background-color: var(--color-background);
+}
 /* :root {
   --text: #020008;
   --background: #F0F0F0;
