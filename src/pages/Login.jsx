@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaEnvelope, FaLock, FaUserMd, FaUserAlt, FaEye, FaEyeSlash } from "react-icons/fa";
@@ -9,7 +9,18 @@ import Navbar from "../components/Navbar";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, user, userRole, loading } = useAuth();
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (!loading && user && userRole) {
+      if (userRole === "doctor") {
+        navigate("/doctor");
+      } else {
+        navigate("/user");
+      }
+    }
+  }, [user, userRole, loading, navigate]);
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -17,6 +28,20 @@ export default function Login() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState("");
+
+  // Show loading while checking authentication so the page doesn't false navigate until authentication is confirmed
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen w-full bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-primary">Loading...</div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -32,15 +57,15 @@ export default function Login() {
     try {
       const { user } = await login(form.email, form.password);
       console.log("Login successful:", user);
-      
+
       // Get user role from Firestore
       const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
-      
+
       if (userDoc.exists()) {
         const userData = userDoc.data();
         const userRole = userData.role;
-        
+
         // Navigate based on actual role from Firestore, not the selected tab
         if (userRole === "doctor") {
           navigate("/doctor");
@@ -58,7 +83,7 @@ export default function Login() {
       console.error("Login failed:", error.message);
     }
   };
-  
+
 
   return (
     <>
@@ -79,22 +104,20 @@ export default function Login() {
             <button
               type="button"
               onClick={() => handleRoleSelect("user")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full border transition ${
-                form.role === "user"
+              className={`flex items-center gap-2 px-4 py-2 rounded-full border transition ${form.role === "user"
                   ? "bg-primary text-white"
                   : "border-primary text-primary hover:bg-primary/10"
-              }`}
+                }`}
             >
               <FaUserAlt /> User
             </button>
             <button
               type="button"
               onClick={() => handleRoleSelect("doctor")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full border transition ${
-                form.role === "doctor"
+              className={`flex items-center gap-2 px-4 py-2 rounded-full border transition ${form.role === "doctor"
                   ? "bg-primary text-white"
                   : "border-primary text-primary hover:bg-primary/10"
-              }`}
+                }`}
             >
               <FaUserMd /> Doctor
             </button>

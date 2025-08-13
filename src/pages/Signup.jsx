@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaUser, FaEnvelope, FaLock, FaUserMd, FaUserAlt, FaEye, FaEyeSlash } from "react-icons/fa";
@@ -7,7 +7,18 @@ import Navbar from "../components/Navbar";
 
 export default function Signup() {
     const navigate = useNavigate();
-    const { signup } = useAuth();
+    const { signup, user, userRole, loading } = useAuth();
+
+    // Redirect if user is already logged in
+    useEffect(() => {
+        if (!loading && user && userRole) {
+            if (userRole === "doctor") {
+                navigate("/doctor");
+            } else {
+                navigate("/user");
+            }
+        }
+    }, [user, userRole, loading, navigate]);
 
     const [form, setForm] = useState({
         name: "",
@@ -19,6 +30,20 @@ export default function Signup() {
     const [formError, setFormError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState("weak");
+
+    // Show loading while checking authentication
+    if (loading) {
+        return (
+            <>
+                <Navbar />
+                <div className="min-h-screen w-full bg-background flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="text-primary">Loading...</div>
+                    </div>
+                </div>
+            </>
+        );
+    }
 
     const evaluatePasswordStrength = (password) => {
         let strength = 0;
