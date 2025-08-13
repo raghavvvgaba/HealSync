@@ -2,9 +2,10 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaShieldAlt, FaCloudUploadAlt, FaShareAlt } from "react-icons/fa";
 import { MdOutlineHealthAndSafety } from "react-icons/md";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Navbar from "../components/Navbar";
+import { useAuth } from "../context/authContext";
 
 const faqList = [
 	{
@@ -75,6 +76,22 @@ const FAQItem = ({ question, answer }) => {
 };
 
 const LandingPage = () => {
+	const { user, userRole, loading } = useAuth();
+	const navigate = useNavigate();
+
+	const handleGetStarted = () => {
+		if (user) {
+			// Navigate based on user role
+			if (userRole === "doctor") {
+				navigate("/doctor");
+			} else {
+				navigate("/user");
+			}
+		} else {
+			// Not logged in, go to signup
+			navigate("/signup");
+		}
+	};
 	return (
 		<>
 			<Navbar />
@@ -96,14 +113,14 @@ const LandingPage = () => {
 							records platform that lets you and your doctor stay in sync—securely,
 							effortlessly, and always up to date.
 						</p>
-						<Link
-							to="/signup"
+						<button
+							onClick={handleGetStarted}
 							className="relative group px-6 py-3 rounded-lg overflow-hidden transition-transform duration-300 ease-in-out
   bg-[var(--color-primary)] text-[var(--color-text)]
   hover:scale-105 hover:shadow-[0_0_20px_var(--color-accent)]"
 						>
-							Get Started
-						</Link>
+							{user ? "Go to Dashboard" : "Get Started"}
+						</button>
 					</motion.div>
 
 					{/* Optional down arrow */}
@@ -195,12 +212,12 @@ const LandingPage = () => {
 							Sign up and experience the future of digital healthcare with
 							HealSync.
 						</p>
-						<Link
-							to="/signup"
+						<button
+							onClick={handleGetStarted}
 							className="bg-accent text-white px-8 py-3 rounded-xl font-semibold text-lg hover:scale-105 transition-all"
 						>
-							Create Your Account
-						</Link>
+							{user ? "Go to Dashboard" : "Create Your Account"}
+						</button>
 					</motion.div>
 				</section>
 

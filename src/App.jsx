@@ -3,7 +3,7 @@ import { AnimatePresence } from 'framer-motion';
 import LandingPage from './pages/LandingPage';
 import UserDashboard from './pages/User/UserDashboard';
 import MedicalHistoryPage from './components/MedicalHistoryPage';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import PrivateRoute from './components/PrivateRoute';
@@ -44,6 +44,9 @@ const App = () => {
             <Route path='medical-history' element={<MedicalHistoryPage />} />
             <Route path='edit-profile' element={<EditProfile />} />
             <Route path='view-profile' element={<Profile />} />
+          </Route>
+          <Route path="/doctor" element={<PrivateRoute><DoctorLayout /></PrivateRoute>} >
+            <Route index element={<DoctorDashboard />} />
           </Route>
         </Routes>
       </AnimatePresence>

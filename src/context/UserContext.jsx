@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { auth } from "../config/firebase";
 import { getUserProfile } from "../utils/firestoreService";
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 
 // Create context
 const UserContext = createContext();
