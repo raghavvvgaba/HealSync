@@ -1,5 +1,6 @@
-import { getFirestore, collection, addDoc, getDoc, doc, setDoc, updateDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDoc, doc, setDoc, updateDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
 import { db, auth } from "../config/firebase";
+import { findDoctorByDoctorId } from "./firestoreDoctorService";
 
 // Updated function to add/update profile data for a user incrementally
 // This function now uses { merge: true } to merge the incoming profileData with any existing document data
@@ -42,6 +43,80 @@ export async function editUserProfile(userId, profileData) {
     return { success: true };
   } catch (error) {
     console.error("Error editing user profile:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Shares a user's profile and medical records with a doctor
+ * @param {string} patientId - The patient's user ID
+ * @param {string} doctorIdCode - The doctor's human-readable ID (DR-XXXX-1234)
+ * @returns {Promise<Object>} - Success/error result
+ */
+export async function shareProfileWithDoctor(patientId, doctorIdCode) {
+  try {
+    // First, find the doctor by their public ID code
+    const doctorData = await findDoctorByDoctorId(doctorIdCode);
+    
+    if (!doctorData) {
+      return { success: false, error: "Doctor not found. Please check the Doctor ID and try again." };
+    }
+    
+    const doctorId = doctorData.id; // This is the Firebase UID
+    
+    // Use predictable ID format for better security and rule enforcement
+    const shareId = `${doctorId}_${patientId}`;
+    
+    // Check if already shared
+    const existingShareRef = doc(db, "shared_profiles", shareId);
+    const existingShare = await getDoc(existingShareRef);
+    
+    if (existingShare.exists() && existingShare.data().status === 'active') {
+      return { success: false, error: "Profile already shared with this doctor." };
+    }
+    
+    // Create a share record in a "shared_profiles" collection
+    const shareData = {
+      patientId,
+      doctorId,
+      doctorIdCode,
+      doctorName: doctorData.name || 'Unknown Doctor',
+      sharedAt: serverTimestamp(),
+      status: 'active' // active, revoked, expired
+    };
+    
+    const shareRef = doc(db, "shared_profiles", shareId);
+    await setDoc(shareRef, shareData);
+    
+    return { success: true, shareId, doctorName: doctorData.name };
+  } catch (error) {
+    console.error("Error sharing profile with doctor:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Gets all profiles shared with a specific doctor
+ * @param {string} doctorId - The doctor's user ID
+ * @returns {Promise<Object>} - Success/error result with shared profiles
+ */
+export async function getSharedProfiles(doctorId) {
+  try {
+    const sharedProfilesRef = collection(db, "shared_profiles");
+    const q = query(sharedProfilesRef, where("doctorId", "==", doctorId), where("status", "==", "active"));
+    const querySnapshot = await getDocs(q);
+    
+    const sharedProfiles = [];
+    querySnapshot.forEach((doc) => {
+      sharedProfiles.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    return { success: true, data: sharedProfiles };
+  } catch (error) {
+    console.error("Error fetching shared profiles:", error);
     return { success: false, error: error.message };
   }
 }

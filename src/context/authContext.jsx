@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../config/firebase";
 import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, updateProfile, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
+import { generateUniqueDoctorId } from "../utils/firestoreDoctorService";
 
 const AuthContext = createContext();
 
@@ -45,14 +46,27 @@ export const AuthProvider = ({ children }) => {
       // Step 2: Update Firebase profile
       await updateProfile(userCredential.user, { displayName: name });
       
-      // Step 3: Store user role in Firestore
+      // Step 3: Generate doctor ID if the user is a doctor
+      let doctorId = null;
+      if (role === "doctor") {
+        doctorId = await generateUniqueDoctorId();
+      }
+      
+      // Step 4: Store user data in Firestore
       const userDocRef = doc(db, "users", userCredential.user.uid);
-      await setDoc(userDocRef, {
+      const userData = {
         name,
         email,
         role,
         createdAt: new Date().toISOString(),
-      });
+      };
+      
+      // Add doctor ID if user is a doctor
+      if (doctorId) {
+        userData.doctorId = doctorId;
+      }
+      
+      await setDoc(userDocRef, userData);
       
       // Update local state
       setUserRole(role);

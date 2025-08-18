@@ -10,6 +10,7 @@ import PrivateRoute from './components/PrivateRoute';
 import UserLayout from './pages/User/UserLayout';
 import DoctorLayout  from './pages/Doctor/DoctorLayout';
 import DoctorDashboard from './pages/Doctor/DoctorDashboard';
+import PatientProfilePage from './pages/Doctor/PatientProfilePage';
 import EditProfile from './pages/User/EditProfile';
 import Onboarding from './components/Onboarding';
 import { Profile } from './pages/User/Profile';
@@ -45,8 +46,9 @@ const App = () => {
             <Route path='edit-profile' element={<EditProfile />} />
             <Route path='view-profile' element={<Profile />} />
           </Route>
-          <Route path="/doctor" element={<PrivateRoute><DoctorLayout /></PrivateRoute>} >
+                    <Route path="/doctor" element={<PrivateRoute><DoctorLayout /></PrivateRoute>} >
             <Route index element={<DoctorDashboard />} />
+            <Route path="shared-profile/:shareId" element={<PatientProfilePage />} />
           </Route>
         </Routes>
       </AnimatePresence>

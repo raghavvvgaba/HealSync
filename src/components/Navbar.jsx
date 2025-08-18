@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiSun, FiMoon } from "react-icons/fi";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../context/authContext";
+import ShareButton from "./ShareButton";
 
 const Navbar = () => {
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
@@ -79,48 +80,7 @@ const Navbar = () => {
             <div className="flex items-center gap-4 relative">
               {/* Share Button - Only show for regular users, not doctors */}
               {userRole === "user" && (
-                <div className="relative">
-                  <button
-                    onClick={() => setShowShareBox((prev) => !prev)}
-                    className="px-3 py-2 text-sm rounded-xl bg-secondary text-white hover:scale-105 transition"
-                  >
-                    Share To Doctor
-                  </button>
-
-                  <AnimatePresence>
-                    {showShareBox && (
-                      <motion.form
-                        ref={shareBoxRef}
-                        onSubmit={handleSubmit((data) => {
-                          console.log("Shared with:", data.shareTo);
-                          reset();
-                          setShowShareBox(false);
-                        })}
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute right-0 mt-2 w-64 bg-background border border-secondary rounded-xl shadow-xl z-50 p-4 space-y-2"
-                      >
-                        <label className="text-sm text-text">
-                          Doctor's Email / ID
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Enter Doctor's ID"
-                          {...register("shareTo", { required: true })}
-                          className="w-full px-3 py-2 border rounded-md border-gray-300 dark:border-gray-600 bg-transparent text-text"
-                        />
-                        <button
-                          type="submit"
-                          className="w-full px-3 py-2 bg-green-700 text-white rounded-md hover:opacity-90 transition"
-                        >
-                          Share Profile
-                        </button>
-                      </motion.form>
-                    )}
-                  </AnimatePresence>
-                </div>
+                <ShareButton/>
               )}
 
               {/* Avatar Dropdown */}
