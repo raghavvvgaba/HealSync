@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaEnvelope, FaLock, FaUserMd, FaUserAlt, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaUserMd, FaUserAlt, FaEye, FaEyeSlash, FaHeartbeat, FaShieldAlt, FaUsers } from "react-icons/fa";
 import { useAuth } from "../context/authContext";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
@@ -21,6 +21,7 @@ export default function Login() {
       }
     }
   }, [user, userRole, loading, navigate]);
+  
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -84,104 +85,199 @@ export default function Login() {
     }
   };
 
-
   return (
     <>
       <Navbar />
-      <motion.div
-        className="min-h-screen w-full bg-background flex items-center justify-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <form
-          onSubmit={handleLogin}
-          className="w-full max-w-md bg-white dark:bg-accent-20 border border-accent p-6 rounded-2xl shadow-lg space-y-5"
+      <div className="min-h-screen w-full bg-gradient-to-br from-primary/10 via-background to-secondary/10 flex">
+        {/* Left Side - Illustration and Features */}
+        <motion.div 
+          className="hidden lg:flex lg:w-1/2 flex-col justify-center items-center p-12 relative overflow-hidden"
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.8 }}
         >
-          <h2 className="text-2xl font-bold text-primary text-center">Login</h2>
-
-          {/* Role Tabs */}
-          <div className="flex justify-center gap-4 mb-4">
-            <button
-              type="button"
-              onClick={() => handleRoleSelect("user")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full border transition ${form.role === "user"
-                  ? "bg-primary text-white"
-                  : "border-primary text-primary hover:bg-primary/10"
-                }`}
-            >
-              <FaUserAlt /> User
-            </button>
-            <button
-              type="button"
-              onClick={() => handleRoleSelect("doctor")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full border transition ${form.role === "doctor"
-                  ? "bg-primary text-white"
-                  : "border-primary text-primary hover:bg-primary/10"
-                }`}
-            >
-              <FaUserMd /> Doctor
-            </button>
+          {/* Background decorative elements */}
+          <div className="absolute top-0 left-0 w-full h-full">
+            <div className="absolute top-20 left-10 w-32 h-32 bg-primary/20 rounded-full blur-xl"></div>
+            <div className="absolute bottom-20 right-10 w-40 h-40 bg-secondary/20 rounded-full blur-xl"></div>
+            <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-accent/20 rounded-full blur-lg"></div>
           </div>
 
-          {/* Error Message */}
-          {formError && (
-            <div className="bg-red-100 text-red-700 text-sm px-4 py-2 rounded-md">
-              {formError}
-            </div>
-          )}
-
-          {/* Email Input */}
-          <div className="flex items-center border border-text px-3 py-2 rounded-md">
-            <FaEnvelope className="mr-2 text-text" />
-            <input
-              name="email"
-              type="email"
-              placeholder="Email"
-              required
-              value={form.email}
-              onChange={handleChange}
-              className="bg-transparent w-full outline-none"
-            />
-          </div>
-
-          {/* Password Input */}
-          <div className="relative">
-            <div className="flex items-center border border-text px-3 py-2 rounded-md">
-              <FaLock className="mr-2 text-text" />
-              <input
-                name="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                required
-                value={form.password}
-                onChange={handleChange}
-                className="bg-transparent w-full outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 text-text"
+          {/* Main Illustration */}
+          <div className="relative z-10 mb-8">
+            <div className="relative">
+              {/* Medical Cross Background */}
+              <div className="w-48 h-48 bg-gradient-to-br from-primary to-secondary rounded-3xl flex items-center justify-center shadow-2xl transform rotate-6">
+                <div className="w-32 h-32 bg-white rounded-2xl flex items-center justify-center">
+                  <FaHeartbeat className="text-6xl text-primary" />
+                </div>
+              </div>
+              
+              {/* Floating Elements */}
+              <motion.div 
+                className="absolute -top-4 -right-4 w-16 h-16 bg-accent rounded-2xl flex items-center justify-center shadow-lg"
+                animate={{ y: [-5, 5, -5] }}
+                transition={{ duration: 3, repeat: Infinity }}
               >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
+                <FaShieldAlt className="text-2xl text-white" />
+              </motion.div>
+              
+              <motion.div 
+                className="absolute -bottom-4 -left-4 w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center shadow-lg"
+                animate={{ y: [5, -5, 5] }}
+                transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+              >
+                <FaUsers className="text-2xl text-white" />
+              </motion.div>
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-primary dark:bg-secondary text-white py-2 rounded-lg hover:opacity-90 transition"
-          >
-            Log In as {form.role === "doctor" ? "Doctor" : "User"}
-          </button>
+          {/* Feature List */}
+          <div className="space-y-6 text-center max-w-md">
+            <h1 className="text-4xl font-bold text-primary mb-2">Welcome to HealSync</h1>
+            <p className="text-lg text-text/80 mb-8">Your comprehensive healthcare management platform</p>
+          </div>
+        </motion.div>
 
-          <p className="text-sm text-center text-text">
-            Don’t have an account?{" "}
-            <Link to="/signup" className="text-primary underline">
-              Sign up
-            </Link>
-          </p>
-        </form>
-      </motion.div>
+        {/* Right Side - Login Form */}
+        <motion.div 
+          className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12"
+          initial={{ x: 100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.8 }}
+        >
+          <div className="w-full max-w-md">
+            {/* Mobile Header */}
+            <div className="lg:hidden text-center mb-8">
+              <motion.div 
+                className="w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3, type: "spring" }}
+              >
+                <FaHeartbeat className="text-3xl text-white" />
+              </motion.div>
+              <h1 className="text-2xl font-bold text-primary">HealSync</h1>
+              <p className="text-text/70">Welcome back to your account</p>
+            </div>
+
+            <motion.form
+              onSubmit={handleLogin}
+              className="bg-white/90 dark:bg-white/5 backdrop-blur-xl border border-accent-40 p-8 rounded-3xl shadow-2xl dark:shadow-white/5 space-y-6"
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <div className="text-center mb-6">
+                <h2 className="text-3xl lg:text-3xl font-bold text-primary">Welcome Back</h2>
+                <p className="text-text/70 mt-2">Choose your account type and login</p>
+              </div>
+
+              {/* Role Selection */}
+              <div className="flex gap-3 p-2 bg-gray-100/80 dark:bg-white/5 rounded-2xl backdrop-blur-sm">
+                <button
+                  type="button"
+                  onClick={() => handleRoleSelect("user")}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
+                    form.role === "user"
+                      ? "bg-white dark:bg-white/10 text-primary dark:text-primary shadow-lg dark:shadow-[0_4px_8px_0_rgba(255,255,255,0.10)] transform scale-105 backdrop-blur-sm"
+                      : "text-text/70 hover:text-primary hover:bg-white/50 dark:hover:bg-white/5"
+                  }`}
+                >
+                  <FaUserAlt className="text-sm" />
+                  <span className="text-sm">User</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleRoleSelect("doctor")}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
+                    form.role === "doctor"
+                      ? "bg-white dark:bg-white/10 text-primary dark:text-primary shadow-lg dark:shadow-[0_4px_8px_0_rgba(255,255,255,0.10)] transform scale-105 backdrop-blur-sm"
+                      : "text-text/70 hover:text-primary hover:bg-white/50 dark:hover:bg-white/5"
+                  }`}
+                >
+                  <FaUserMd className="text-sm" />
+                  <span className="text-sm">Doctor</span>
+                </button>
+              </div>
+
+              {/* Error Message */}
+              {formError && (
+                <motion.div 
+                  className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                >
+                  {formError}
+                </motion.div>
+              )}
+
+              {/* Email Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-text/80">Email Address</label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                    <FaEnvelope className="text-text drop-shadow-none" />
+                  </div>
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    required
+                    value={form.email}
+                    onChange={handleChange}
+                    className="w-full pl-12 pr-4 py-4 bg-gray-50/80 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] focus:border dark:focus:border-[var(--color-primary)] transition-all backdrop-blur-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Password Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-text/80">Password</label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                    <FaLock className="text-text drop-shadow-none" />
+                  </div>
+                  <input
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    required
+                    value={form.password}
+                    onChange={handleChange}
+                    className="w-full pl-12 pr-12 py-4 bg-gray-50/80 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] focus:border dark:focus:border-[var(--color-primary)] transition-all backdrop-blur-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-text/50 hover:text-primary transition-colors"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </div>
+
+              <motion.button
+                type="submit"
+                className="w-full bg-primary text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Log In as {form.role === "doctor" ? "Doctor" : "User"}
+              </motion.button>
+
+              <div className="text-center pt-4">
+                <p className="text-text/70">
+                  Don't have an account?{" "}
+                  <Link to="/signup" className="text-primary font-semibold hover:underline transition-all">
+                    Create Account
+                  </Link>
+                </p>
+              </div>
+            </motion.form>
+          </div>
+        </motion.div>
+      </div>
     </>
   );
 }

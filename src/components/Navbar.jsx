@@ -55,8 +55,8 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="w-full h-16 px-6 py-4 bg-background text-text shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
+    <nav className="w-full px-4 py-3 bg-background text-text shadow-md sticky top-0 z-50">
+  <div className="max-w-7xl mx-auto flex flex-row justify-between items-center gap-2">
         {/* Logo */}
         <Link to="/">
           <motion.div
@@ -71,13 +71,13 @@ const Navbar = () => {
 
         {/* Right section */}
         <motion.div
-          className="flex items-center gap-6"
+          className="flex flex-row items-center gap-2 sm:gap-6 w-auto"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           {user ? (
-            <div className="flex items-center gap-4 relative">
+            <div className="flex flex-row items-center gap-2 relative w-auto">
               {/* Share Button - Only show for regular users, not doctors */}
               {userRole === "user" && (
                 <ShareButton/>
@@ -120,16 +120,16 @@ const Navbar = () => {
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-4">
+            <div className="flex flex-row items-center gap-2 w-auto">
               <Link
                 to="/signup"
-                className="text-sm md:text-base px-4 py-2 rounded-xl bg-primary text-white hover:scale-105 transition"
+                className="text-xs sm:text-sm md:text-base px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-xl bg-primary text-white hover:scale-105 transition text-center min-w-[60px] sm:min-w-[80px]"
               >
                 Sign Up
               </Link>
               <Link
                 to="/login"
-                className="text-sm md:text-base px-4 py-2 rounded-xl bg-accent text-white hover:scale-105 transition"
+                className="text-xs sm:text-sm md:text-base px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-xl bg-accent text-white hover:scale-105 transition text-center min-w-[60px] sm:min-w-[80px]"
               >
                 Login
               </Link>
@@ -139,7 +139,7 @@ const Navbar = () => {
           {/* Theme Toggle - Outside of conditional rendering */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition"
+            className="p-2 sm:p-2 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition"
             aria-label="Toggle Theme"
           >
             {theme === "light" ? <FiSun /> : <FiMoon />}

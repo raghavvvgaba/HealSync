@@ -4,7 +4,7 @@ import Navbar from "../../components/Navbar";
 
 export default function UserLayout() {
   return (
-    <div className="p-4">
+    <div>
       <Navbar/>
       <Outlet /> {/* Child routes like /User/medical-history will render here */}
     </div>

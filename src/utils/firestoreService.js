@@ -120,3 +120,59 @@ export async function getSharedProfiles(doctorId) {
     return { success: false, error: error.message };
   }
 }
+
+/**
+ * Gets all doctors with whom a patient has shared their profile
+ * @param {string} patientId - The patient's user ID
+ * @returns {Promise<Object>} - Success/error result with shared profiles
+ */
+export async function getPatientSharedProfiles(patientId) {
+  try {
+    const sharedProfilesRef = collection(db, "shared_profiles");
+    const q = query(sharedProfilesRef, where("patientId", "==", patientId), where("status", "==", "active"));
+    const querySnapshot = await getDocs(q);
+    
+    const sharedProfiles = [];
+    querySnapshot.forEach((doc) => {
+      sharedProfiles.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    return { success: true, data: sharedProfiles };
+  } catch (error) {
+    console.error("Error fetching patient shared profiles:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Revokes access of a doctor to patient's profile
+ * @param {string} patientId - The patient's user ID
+ * @param {string} doctorId - The doctor's user ID
+ * @returns {Promise<Object>} - Success/error result
+ */
+export async function revokeProfileAccess(patientId, doctorId) {
+  try {
+    const shareId = `${doctorId}_${patientId}`;
+    const shareRef = doc(db, "shared_profiles", shareId);
+    
+    // Check if the share exists
+    const shareDoc = await getDoc(shareRef);
+    if (!shareDoc.exists()) {
+      return { success: false, error: "Share record not found." };
+    }
+    
+    // Update the status to 'revoked'
+    await updateDoc(shareRef, {
+      status: 'revoked',
+      revokedAt: serverTimestamp()
+    });
+    
+    return { success: true, message: "Profile access successfully revoked." };
+  } catch (error) {
+    console.error("Error revoking profile access:", error);
+    return { success: false, error: error.message };
+  }
+}
