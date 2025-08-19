@@ -96,32 +96,6 @@ export async function shareProfileWithDoctor(patientId, doctorIdCode) {
 }
 
 /**
- * Gets all profiles shared with a specific doctor
- * @param {string} doctorId - The doctor's user ID
- * @returns {Promise<Object>} - Success/error result with shared profiles
- */
-export async function getSharedProfiles(doctorId) {
-  try {
-    const sharedProfilesRef = collection(db, "shared_profiles");
-    const q = query(sharedProfilesRef, where("doctorId", "==", doctorId), where("status", "==", "active"));
-    const querySnapshot = await getDocs(q);
-    
-    const sharedProfiles = [];
-    querySnapshot.forEach((doc) => {
-      sharedProfiles.push({
-        id: doc.id,
-        ...doc.data()
-      });
-    });
-    
-    return { success: true, data: sharedProfiles };
-  } catch (error) {
-    console.error("Error fetching shared profiles:", error);
-    return { success: false, error: error.message };
-  }
-}
-
-/**
  * Gets all doctors with whom a patient has shared their profile
  * @param {string} patientId - The patient's user ID
  * @returns {Promise<Object>} - Success/error result with shared profiles
@@ -176,3 +150,96 @@ export async function revokeProfileAccess(patientId, doctorId) {
     return { success: false, error: error.message };
   }
 }
+
+/**
+ * Gets medical records for a patient with pagination
+ * @param {string} patientId - The patient's user ID
+ * @param {Object} lastDoc - The last document from the previous page (optional)
+ * @param {number} pageSize - Number of records per page (default: 20)
+ * @param {boolean} includeDeactivated - Whether to include deactivated records (default: false)
+ * @returns {Promise<Object>} - Success/error result with medical records and pagination info
+ */
+export async function getPatientMedicalRecords(patientId, lastDoc = null, pageSize = 20, includeDeactivated = false) {
+  try {
+    const recordsRef = collection(db, "medicalRecords");
+    let q;
+
+    if (includeDeactivated) {
+      // Include all records (active and deactivated)
+      q = query(
+        recordsRef,
+        where("patientId", "==", patientId),
+        orderBy("visitDate", "desc"),
+        orderBy("createdAt", "desc"),
+        limit(pageSize)
+      );
+
+      if (lastDoc) {
+        q = query(
+          recordsRef,
+          where("patientId", "==", patientId),
+          orderBy("visitDate", "desc"),
+          orderBy("createdAt", "desc"),
+          startAfter(lastDoc),
+          limit(pageSize)
+        );
+      }
+    } else {
+      // Only active records
+      q = query(
+        recordsRef,
+        where("patientId", "==", patientId),
+        where("isActive", "==", true),
+        orderBy("visitDate", "desc"),
+        orderBy("createdAt", "desc"),
+        limit(pageSize)
+      );
+
+      if (lastDoc) {
+        q = query(
+          recordsRef,
+          where("patientId", "==", patientId),
+          where("isActive", "==", true),
+          orderBy("visitDate", "desc"),
+          orderBy("createdAt", "desc"),
+          startAfter(lastDoc),
+          limit(pageSize)
+        );
+      }
+    }
+    
+    const querySnapshot = await getDocs(q);
+    const records = [];
+    let lastDocument = null;
+    
+    querySnapshot.forEach((doc) => {
+      records.push({
+        id: doc.id,
+        ...doc.data()
+      });
+      lastDocument = doc;
+    });
+
+    // Check if there are more records
+    const hasMore = records.length === pageSize;
+    
+    return { 
+      success: true, 
+      data: records,
+      pagination: {
+        hasMore,
+        lastDoc: lastDocument,
+        currentPageSize: records.length,
+        requestedPageSize: pageSize
+      }
+    };
+    
+  } catch (error) {
+    console.error("Error fetching patient medical records:", error);
+    return { 
+      success: false, 
+      error: "Failed to fetch medical records." 
+    };
+  }
+}
+

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
-import { getSharedProfiles } from '../utils/firestoreService';
+import { getSharedProfiles } from '../utils/firestoreDoctorService';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { FaUser, FaCalendar, FaEye, FaSpinner } from 'react-icons/fa';

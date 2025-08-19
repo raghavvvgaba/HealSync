@@ -1,4 +1,17 @@
-import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
+import { 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  doc, 
+  getDoc,
+  addDoc,
+  updateDoc,
+  serverTimestamp,
+  orderBy,
+  limit,
+  startAfter
+} from "firebase/firestore";
 import { db } from "../config/firebase";
 
 /**
@@ -187,6 +200,32 @@ export async function getPatientBasicInfo(patientId) {
 }
 
 /**
+ * Gets all profiles shared with a specific doctor
+ * @param {string} doctorId - The doctor's user ID
+ * @returns {Promise<Object>} - Success/error result with shared profiles
+ */
+export async function getSharedProfiles(doctorId) {
+  try {
+    const sharedProfilesRef = collection(db, "shared_profiles");
+    const q = query(sharedProfilesRef, where("doctorId", "==", doctorId), where("status", "==", "active"));
+    const querySnapshot = await getDocs(q);
+    
+    const sharedProfiles = [];
+    querySnapshot.forEach((doc) => {
+      sharedProfiles.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    return { success: true, data: sharedProfiles };
+  } catch (error) {
+    console.error("Error fetching shared profiles:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Gets complete patient profile data
  * @param {string} patientId - The patient's user ID
  * @returns {Promise<Object>} - Success/error result with patient profile
@@ -204,5 +243,312 @@ export async function getPatientProfile(patientId) {
   } catch (error) {
     console.error("Error fetching patient profile:", error);
     return { success: false, error: "Failed to load patient profile." };
+  }
+}
+
+/**
+ * Adds a medical record for a patient by an authorized doctor
+ * @param {string} doctorId - The doctor's user ID
+ * @param {string} patientId - The patient's user ID  
+ * @param {Object} medicalData - The medical record data
+ * @returns {Promise<Object>} - Success/error result
+ */
+export async function addMedicalRecord(doctorId, patientId, medicalData) {
+  try {
+    // Step 1: Verify doctor has active access to patient's profile
+    const shareId = `${doctorId}_${patientId}`;
+    const shareRef = doc(db, "shared_profiles", shareId);
+    const shareDoc = await getDoc(shareRef);
+    
+    if (!shareDoc.exists()) {
+      return { 
+        success: false, 
+        error: "You don't have access to this patient's profile." 
+      };
+    }
+    
+    const shareData = shareDoc.data();
+    
+    // Verify share is active and doctor matches
+    if (shareData.status !== 'active' || shareData.doctorId !== doctorId) {
+      return { 
+        success: false, 
+        error: "Your access to this patient's profile has been revoked or is invalid." 
+      };
+    }
+    
+    // Step 2: Get doctor information for the record
+    const doctorRef = doc(db, "users", doctorId);
+    const doctorDoc = await getDoc(doctorRef);
+    
+    if (!doctorDoc.exists()) {
+      return { 
+        success: false, 
+        error: "Doctor information not found." 
+      };
+    }
+    
+    const doctorInfo = doctorDoc.data();
+    
+    // Step 3: Prepare medical record data
+    const recordData = {
+      patientId,
+      doctorId,
+      doctorIdCode: shareData.doctorIdCode,
+      doctorName: shareData.doctorName || doctorInfo.name,
+      
+      // Medical data
+      visitDate: medicalData.visitDate,
+      symptoms: medicalData.symptoms || [],
+      diagnosis: medicalData.diagnosis || '',
+      medicines: medicalData.medicines || [],
+      prescribedTests: medicalData.prescribedTests || [],
+      followUpNotes: medicalData.followUpNotes || '',
+      
+      // File data (if provided)
+      ...(medicalData.fileName && {
+        fileName: medicalData.fileName,
+        fileType: medicalData.fileType,
+        fileUrl: medicalData.fileUrl
+      }),
+      
+      // Metadata
+      createdAt: serverTimestamp(),
+      lastModifiedAt: serverTimestamp(),
+      createdBy: doctorId,
+      shareRecordId: shareId,
+      isActive: true
+    };
+    
+    // Step 4: Add the medical record
+    const medicalRecordsRef = collection(db, "medicalRecords");
+    const docRef = await addDoc(medicalRecordsRef, recordData);
+    
+    return { 
+      success: true, 
+      recordId: docRef.id,
+      message: "Medical record added successfully." 
+    };
+    
+  } catch (error) {
+    console.error("Error adding medical record:", error);
+    return { 
+      success: false, 
+      error: "Failed to add medical record. Please try again." 
+    };
+  }
+}
+
+/**
+ * Updates a medical record (only by the doctor who created it)
+ * @param {string} recordId - The medical record ID
+ * @param {string} doctorId - The doctor's user ID
+ * @param {Object} updateData - The data to update
+ * @returns {Promise<Object>} - Success/error result
+ */
+export async function updateMedicalRecord(recordId, doctorId, updateData) {
+  try {
+    // Get the existing record
+    const recordRef = doc(db, "medicalRecords", recordId);
+    const recordDoc = await getDoc(recordRef);
+    
+    if (!recordDoc.exists()) {
+      return { 
+        success: false, 
+        error: "Medical record not found." 
+      };
+    }
+    
+    const recordData = recordDoc.data();
+    
+    // Verify doctor authorization
+    if (recordData.createdBy !== doctorId) {
+      return { 
+        success: false, 
+        error: "You can only update medical records you created." 
+      };
+    }
+
+    // Check if record is older than 30 minutes
+    const createdAt = recordData.createdAt;
+    let createdTimestamp;
+    if (createdAt && createdAt.seconds) {
+      createdTimestamp = createdAt.seconds * 1000;
+    } else if (typeof createdAt === 'number') {
+      createdTimestamp = createdAt;
+    } else {
+      // If createdAt is missing or invalid, block update for safety
+      return {
+        success: false,
+        error: "Cannot verify record creation time. Update not allowed."
+      };
+    }
+    const now = Date.now();
+    const THIRTY_MINUTES = 30 * 60 * 1000;
+    if (now - createdTimestamp > THIRTY_MINUTES) {
+      return {
+        success: false,
+        error: "Medical record cannot be updated after 30 minutes of creation."
+      };
+    }
+
+    // Verify active share still exists
+    const shareRef = doc(db, "shared_profiles", recordData.shareRecordId);
+    const shareDoc = await getDoc(shareRef);
+
+    if (!shareDoc.exists() || shareDoc.data().status !== 'active') {
+      return { 
+        success: false, 
+        error: "You no longer have access to this patient's profile." 
+      };
+    }
+
+    // Update the record
+    const updatePayload = {
+      ...updateData,
+      lastModifiedAt: serverTimestamp()
+    };
+
+    await updateDoc(recordRef, updatePayload);
+
+    return { 
+      success: true, 
+      message: "Medical record updated successfully." 
+    };
+
+  } catch (error) {
+    console.error("Error updating medical record:", error);
+    return { 
+      success: false, 
+      error: "Failed to update medical record." 
+    };
+  }
+}
+
+/**
+ * Soft deletes a medical record (marks as inactive)
+ * @param {string} recordId - The medical record ID
+ * @param {string} doctorId - The doctor's user ID
+ * @returns {Promise<Object>} - Success/error result
+ */
+export async function deactivateMedicalRecord(recordId, doctorId) {
+  try {
+    const recordRef = doc(db, "medicalRecords", recordId);
+    const recordDoc = await getDoc(recordRef);
+    
+    if (!recordDoc.exists()) {
+      return { 
+        success: false, 
+        error: "Medical record not found." 
+      };
+    }
+    
+    const recordData = recordDoc.data();
+    
+    // Only the doctor who created the record can deactivate it
+    if (recordData.createdBy !== doctorId) {
+      return { 
+        success: false, 
+        error: "You can only deactivate medical records you created." 
+      };
+    }
+    
+    await updateDoc(recordRef, {
+      isActive: false,
+      lastModifiedAt: serverTimestamp()
+    });
+    
+    return { 
+      success: true, 
+      message: "Medical record deactivated successfully." 
+    };
+    
+  } catch (error) {
+    console.error("Error deactivating medical record:", error);
+    return { 
+      success: false, 
+      error: "Failed to deactivate medical record." 
+    };
+  }
+}
+
+/**
+ * Gets medical records for a specific patient by an authorized doctor with pagination
+ * @param {string} doctorId - The doctor's user ID
+ * @param {string} patientId - The patient's user ID
+ * @param {Object} lastDoc - The last document from the previous page (optional)
+ * @param {number} pageSize - Number of records per page (default: 20)
+ * @returns {Promise<Object>} - Success/error result with medical records and pagination info
+ */
+export async function getDoctorPatientMedicalRecords(doctorId, patientId, lastDoc = null, pageSize = 20) {
+  try {
+    // Verify doctor has active access to patient's profile
+    const shareId = `${doctorId}_${patientId}`;
+    const shareRef = doc(db, "shared_profiles", shareId);
+    const shareDoc = await getDoc(shareRef);
+    
+    if (!shareDoc.exists() || shareDoc.data().status !== 'active') {
+      return { 
+        success: false, 
+        error: "You don't have access to this patient's profile." 
+      };
+    }
+    
+    // Get medical records for this patient with pagination
+    const recordsRef = collection(db, "medicalRecords");
+    let q = query(
+      recordsRef,
+      where("patientId", "==", patientId),
+      where("isActive", "==", true),
+      orderBy("visitDate", "desc"),
+      orderBy("createdAt", "desc"),
+      limit(pageSize)
+    );
+
+    // If we have a lastDoc, add it to the query for pagination
+    if (lastDoc) {
+      q = query(
+        recordsRef,
+        where("patientId", "==", patientId),
+        where("isActive", "==", true),
+        orderBy("visitDate", "desc"),
+        orderBy("createdAt", "desc"),
+        startAfter(lastDoc),
+        limit(pageSize)
+      );
+    }
+    
+    const querySnapshot = await getDocs(q);
+    const records = [];
+    let lastDocument = null;
+    
+    querySnapshot.forEach((doc) => {
+      records.push({
+        id: doc.id,
+        ...doc.data()
+      });
+      lastDocument = doc; // Keep track of the last document for pagination
+    });
+
+    // Check if there are more records by trying to get one more
+    const hasMore = records.length === pageSize;
+    
+    return { 
+      success: true, 
+      data: records,
+      pagination: {
+        hasMore,
+        lastDoc: lastDocument,
+        currentPageSize: records.length,
+        requestedPageSize: pageSize
+      }
+    };
+    
+  } catch (error) {
+    console.error("Error fetching medical records:", error);
+    return { 
+      success: false, 
+      error: "Failed to fetch medical records." 
+    };
   }
 }
