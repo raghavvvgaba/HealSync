@@ -298,7 +298,7 @@ export async function addMedicalRecord(doctorId, patientId, medicalData) {
       doctorName: shareData.doctorName || doctorInfo.name,
       
       // Medical data
-      visitDate: medicalData.visitDate,
+      visitDate: medicalData.visitDate, // Store as string (YYYY-MM-DD)
       symptoms: medicalData.symptoms || [],
       diagnosis: medicalData.diagnosis || '',
       medicines: medicalData.medicines || [],
@@ -493,53 +493,45 @@ export async function getDoctorPatientMedicalRecords(doctorId, patientId, lastDo
         error: "You don't have access to this patient's profile." 
       };
     }
-    
-    // Get medical records for this patient with pagination
+
+    // Get medical records for this patient
     const recordsRef = collection(db, "medicalRecords");
-    let q = query(
+    const q = query(
       recordsRef,
-      where("patientId", "==", patientId),
-      where("isActive", "==", true),
-      orderBy("visitDate", "desc"),
-      orderBy("createdAt", "desc"),
-      limit(pageSize)
+      where("patientId", "==", patientId)
     );
 
-    // If we have a lastDoc, add it to the query for pagination
-    if (lastDoc) {
-      q = query(
-        recordsRef,
-        where("patientId", "==", patientId),
-        where("isActive", "==", true),
-        orderBy("visitDate", "desc"),
-        orderBy("createdAt", "desc"),
-        startAfter(lastDoc),
-        limit(pageSize)
-      );
-    }
-    
     const querySnapshot = await getDocs(q);
-    const records = [];
-    let lastDocument = null;
     
+    const allRecords = [];
     querySnapshot.forEach((doc) => {
-      records.push({
+      allRecords.push({
         id: doc.id,
         ...doc.data()
       });
-      lastDocument = doc; // Keep track of the last document for pagination
     });
 
-    // Check if there are more records by trying to get one more
-    const hasMore = records.length === pageSize;
+    // Filter for active records
+    const activeRecords = allRecords.filter(record => record.isActive !== false);
+
+    // Sort records by visitDate in descending order (newest first)
+    activeRecords.sort((a, b) => {
+      const dateA = new Date(a.visitDate || a.createdAt?.toDate?.() || 0);
+      const dateB = new Date(b.visitDate || b.createdAt?.toDate?.() || 0);
+      return dateB - dateA;
+    });
+
+    // Apply pagination
+    const paginatedRecords = activeRecords.slice(0, pageSize);
+    const hasMore = activeRecords.length > pageSize;
     
     return { 
       success: true, 
-      data: records,
+      data: paginatedRecords,
       pagination: {
         hasMore,
-        lastDoc: lastDocument,
-        currentPageSize: records.length,
+        lastDoc: null, // Simple pagination for now
+        currentPageSize: paginatedRecords.length,
         requestedPageSize: pageSize
       }
     };

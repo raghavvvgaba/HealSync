@@ -77,10 +77,10 @@ function SharedProfilesList() {
 
     if (loading) {
         return (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div className="glass-elevated rounded-3xl p-8">
                 <div className="flex items-center justify-center py-8">
-                    <FaSpinner className="animate-spin text-2xl text-primary" />
-                    <span className="ml-2 text-gray-600 dark:text-gray-400">Loading shared profiles...</span>
+                    <FaSpinner className="animate-spin text-2xl text-primary mr-2" />
+                    <span className="text-secondary">Loading shared profiles...</span>
                 </div>
             </div>
         );
@@ -88,68 +88,52 @@ function SharedProfilesList() {
 
     if (error) {
         return (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">
-                    Error Loading Profiles
-                </h3>
-                <p className="text-red-600 dark:text-red-300 text-sm">{error}</p>
+            <div className="glass-elevated rounded-3xl p-8">
+                <h3 className="text-lg font-semibold text-text mb-2">Error Loading Profiles</h3>
+                <p className="text-secondary text-sm">{error}</p>
             </div>
         );
     }
 
     if (sharedProfiles.length === 0) {
         return (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                    Shared Patient Records
-                </h2>
-                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                    <FaUser className="text-4xl mx-auto mb-4 opacity-50" />
-                    <p className="text-lg mb-2">No patient records shared yet.</p>
-                    <p className="text-sm">
-                        Share your Doctor ID with patients to receive their medical records.
-                    </p>
+            <div className="glass-elevated rounded-3xl overflow-hidden">
+                <div className="p-6 border-b soft-divider bg-gradient-to-r from-primary/15 to-accent/15">
+                    <h2 className="text-xl font-bold text-text">Shared Patient Records</h2>
+                </div>
+                <div className="text-center py-12 px-6">
+                    <FaUser className="text-4xl mx-auto mb-4 text-primary/70" />
+                    <p className="text-lg text-text mb-2">No patient records shared yet.</p>
+                    <p className="text-sm text-secondary">Share your Doctor ID with patients to receive their medical records.</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    Shared Patient Records ({sharedProfiles.length})
-                </h2>
+    <div className="glass-elevated rounded-3xl overflow-hidden hover-glow-primary">
+            <div className="p-6 border-b soft-divider bg-gradient-to-r from-primary/15 to-accent/15">
+                <h2 className="text-xl font-bold text-text">Shared Patient Records ({sharedProfiles.length})</h2>
             </div>
-            
             <div className="p-6">
                 <div className="space-y-4">
                     {sharedProfiles.map((profile) => (
-                        <div 
-                            key={profile.id}
-                            className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                        >
+                        <div key={profile.id} className="glass rounded-2xl p-5 border soft-divider transition-all lift-on-hover hover-glow-primary">
                             <div className="flex items-center justify-between">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-2">
-                                        <FaUser className="text-primary" />
-                                        <h3 className="font-semibold text-gray-900 dark:text-white">
-                                            {profile.patientName}
-                                        </h3>
+                                        <div className="w-10 h-10 rounded-lg bg-[rgba(var(--primary-rgb)/0.15)] text-primary flex items-center justify-center">
+                                            <FaUser />
+                                        </div>
+                                        <h3 className="font-semibold text-text">{profile.patientName}</h3>
                                     </div>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                        {profile.patientEmail}
-                                    </p>
-                                    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500">
+                                    <p className="text-sm text-secondary mb-1">{profile.patientEmail}</p>
+                                    <div className="flex items-center gap-2 text-xs text-secondary">
                                         <FaCalendar />
                                         <span>Shared on {formatDate(profile.sharedAt)}</span>
                                     </div>
                                 </div>
-                                
-                                <button
-                                    onClick={() => viewProfile(profile.id)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-primary dark:bg-secondary text-white rounded-lg hover:opacity-90 transition-all duration-200"
-                                >
+                                <button onClick={() => viewProfile(profile.id)} className="glass-cta flex items-center gap-2 px-5 py-2.5">
                                     <FaEye />
                                     View Profile
                                 </button>

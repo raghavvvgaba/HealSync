@@ -43,6 +43,13 @@ export default {
           '--color-secondary': '#71717A',
           '--color-accent': '#F59E0B',
           '--color-surface': '#FFFFFF',
+          // RGB variants for alpha blending and aurora
+          '--primary-rgb': '139 92 246',
+          '--accent-rgb': '245 158 11',
+          '--surface-rgb': '255 255 255',
+          // Glass variables
+          '--glass-bg': 'rgba(255, 255, 255, 0.55)',
+          '--glass-border': 'rgba(17, 24, 39, 0.12)',
         },
         // 🌙 High-Contrast Dark Mode Colors (UPDATED)
         '.dark': {
@@ -52,6 +59,13 @@ export default {
           '--color-secondary': '#A1A1AA',
           '--color-accent': '#FBBF24',
           '--color-surface': '#18181B',       // Darker surface for better separation
+          // RGB variants for alpha blending and aurora
+          '--primary-rgb': '167 139 250',
+          '--accent-rgb': '251 191 36',
+          '--surface-rgb': '24 24 27',
+          // Glass variables
+          '--glass-bg': 'rgba(24, 24, 27, 0.55)',
+          '--glass-border': 'rgba(255, 255, 255, 0.12)',
         },
         // Base styles for body
         'html, body': {

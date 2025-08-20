@@ -1,4 +1,4 @@
-import { getFirestore, collection, addDoc, getDoc, doc, setDoc, updateDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDoc, doc, setDoc, updateDoc, serverTimestamp, query, where, getDocs, orderBy, limit, startAfter } from "firebase/firestore";
 import { db, auth } from "../config/firebase";
 import { findDoctorByDoctorId } from "./firestoreDoctorService";
 
@@ -162,62 +162,38 @@ export async function revokeProfileAccess(patientId, doctorId) {
 export async function getPatientMedicalRecords(patientId, lastDoc = null, pageSize = 20, includeDeactivated = false) {
   try {
     const recordsRef = collection(db, "medicalRecords");
-    let q;
-
-    if (includeDeactivated) {
-      // Include all records (active and deactivated)
-      q = query(
-        recordsRef,
-        where("patientId", "==", patientId),
-        orderBy("visitDate", "desc"),
-        orderBy("createdAt", "desc"),
-        limit(pageSize)
-      );
-
-      if (lastDoc) {
-        q = query(
-          recordsRef,
-          where("patientId", "==", patientId),
-          orderBy("visitDate", "desc"),
-          orderBy("createdAt", "desc"),
-          startAfter(lastDoc),
-          limit(pageSize)
-        );
-      }
-    } else {
-      // Only active records
-      q = query(
-        recordsRef,
-        where("patientId", "==", patientId),
-        where("isActive", "==", true),
-        orderBy("visitDate", "desc"),
-        orderBy("createdAt", "desc"),
-        limit(pageSize)
-      );
-
-      if (lastDoc) {
-        q = query(
-          recordsRef,
-          where("patientId", "==", patientId),
-          where("isActive", "==", true),
-          orderBy("visitDate", "desc"),
-          orderBy("createdAt", "desc"),
-          startAfter(lastDoc),
-          limit(pageSize)
-        );
-      }
-    }
+    
+    // Simple query to get patient's medical records
+    let q = query(
+      recordsRef,
+      where("patientId", "==", patientId),
+      limit(pageSize)
+    );
     
     const querySnapshot = await getDocs(q);
     const records = [];
     let lastDocument = null;
     
     querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      
+      // Filter out deactivated records in JavaScript if needed
+      if (!includeDeactivated && data.isActive === false) {
+        return; // Skip deactivated records
+      }
+      
       records.push({
         id: doc.id,
-        ...doc.data()
+        ...data
       });
       lastDocument = doc;
+    });
+
+    // Sort by visitDate in memory
+    const sortedRecords = records.sort((a, b) => {
+      const dateA = new Date(a.visitDate || a.createdAt?.toDate() || 0);
+      const dateB = new Date(b.visitDate || b.createdAt?.toDate() || 0);
+      return dateB - dateA; // Descending order (newest first)
     });
 
     // Check if there are more records
@@ -225,20 +201,25 @@ export async function getPatientMedicalRecords(patientId, lastDoc = null, pageSi
     
     return { 
       success: true, 
-      data: records,
-      pagination: {
-        hasMore,
-        lastDoc: lastDocument,
-        currentPageSize: records.length,
-        requestedPageSize: pageSize
-      }
+      data: sortedRecords,
+      hasMore,
+      lastDoc: lastDocument
     };
     
   } catch (error) {
     console.error("Error fetching patient medical records:", error);
+    
+    // If it's a permission error or index error, return a more helpful message
+    if (error.code === 'failed-precondition') {
+      return { 
+        success: false, 
+        error: "Database index not ready. Please try again in a moment." 
+      };
+    }
+    
     return { 
       success: false, 
-      error: "Failed to fetch medical records." 
+      error: error.message || "Failed to fetch medical records." 
     };
   }
 }

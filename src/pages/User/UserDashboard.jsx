@@ -1,8 +1,10 @@
+import React, { useState, useEffect } from 'react';
 import UserHealthProfileBlock from '../../components/UserHealthProfileBlock';
 import MedicalHistoryBlock from '../../components/MedicalHistoryBlock';
 import SharedDoctorsBlock from '../../components/SharedDoctorsBlock';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../../context/authContext';
+import { getPatientMedicalRecords } from '../../utils/firestoreService';
 import { FaUser, FaClock, FaBell } from 'react-icons/fa';
 
 const dummyUser = {
@@ -13,53 +15,48 @@ const dummyUser = {
     diseases: ['Diabetes', 'High BP', 'Wears Specs'],
 };
 
-const dummyRecords = [
-    {
-        visitDate: "2025-05-16",
-        doctor: {
-            name: "Dr. Priya Mehta",
-            id: "D-4562"
-        },
-        symptoms: ["Headaches", "Nausea", "Vomiting"],
-        diagnosis: "Migraine",
-        medicines: ["Paracetamol 500mg", "Sumatriptan"],
-        prescribedTests: ["MRI Brain", "Blood Test"],
-        followUpNotes: "Follow-up in 2 weeks if symptoms persist.",
-        fileName: "migraine-prescription.pdf",
-        fileType: "pdf",
-        fileUrl: "https://example.com/record.pdf"
-    },
-    {
-        visitDate: "2025-04-12",
-        doctor: {
-            name: "Dr. Amit Singh",
-            id: "D-3421"
-        },
-        symptoms: ['Fever', 'Cough', 'Sore throat'],
-        diagnosis: 'Viral Infection',
-        medicines: ['Paracetamol 500mg', 'Cough syrup'],
-        fileName: 'viral_infection_report.pdf',
-        fileType: 'pdf',
-        fileUrl: '/files/viral_infection_report.pdf',
-    },
-    {
-        visitDate: "2025-03-08",
-        doctor: {
-            name: "Dr. Sunita Sharma",
-            id: "D-5678"
-        },
-        symptoms: ['Eye strain', 'Blurred vision'],
-        diagnosis: 'Eye Checkup',
-        medicines: ['Lubricant drops'],
-        fileName: 'eye_checkup.jpeg',
-        fileType: 'image',
-        fileUrl: '/files/eye_checkup.jpeg',
-    }
-];
-
 const UserDashboard = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    
+    // State for medical records
+    const [medicalRecords, setMedicalRecords] = useState([]);
+    const [recordsLoading, setRecordsLoading] = useState(true);
+    const [recordsError, setRecordsError] = useState(null);
+
+    // Fetch medical records when component mounts
+    useEffect(() => {
+        if (user?.uid) {
+            fetchMedicalRecords();
+        }
+    }, [user]);
+
+    const fetchMedicalRecords = async () => {
+        try {
+            setRecordsLoading(true);
+            setRecordsError(null);
+            
+            const result = await getPatientMedicalRecords(
+                user.uid,
+                null,    // lastDoc for pagination
+                20,      // pageSize - get latest 20 records
+                false    // includeDeactivated - only active records
+            );
+            
+            if (result.success) {
+                setMedicalRecords(result.data || []);
+            } else {
+                setRecordsError(result.error || 'Failed to fetch medical records');
+                setMedicalRecords([]);
+            }
+        } catch (error) {
+            console.error('Error fetching medical records:', error);
+            setRecordsError('Failed to load medical records');
+            setMedicalRecords([]);
+        } finally {
+            setRecordsLoading(false);
+        }
+    };
 
     // Get current time greeting
     const getGreeting = () => {
@@ -115,7 +112,13 @@ const UserDashboard = () => {
 
                     {/* Middle Row - Medical History */}
                     <div className="grid grid-cols-1 gap-6">
-                        <MedicalHistoryBlock records={dummyRecords} />
+                                                {/* Medical History */}
+                        <MedicalHistoryBlock 
+                            records={medicalRecords}
+                            loading={recordsLoading}
+                            error={recordsError}
+                            onRefresh={fetchMedicalRecords}
+                        />
                     </div>
 
                 </div>

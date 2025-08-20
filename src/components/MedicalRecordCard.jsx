@@ -38,6 +38,16 @@ const MedicalRecordCard = ({ record }) => {
         <span className="break-words">{new Date(visitDate).toDateString()}</span>
       </div>
 
+      {/* Creation Time */}
+      {record.createdAt && (
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm text-gray-500 dark:text-gray-400">
+          <span>📝</span>
+          <span className="break-words">
+            Record created at {new Date(record.createdAt.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </span>
+        </div>
+      )}
+
       {/* Doctor Info */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-3 font-medium">
         <MdPerson className="text-accent shrink-0" />

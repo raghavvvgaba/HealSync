@@ -55,8 +55,12 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="w-full px-4 py-3 bg-background text-text shadow-md sticky top-0 z-50">
-  <div className="max-w-7xl mx-auto flex flex-row justify-between items-center gap-2">
+    <nav className="w-full px-2 sm:px-4 text-text sticky top-3 z-50">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-row justify-between items-center gap-2 rounded-2xl 
+          bg-white/70 dark:bg-black/70 
+          supports-[backdrop-filter]:bg-white/50 dark:supports-[backdrop-filter]:bg-black/60 
+          backdrop-blur border border-primary shadow-xl overflow-hidden px-3 sm:px-4 py-2">
         {/* Logo */}
         <Link to="/">
           <motion.div
@@ -145,6 +149,7 @@ const Navbar = () => {
             {theme === "light" ? <FiSun /> : <FiMoon />}
           </button>
         </motion.div>
+        </div>
       </div>
     </nav>
   );

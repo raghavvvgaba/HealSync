@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
-import { getSharedProfileRecord, getPatientBasicInfo, getPatientProfile } from '../../utils/firestoreDoctorService';
-import { FaArrowLeft, FaUser, FaEnvelope, FaPhone, FaCalendar, FaMapMarkerAlt, FaSpinner, FaFileMedicalAlt, FaHeart, FaRunning, FaUtensils, FaPills, FaDownload, FaEye } from 'react-icons/fa';
+import { getSharedProfileRecord, getPatientBasicInfo, getPatientProfile, getDoctorPatientMedicalRecords, addMedicalRecord } from '../../utils/firestoreDoctorService';
+import { FaArrowLeft, FaUser, FaEnvelope, FaPhone, FaCalendar, FaMapMarkerAlt, FaSpinner, FaFileMedicalAlt, FaHeart, FaRunning, FaUtensils, FaPills, FaDownload, FaEye, FaPlus, FaTimes, FaSave } from 'react-icons/fa';
 import { GiBodyHeight } from 'react-icons/gi';
 import { MdBloodtype, MdSick, MdAccessibility } from 'react-icons/md';
 import { BsCapsulePill, BsEyeFill, BsEarFill } from 'react-icons/bs';
@@ -18,51 +18,240 @@ function PatientProfilePage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('profile'); // 'profile' or 'medical-records'
-
-    // Dummy medical records data
-    const medicalRecords = [
-        {
-            visitDate: "2025-05-16",
-            doctor: { name: "Dr. Priya Mehta", id: "D-4562" },
-            symptoms: ["Headaches", "Nausea", "Vomiting"],
-            diagnosis: "Migraine",
-            medicines: ["Paracetamol 500mg", "Sumatriptan"],
-            prescribedTests: ["MRI Brain", "Blood Test"],
-            followUpNotes: "Follow-up in 2 weeks if symptoms persist.",
-            fileName: "migraine-prescription.pdf",
-            fileType: "pdf",
-            fileUrl: "https://example.com/record.pdf"
-        },
-        {
-            visitDate: "2025-04-10",
-            doctor: { name: "Dr. Rajesh Kumar", id: "D-3421" },
-            symptoms: ["Dry eyes", "Eye strain"],
-            diagnosis: "Eye Checkup",
-            medicines: ["Lubricant drops"],
-            prescribedTests: ["Vision Test"],
-            followUpNotes: "Use computer glasses for extended screen time.",
-            fileName: "eye_checkup.jpeg",
-            fileType: "image",
-            fileUrl: "/files/eye_checkup.jpeg"
-        },
-        {
-            visitDate: "2025-03-15",
-            doctor: { name: "Dr. Sarah Johnson", id: "D-5678" },
-            symptoms: ["Chest pain", "Shortness of breath"],
-            diagnosis: "Cardiac Evaluation",
-            medicines: ["Aspirin 75mg", "Atorvastatin"],
-            prescribedTests: ["ECG", "Echocardiogram", "Stress Test"],
-            followUpNotes: "Regular exercise and diet modification recommended.",
-            fileName: "cardiac_report.pdf",
-            fileType: "pdf",
-            fileUrl: "/files/cardiac_report.pdf"
-        }
-    ];
+    
+    // Medical records state
+    const [medicalRecords, setMedicalRecords] = useState([]);
+    const [medicalRecordsLoading, setMedicalRecordsLoading] = useState(false);
+    const [medicalRecordsError, setMedicalRecordsError] = useState(null);
+    const [pagination, setPagination] = useState({
+        hasMore: false,
+        lastDoc: null,
+        currentPageSize: 0,
+        requestedPageSize: 20
+    });
+    
+    // Add medical record modal state
+    const [showAddRecordModal, setShowAddRecordModal] = useState(false);
+    const [addingRecord, setAddingRecord] = useState(false);
 
     useEffect(() => {
         if (!user) return;
         fetchSharedProfile();
     }, [user, shareId]);
+
+    useEffect(() => {
+        if (shareRecord && activeTab === 'medical-records') {
+            fetchMedicalRecords();
+        }
+    }, [shareRecord, activeTab]);
+
+    const fetchMedicalRecords = async (loadMore = false) => {
+        if (!shareRecord) return;
+        
+        try {
+            setMedicalRecordsLoading(true);
+            setMedicalRecordsError(null);
+            
+            const lastDoc = loadMore ? pagination.lastDoc : null;
+            const result = await getDoctorPatientMedicalRecords(
+                user.uid, 
+                shareRecord.patientId, 
+                lastDoc, 
+                20
+            );
+            
+            if (result.success) {
+                if (loadMore) {
+                    setMedicalRecords(prev => [...prev, ...result.data]);
+                } else {
+                    setMedicalRecords(result.data);
+                }
+                setPagination(result.pagination);
+            } else {
+                setMedicalRecordsError(result.error);
+            }
+        } catch (error) {
+            console.error("Error fetching medical records:", error);
+            setMedicalRecordsError("Failed to load medical records.");
+        } finally {
+            setMedicalRecordsLoading(false);
+        }
+    };
+
+    const handleAddMedicalRecord = async (formData) => {
+        if (!shareRecord) return;
+        
+        try {
+            setAddingRecord(true);
+            const result = await addMedicalRecord(user.uid, shareRecord.patientId, formData);
+            
+            if (result.success) {
+                setShowAddRecordModal(false);
+                // Refresh medical records
+                fetchMedicalRecords();
+            } else {
+                alert(result.error || 'Failed to add medical record');
+            }
+        } catch (error) {
+            console.error('Error adding medical record:', error);
+            alert('Failed to add medical record. Please try again.');
+        } finally {
+            setAddingRecord(false);
+        }
+    };
+
+    const AddMedicalRecordModal = () => {
+        const [formData, setFormData] = useState({
+            visitDate: new Date().toISOString().split('T')[0],
+            diagnosis: '',
+            symptoms: '',
+            medicines: '',
+            prescribedTests: '',
+            followUpNotes: ''
+        });
+
+        const handleSubmit = (e) => {
+            e.preventDefault();
+            
+            // Convert comma-separated strings to arrays
+            const processedData = {
+                ...formData,
+                symptoms: formData.symptoms.split(',').map(s => s.trim()).filter(s => s),
+                medicines: formData.medicines.split(',').map(m => m.trim()).filter(m => m),
+                prescribedTests: formData.prescribedTests.split(',').map(t => t.trim()).filter(t => t)
+            };
+            
+            handleAddMedicalRecord(processedData);
+        };
+
+        if (!showAddRecordModal) return null;
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Add Medical Record</h2>
+                            <button
+                                onClick={() => setShowAddRecordModal(false)}
+                                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                            >
+                                <FaTimes />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Visit Date
+                                </label>
+                                <input
+                                    type="date"
+                                    value={formData.visitDate}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, visitDate: e.target.value }))}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Diagnosis
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.diagnosis}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, diagnosis: e.target.value }))}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                    placeholder="Enter diagnosis"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Symptoms (comma-separated)
+                                </label>
+                                <textarea
+                                    value={formData.symptoms}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, symptoms: e.target.value }))}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                    rows="2"
+                                    placeholder="e.g., Headache, Nausea, Fever"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Medicines (comma-separated)
+                                </label>
+                                <textarea
+                                    value={formData.medicines}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, medicines: e.target.value }))}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                    rows="2"
+                                    placeholder="e.g., Paracetamol 500mg, Ibuprofen 200mg"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Prescribed Tests (comma-separated)
+                                </label>
+                                <textarea
+                                    value={formData.prescribedTests}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, prescribedTests: e.target.value }))}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                    rows="2"
+                                    placeholder="e.g., Blood Test, X-Ray, MRI"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Follow-up Notes
+                                </label>
+                                <textarea
+                                    value={formData.followUpNotes}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, followUpNotes: e.target.value }))}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                    rows="3"
+                                    placeholder="Any additional notes or follow-up instructions"
+                                />
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    type="submit"
+                                    disabled={addingRecord}
+                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {addingRecord ? (
+                                        <>
+                                            <FaSpinner className="animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FaSave />
+                                            Save Record
+                                        </>
+                                    )}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAddRecordModal(false)}
+                                    className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     const fetchSharedProfile = async () => {
         try {
@@ -138,9 +327,12 @@ function PatientProfilePage() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-start mb-4">
                 <div>
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white">{record.diagnosis}</h4>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white">{record.diagnosis || 'Medical Record'}</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {record.doctor.name} • {new Date(record.visitDate).toLocaleDateString()}
+                        {record.visitDate ? new Date(record.visitDate).toLocaleDateString() : 'No date specified'}
+                        {record.createdAt ? ` at ${new Date(record.createdAt.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
+                        {' '}
+                        • {record.doctorName || 'Unknown Doctor'}
                     </p>
                 </div>
                 {record.fileName && (
@@ -216,6 +408,7 @@ function PatientProfilePage() {
     }
 
     return (
+        <>
         <div className="max-w-7xl mx-auto p-6 space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -387,24 +580,77 @@ function PatientProfilePage() {
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold text-gray-900 dark:text-white">Medical Records</h2>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                            {medicalRecords.length} record(s) found
-                        </span>
+                        <div className="flex items-center gap-4">
+                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                                {medicalRecords.length} record(s) found
+                            </span>
+                            <button
+                                onClick={() => setShowAddRecordModal(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity"
+                            >
+                                <FaPlus className="text-sm" />
+                                Add Medical Record
+                            </button>
+                        </div>
                     </div>
                     
-                    {medicalRecords.length > 0 ? (
+                    {medicalRecordsError && (
+                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                            <p className="text-red-600 dark:text-red-300">{medicalRecordsError}</p>
+                            <button
+                                onClick={() => fetchMedicalRecords()}
+                                className="mt-2 text-sm text-red-700 dark:text-red-400 hover:underline"
+                            >
+                                Try again
+                            </button>
+                        </div>
+                    )}
+                    
+                    {medicalRecordsLoading && medicalRecords.length === 0 ? (
+                        <div className="text-center py-12">
+                            <FaSpinner className="animate-spin text-4xl text-primary mx-auto mb-4" />
+                            <p className="text-gray-600 dark:text-gray-400">Loading medical records...</p>
+                        </div>
+                    ) : medicalRecords.length > 0 ? (
                         <div className="space-y-4">
                             {medicalRecords.map((record, index) => (
-                                <MedicalRecordCard key={index} record={record} />
+                                <MedicalRecordCard key={record.id || index} record={record} />
                             ))}
+                            
+                            {/* Load More Button */}
+                            {pagination.hasMore && (
+                                <div className="text-center py-4">
+                                    <button
+                                        onClick={() => fetchMedicalRecords(true)}
+                                        disabled={medicalRecordsLoading}
+                                        className="px-6 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {medicalRecordsLoading ? (
+                                            <span className="flex items-center gap-2">
+                                                <FaSpinner className="animate-spin" />
+                                                Loading...
+                                            </span>
+                                        ) : (
+                                            'Load More Records'
+                                        )}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="text-center py-12">
                             <FaFileMedicalAlt className="text-6xl text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Medical Records</h3>
-                            <p className="text-gray-600 dark:text-gray-400">
-                                This patient hasn't uploaded any medical records yet.
+                            <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                No medical records found for this patient.
                             </p>
+                            <button
+                                onClick={() => setShowAddRecordModal(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity mx-auto"
+                            >
+                                <FaPlus className="text-sm" />
+                                Add First Medical Record
+                            </button>
                         </div>
                     )}
                 </div>
@@ -420,6 +666,10 @@ function PatientProfilePage() {
                 </div>
             )}
         </div>
+        
+        {/* Add Medical Record Modal */}
+        <AddMedicalRecordModal />
+        </>
     );
 }
 
