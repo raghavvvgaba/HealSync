@@ -43,6 +43,25 @@ function DoctorIdDisplay() {
         }
     };
 
+    const handleShareMobile = async () => {
+        if (!doctorId) return;
+        try {
+            if (navigator.share) {
+                await navigator.share({
+                    title: 'HealSync Doctor ID',
+                    text: `Here is my Doctor ID: ${doctorId}\nUse HealSync to share your records with me.`,
+                    url: window.location.origin,
+                });
+            } else {
+                // Fallback to copy if Web Share API isn't available
+                await handleCopy();
+            }
+        } catch (e) {
+            // User canceled or share failed; fallback to copy to provide utility
+            await handleCopy();
+        }
+    };
+
     if (loading) {
         return (
             <div className="glass-elevated rounded-3xl p-6">
@@ -77,7 +96,17 @@ function DoctorIdDisplay() {
                         </div>
                         <h3 className="text-lg font-semibold text-text">Your Doctor ID</h3>
                     </div>
-                    <span className="px-3 py-1.5 rounded-full text-xs text-primary bg-[rgba(var(--primary-rgb)/0.15)] border soft-divider">Share with Patients</span>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={handleShareMobile}
+                            className="inline-flex sm:hidden items-center justify-center w-9 h-9 rounded-full glass border soft-divider text-primary hover:brightness-110"
+                            title="Share with Patients"
+                            aria-label="Share with Patients"
+                        >
+                            <FaShareAlt className="text-sm" />
+                        </button>
+                        <span className="hidden sm:inline-flex px-3 py-1.5 rounded-full text-xs text-primary bg-[rgba(var(--primary-rgb)/0.15)] border soft-divider">Share with Patients</span>
+                    </div>
                 </div>
             </div>
 

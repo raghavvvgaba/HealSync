@@ -80,9 +80,9 @@ body {
 
 /* Hover glow utilities */
 .hover-glow-primary { transition: box-shadow 200ms, transform 200ms; }
-.hover-glow-primary:hover { box-shadow: 0 10px 35px rgb(var(--primary-rgb) / 0.35), 0 2px 10px rgb(var(--primary-rgb) / 0.25); }
+.hover-glow-primary:hover { box-shadow: 0 8px 24px rgb(var(--primary-rgb) / 0.22), 0 1px 6px rgb(var(--primary-rgb) / 0.16); }
 .hover-glow-accent { transition: box-shadow 200ms, transform 200ms; }
-.hover-glow-accent:hover { box-shadow: 0 10px 35px rgb(var(--accent-rgb) / 0.38), 0 2px 10px rgb(var(--accent-rgb) / 0.28); }
+.hover-glow-accent:hover { box-shadow: 0 8px 24px rgb(var(--accent-rgb) / 0.24), 0 1px 6px rgb(var(--accent-rgb) / 0.18); }
 
 /* Lift and subtle scale */
 .lift-on-hover { transition: transform 220ms ease, box-shadow 220ms ease; }
@@ -99,8 +99,8 @@ body {
 .shine-on-hover:hover::after { transform: rotate(8deg) translate3d(35%,0,0); opacity: 1; }
 
 /* CTA button with accent gradient + glow */
-.glass-cta { color: white; border-radius: 1rem; background: linear-gradient(90deg, var(--color-accent), color-mix(in oklab, var(--color-accent), black 20%)); box-shadow: 0 10px 30px rgb(var(--accent-rgb) / 0.35); transition: filter 160ms, transform 160ms, box-shadow 160ms; }
-.glass-cta:hover { filter: brightness(1.05); transform: translateY(-1px); box-shadow: 0 14px 36px rgb(var(--accent-rgb) / 0.45); }
+.glass-cta { color: white; border-radius: 1rem; background: linear-gradient(90deg, var(--color-accent), color-mix(in oklab, var(--color-accent), black 20%)); box-shadow: 0 8px 22px rgb(var(--accent-rgb) / 0.25); transition: filter 160ms, transform 160ms, box-shadow 160ms; }
+.glass-cta:hover { filter: brightness(1.03); transform: translateY(-1px); box-shadow: 0 10px 28px rgb(var(--accent-rgb) / 0.35); }
 
 /* Ensure root element covers full height */
 #root {

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
 import { getSharedProfileRecord, getPatientBasicInfo, getPatientProfile, getDoctorPatientMedicalRecords, addMedicalRecord } from '../../utils/firestoreDoctorService';
-import { FaArrowLeft, FaUser, FaEnvelope, FaPhone, FaCalendar, FaMapMarkerAlt, FaSpinner, FaFileMedicalAlt, FaHeart, FaRunning, FaUtensils, FaPills, FaDownload, FaEye, FaPlus, FaTimes, FaSave } from 'react-icons/fa';
+import { FaArrowLeft, FaUser, FaEnvelope, FaPhone, FaCalendar, FaMapMarkerAlt, FaSpinner, FaFileMedicalAlt, FaHeart, FaRunning, FaUtensils, FaPills, FaDownload, FaEye, FaPlus, FaTimes, FaSave, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import { GiBodyHeight } from 'react-icons/gi';
 import { MdBloodtype, MdSick, MdAccessibility } from 'react-icons/md';
 import { BsCapsulePill, BsEyeFill, BsEarFill } from 'react-icons/bs';
@@ -33,6 +34,15 @@ function PatientProfilePage() {
     // Add medical record modal state
     const [showAddRecordModal, setShowAddRecordModal] = useState(false);
     const [addingRecord, setAddingRecord] = useState(false);
+    const [addRecordError, setAddRecordError] = useState("");
+    const [toast, setToast] = useState(null); // {type: 'success'|'error', message: string}
+
+    // Auto-dismiss toast after a short delay
+    useEffect(() => {
+        if (!toast) return;
+        const t = setTimeout(() => setToast(null), 5000);
+        return () => clearTimeout(t);
+    }, [toast]);
 
     useEffect(() => {
         if (!user) return;
@@ -80,24 +90,44 @@ function PatientProfilePage() {
 
     const handleAddMedicalRecord = async (formData) => {
         if (!shareRecord) return;
-        
+        setAddRecordError("");
         try {
             setAddingRecord(true);
             const result = await addMedicalRecord(user.uid, shareRecord.patientId, formData);
-            
             if (result.success) {
                 setShowAddRecordModal(false);
-                // Refresh medical records
                 fetchMedicalRecords();
+                setToast({ type: 'success', message: 'Medical record added successfully' });
             } else {
-                alert(result.error || 'Failed to add medical record');
+                setAddRecordError(result.error || 'Failed to add medical record');
             }
         } catch (error) {
             console.error('Error adding medical record:', error);
-            alert('Failed to add medical record. Please try again.');
+            setAddRecordError('Failed to add medical record. Please try again.');
         } finally {
             setAddingRecord(false);
         }
+    };
+
+    // Toast rendered via portal to avoid stacking-context issues
+    const ToastPortal = ({ toast }) => {
+        if (!toast) return null;
+        return createPortal(
+            <div className="fixed top-20 right-4 z-[9999] pointer-events-none">
+                <div
+                    role="alert"
+                    className={`pointer-events-auto glass-elevated border soft-divider rounded-xl px-5 py-4 text-sm sm:text-base font-semibold shadow-xl flex items-start gap-3 ${toast.type === 'success' ? 'text-green-400' : 'text-red-400'}`}
+                >
+                    {toast.type === 'success' ? (
+                        <FaCheckCircle className="mt-0.5 shrink-0" />
+                    ) : (
+                        <FaExclamationCircle className="mt-0.5 shrink-0" />
+                    )}
+                    <span className="text-text">{toast.message}</span>
+                </div>
+            </div>,
+            document.body
+        );
     };
 
     const AddMedicalRecordModal = () => {
@@ -126,105 +156,110 @@ function PatientProfilePage() {
 
         if (!showAddRecordModal) return null;
 
+        // Close on Escape
+        useEffect(() => {
+            const onKey = (e) => {
+                if (e.key === 'Escape') setShowAddRecordModal(false);
+            };
+            window.addEventListener('keydown', onKey);
+            return () => window.removeEventListener('keydown', onKey);
+        }, []);
+
         return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                    <div className="p-6">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Add Medical Record</h2>
+            <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm p-4 sm:p-6 flex items-center justify-center" onClick={() => setShowAddRecordModal(false)}>
+                <div className="glass-elevated rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border soft-divider" onClick={(e) => e.stopPropagation()}>
+                    <div className="p-4 sm:p-6">
+                        <div className="flex items-center justify-between mb-4 sm:mb-6">
+                            <h2 className="text-lg sm:text-xl font-bold text-text">Add Medical Record</h2>
                             <button
                                 onClick={() => setShowAddRecordModal(false)}
-                                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                className="w-9 h-9 rounded-lg glass border soft-divider text-secondary hover-glow-primary flex items-center justify-center"
+                                aria-label="Close"
                             >
-                                <FaTimes />
+                                <FaTimes className="text-sm" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Visit Date
-                                </label>
-                                <input
-                                    type="date"
-                                    value={formData.visitDate}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, visitDate: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
-                                    required
-                                />
+                        {addRecordError && (
+                            <div className="mb-3 sm:mb-4 glass border soft-divider rounded-lg p-3 text-red-400 bg-red-500/10">
+                                {addRecordError}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                <div>
+                                    <label className="block text-xs sm:text-sm font-medium text-secondary mb-1.5">Visit Date</label>
+                                    <input
+                                        type="date"
+                                        value={formData.visitDate}
+                                        onChange={(e) => { setFormData(prev => ({ ...prev, visitDate: e.target.value })); setAddRecordError(""); }}
+                                        className="w-full px-3 py-2 rounded-lg glass border soft-divider text-text placeholder:text-secondary/70 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs sm:text-sm font-medium text-secondary mb-1.5">Diagnosis</label>
+                                    <input
+                                        type="text"
+                                        value={formData.diagnosis}
+                                        onChange={(e) => { setFormData(prev => ({ ...prev, diagnosis: e.target.value })); setAddRecordError(""); }}
+                                        className="w-full px-3 py-2 rounded-lg glass border soft-divider text-text placeholder:text-secondary/70 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent"
+                                        placeholder="Enter diagnosis"
+                                        required
+                                    />
+                                </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Diagnosis
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.diagnosis}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, diagnosis: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
-                                    placeholder="Enter diagnosis"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Symptoms (comma-separated)
-                                </label>
+                                <label className="block text-xs sm:text-sm font-medium text-secondary mb-1.5">Symptoms (comma-separated)</label>
                                 <textarea
                                     value={formData.symptoms}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, symptoms: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                    onChange={(e) => { setFormData(prev => ({ ...prev, symptoms: e.target.value })); setAddRecordError(""); }}
+                                    className="w-full px-3 py-2 rounded-lg glass border soft-divider text-text placeholder:text-secondary/70 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent"
                                     rows="2"
                                     placeholder="e.g., Headache, Nausea, Fever"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Medicines (comma-separated)
-                                </label>
+                                <label className="block text-xs sm:text-sm font-medium text-secondary mb-1.5">Medicines (comma-separated)</label>
                                 <textarea
                                     value={formData.medicines}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, medicines: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                    onChange={(e) => { setFormData(prev => ({ ...prev, medicines: e.target.value })); setAddRecordError(""); }}
+                                    className="w-full px-3 py-2 rounded-lg glass border soft-divider text-text placeholder:text-secondary/70 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent"
                                     rows="2"
                                     placeholder="e.g., Paracetamol 500mg, Ibuprofen 200mg"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Prescribed Tests (comma-separated)
-                                </label>
+                                <label className="block text-xs sm:text-sm font-medium text-secondary mb-1.5">Prescribed Tests (comma-separated)</label>
                                 <textarea
                                     value={formData.prescribedTests}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, prescribedTests: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                    onChange={(e) => { setFormData(prev => ({ ...prev, prescribedTests: e.target.value })); setAddRecordError(""); }}
+                                    className="w-full px-3 py-2 rounded-lg glass border soft-divider text-text placeholder:text-secondary/70 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent"
                                     rows="2"
                                     placeholder="e.g., Blood Test, X-Ray, MRI"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Follow-up Notes
-                                </label>
+                                <label className="block text-xs sm:text-sm font-medium text-secondary mb-1.5">Follow-up Notes</label>
                                 <textarea
                                     value={formData.followUpNotes}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, followUpNotes: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                    onChange={(e) => { setFormData(prev => ({ ...prev, followUpNotes: e.target.value })); setAddRecordError(""); }}
+                                    className="w-full px-3 py-2 rounded-lg glass border soft-divider text-text placeholder:text-secondary/70 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent"
                                     rows="3"
                                     placeholder="Any additional notes or follow-up instructions"
                                 />
                             </div>
 
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-4">
                                 <button
                                     type="submit"
                                     disabled={addingRecord}
-                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 glass-cta px-4 py-2 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
                                     {addingRecord ? (
                                         <>
@@ -233,7 +268,7 @@ function PatientProfilePage() {
                                         </>
                                     ) : (
                                         <>
-                                            <FaSave />
+                                            
                                             Save Record
                                         </>
                                     )}
@@ -241,7 +276,7 @@ function PatientProfilePage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowAddRecordModal(false)}
-                                    className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                    className="px-4 py-2 glass rounded-lg border soft-divider text-text hover-glow-primary"
                                 >
                                     Cancel
                                 </button>
@@ -288,22 +323,24 @@ function PatientProfilePage() {
     };
 
     const InfoCard = ({ title, icon: Icon, children, className = "" }) => (
-        <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 ${className}`}>
+        <div className={`glass rounded-2xl p-5 sm:p-6 border soft-divider hover-glow-primary ${className}`}>
             <div className="flex items-center gap-3 mb-4">
-                <Icon className="text-primary text-xl" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+                <div className="w-9 h-9 rounded-lg bg-[rgba(var(--primary-rgb)/0.15)] text-primary flex items-center justify-center">
+                    <Icon className="text-base" />
+                </div>
+                <h3 className="text-base sm:text-lg font-semibold text-text">{title}</h3>
             </div>
             {children}
         </div>
     );
 
     const DataField = ({ label, value, icon: Icon }) => (
-        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div className="flex items-center gap-2">
-                {Icon && <Icon className="text-primary text-sm" />}
-                <span className="text-sm font-medium text-gray-900 dark:text-white">{label}</span>
+        <div className="flex items-center justify-between p-3 rounded-lg border soft-divider glass">
+            <div className="flex items-center gap-2 min-w-0">
+                {Icon && <Icon className="text-primary text-sm shrink-0" />}
+                <span className="text-sm font-medium text-text truncate">{label}</span>
             </div>
-            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+            <span className="text-sm text-secondary font-medium max-w-[60%] text-right truncate">
                 {value || 'Not specified'}
             </span>
         </div>
@@ -324,11 +361,11 @@ function PatientProfilePage() {
     );
 
     const MedicalRecordCard = ({ record }) => (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
-            <div className="flex justify-between items-start mb-4">
+        <div className="glass rounded-2xl p-5 sm:p-6 border soft-divider hover-glow-primary">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
                 <div>
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white">{record.diagnosis || 'Medical Record'}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <h4 className="text-base sm:text-lg font-semibold text-text">{record.diagnosis || 'Medical Record'}</h4>
+                    <p className="text-xs sm:text-sm text-secondary">
                         {record.visitDate ? new Date(record.visitDate).toLocaleDateString() : 'No date specified'}
                         {record.createdAt ? ` at ${new Date(record.createdAt.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
                         {' '}
@@ -337,10 +374,10 @@ function PatientProfilePage() {
                 </div>
                 {record.fileName && (
                     <div className="flex gap-2">
-                        <button className="p-2 text-primary hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        <button className="p-2 text-primary hover:bg-white/10 rounded-lg transition-colors">
                             <FaEye className="text-sm" />
                         </button>
-                        <button className="p-2 text-primary hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        <button className="p-2 text-primary hover:bg-white/10 rounded-lg transition-colors">
                             <FaDownload className="text-sm" />
                         </button>
                     </div>
@@ -349,26 +386,26 @@ function PatientProfilePage() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Symptoms</p>
+                    <p className="text-sm font-medium text-text mb-2">Symptoms</p>
                     <TagList items={record.symptoms} colorClass="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300" />
                 </div>
                 
                 <div>
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Medicines</p>
+                    <p className="text-sm font-medium text-text mb-2">Medicines</p>
                     <TagList items={record.medicines} colorClass="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300" />
                 </div>
                 
                 {record.prescribedTests && record.prescribedTests.length > 0 && (
                     <div className="md:col-span-2">
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prescribed Tests</p>
+                        <p className="text-sm font-medium text-text mb-2">Prescribed Tests</p>
                         <TagList items={record.prescribedTests} colorClass="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300" />
                     </div>
                 )}
                 
                 {record.followUpNotes && (
                     <div className="md:col-span-2">
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Follow-up Notes</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                        <p className="text-sm font-medium text-text mb-2">Follow-up Notes</p>
+                        <p className="text-sm text-secondary glass p-3 rounded-lg border soft-divider">
                             {record.followUpNotes}
                         </p>
                     </div>
@@ -409,63 +446,63 @@ function PatientProfilePage() {
 
     return (
         <>
-        <div className="max-w-7xl mx-auto p-6 space-y-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 space-y-6 aurora-bg">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors"
+                    className="inline-flex items-center gap-2 glass rounded-full px-3 py-1.5 text-sm text-secondary hover-glow-primary"
                 >
                     <FaArrowLeft />
-                    <span>Back to Patient List</span>
+                    <span className="font-medium">Back to Patient List</span>
                 </button>
                 <div className="text-right">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs glass border soft-divider text-secondary">
                         Shared on {shareRecord?.sharedAt?.toDate?.()?.toLocaleDateString() || 'Unknown'}
-                    </p>
+                    </span>
                 </div>
             </div>
 
             {/* Patient Header */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+            <div className="glass-elevated rounded-3xl p-5 sm:p-6">
                 <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center">
-                        <FaUser className="text-2xl text-white" />
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center shadow-lg">
+                        <FaUser className="text-xl sm:text-2xl" />
                     </div>
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <div className="min-w-0">
+                        <h1 className="text-xl sm:text-2xl font-bold text-text truncate">
                             {patientInfo.name || 'Patient Name'}
                         </h1>
-                        <p className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                            <FaEnvelope className="text-sm" />
-                            {patientInfo.email || 'No email provided'}
+                        <p className="text-secondary flex items-center gap-2 text-sm truncate">
+                            <FaEnvelope className="text-xs" />
+                            <span className="truncate">{patientInfo.email || 'No email provided'}</span>
                         </p>
                     </div>
                 </div>
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+        <div className="glass rounded-xl p-1 border soft-divider flex gap-1">
                 <button
                     onClick={() => setActiveTab('profile')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md font-medium transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-1.5 sm:py-2 px-2.5 sm:px-4 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
                         activeTab === 'profile'
-                            ? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                            ? 'bg-[rgba(var(--primary-rgb)/0.15)] text-primary'
+                            : 'text-secondary hover:text-text'
                     }`}
                 >
-                    <FaUser className="text-sm" />
+            <FaUser className="text-xs sm:text-sm" />
                     Profile Information
                 </button>
                 <button
                     onClick={() => setActiveTab('medical-records')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md font-medium transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-1.5 sm:py-2 px-2.5 sm:px-4 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
                         activeTab === 'medical-records'
-                            ? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                            ? 'bg-[rgba(var(--primary-rgb)/0.15)] text-primary'
+                            : 'text-secondary hover:text-text'
                     }`}
                 >
-                    <FaFileMedicalAlt className="text-sm" />
+            <FaFileMedicalAlt className="text-xs sm:text-sm" />
                     Medical Records
                 </button>
             </div>
@@ -578,18 +615,16 @@ function PatientProfilePage() {
             {/* Medical Records Tab */}
             {activeTab === 'medical-records' && (
                 <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Medical Records</h2>
-                        <div className="flex items-center gap-4">
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
-                                {medicalRecords.length} record(s) found
-                            </span>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <h2 className="text-lg sm:text-xl font-bold text-text">Medical Records</h2>
+                        <div className="flex items-center gap-3">
+                            <span className="text-xs sm:text-sm text-secondary">{medicalRecords.length} record(s) found</span>
                             <button
                                 onClick={() => setShowAddRecordModal(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity"
+                                className="glass-cta px-4 py-2 flex items-center gap-2"
                             >
                                 <FaPlus className="text-sm" />
-                                Add Medical Record
+                                <span className="text-sm">Add Medical Record</span>
                             </button>
                         </div>
                     </div>
@@ -623,7 +658,7 @@ function PatientProfilePage() {
                                     <button
                                         onClick={() => fetchMedicalRecords(true)}
                                         disabled={medicalRecordsLoading}
-                                        className="px-6 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="px-6 py-2 glass rounded-lg border soft-divider text-text hover-glow-primary disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {medicalRecordsLoading ? (
                                             <span className="flex items-center gap-2">
@@ -669,6 +704,8 @@ function PatientProfilePage() {
         
         {/* Add Medical Record Modal */}
         <AddMedicalRecordModal />
+    {/* Success Toast */}
+    <ToastPortal toast={toast} />
         </>
     );
 }

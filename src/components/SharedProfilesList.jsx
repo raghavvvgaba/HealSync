@@ -113,29 +113,32 @@ function SharedProfilesList() {
     return (
     <div className="glass-elevated rounded-3xl overflow-hidden hover-glow-primary">
             <div className="p-6 border-b soft-divider bg-gradient-to-r from-primary/15 to-accent/15">
-                <h2 className="text-xl font-bold text-text">Shared Patient Records ({sharedProfiles.length})</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-text">Shared Patient Records ({sharedProfiles.length})</h2>
             </div>
-            <div className="p-6">
-                <div className="space-y-4">
+            <div className="p-4 sm:p-6">
+                <div className="space-y-3 sm:space-y-4">
                     {sharedProfiles.map((profile) => (
-                        <div key={profile.id} className="glass rounded-2xl p-5 border soft-divider transition-all lift-on-hover hover-glow-primary">
-                            <div className="flex items-center justify-between">
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <div className="w-10 h-10 rounded-lg bg-[rgba(var(--primary-rgb)/0.15)] text-primary flex items-center justify-center">
+                        <div key={profile.id} className="glass rounded-xl sm:rounded-2xl p-4 sm:p-5 border soft-divider transition-all lift-on-hover hover-glow-primary">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-3 mb-1.5 sm:mb-2 min-w-0">
+                                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[rgba(var(--primary-rgb)/0.15)] text-primary flex items-center justify-center shrink-0">
                                             <FaUser />
                                         </div>
-                                        <h3 className="font-semibold text-text">{profile.patientName}</h3>
+                                        <h3 className="font-semibold text-text truncate">{profile.patientName}</h3>
                                     </div>
-                                    <p className="text-sm text-secondary mb-1">{profile.patientEmail}</p>
-                                    <div className="flex items-center gap-2 text-xs text-secondary">
+                                    <p className="text-xs sm:text-sm text-secondary mb-1 truncate">{profile.patientEmail}</p>
+                                    <div className="flex items-center gap-2 text-[11px] sm:text-xs text-secondary">
                                         <FaCalendar />
                                         <span>Shared on {formatDate(profile.sharedAt)}</span>
                                     </div>
                                 </div>
-                                <button onClick={() => viewProfile(profile.id)} className="glass-cta flex items-center gap-2 px-5 py-2.5">
-                                    <FaEye />
-                                    View Profile
+                                <button 
+                                    onClick={() => viewProfile(profile.id)} 
+                                    className="glass-cta flex items-center justify-center gap-2 w-full sm:w-auto px-4 sm:px-5 py-2 sm:py-2.5"
+                                >
+                                    <FaEye className="text-sm" />
+                                    <span className="text-sm sm:text-base">View Profile</span>
                                 </button>
                             </div>
                         </div>
