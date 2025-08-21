@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiSun, FiMoon } from "react-icons/fi";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../context/authContext";
-import ShareButton from "./ShareButton";
 
 const Navbar = () => {
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
@@ -57,10 +56,10 @@ const Navbar = () => {
   return (
     <nav className="w-full px-2 sm:px-4 text-text sticky top-3 z-50">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-row justify-between items-center gap-2 rounded-2xl 
+        <div className="relative flex flex-row justify-between items-center gap-2 rounded-2xl 
           bg-white/70 dark:bg-black/70 
           supports-[backdrop-filter]:bg-white/50 dark:supports-[backdrop-filter]:bg-black/60 
-          backdrop-blur border border-primary shadow-xl overflow-hidden px-3 sm:px-4 py-2">
+          backdrop-blur border border-primary shadow-xl overflow-visible px-3 sm:px-4 py-2">
         {/* Logo */}
         <Link to="/">
           <motion.div
@@ -82,11 +81,6 @@ const Navbar = () => {
         >
           {user ? (
             <div className="flex flex-row items-center gap-2 relative w-auto">
-              {/* Share Button - Only show for regular users, not doctors */}
-              {userRole === "user" && (
-                <ShareButton/>
-              )}
-
               {/* Avatar Dropdown */}
               <div
                 className="relative"
@@ -104,7 +98,9 @@ const Navbar = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute right-0 mt-2 w-48 bg-background border border-secondary rounded-xl shadow-xl z-50 p-4 text-sm"
+                      className="absolute right-0 mt-2 w-56 rounded-xl shadow-2xl z-[100] p-4 text-sm pointer-events-auto 
+                        bg-white/80 dark:bg-black/70 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-black/60 
+                        backdrop-blur border border-secondary/60"
                     >
                       <div className="font-semibold text-text mb-1">
                         {user?.displayName}
@@ -154,5 +150,4 @@ const Navbar = () => {
     </nav>
   );
 };
-
 export default Navbar;

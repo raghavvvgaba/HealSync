@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/authContext';
-import { getPatientSharedProfiles, revokeProfileAccess } from '../utils/firestoreService';
-import { FaUserMd, FaCalendarAlt, FaTrashAlt, FaSpinner, FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa';
+import { getPatientSharedProfiles, revokeProfileAccess, shareProfileWithDoctor } from '../utils/firestoreService';
+import { FaUserMd, FaCalendarAlt, FaTrashAlt, FaSpinner, FaExclamationTriangle, FaCheckCircle, FaPlus } from 'react-icons/fa';
 import { MdCancel } from 'react-icons/md';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useForm } from 'react-hook-form';
 
 const SharedDoctorsBlock = () => {
   const { user } = useAuth();
@@ -12,6 +14,13 @@ const SharedDoctorsBlock = () => {
   const [revoking, setRevoking] = useState(null);
   const [notification, setNotification] = useState(null);
   const [confirmPopover, setConfirmPopover] = useState({ doctorId: null, doctorName: '' });
+  const [showShareForm, setShowShareForm] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareStatus, setShareStatus] = useState(null);
+  const [shareErrorMessage, setShareErrorMessage] = useState('');
+  const [doctorName, setDoctorName] = useState('');
+  
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
   useEffect(() => {
     if (user?.uid) {
@@ -72,6 +81,51 @@ const SharedDoctorsBlock = () => {
     }
   };
 
+  const handleShare = async (data) => {
+    if (!user) {
+      setShareErrorMessage('You must be logged in to share your profile');
+      setShareStatus('error');
+      return;
+    }
+
+    setIsSharing(true);
+    setShareStatus(null);
+    setShareErrorMessage('');
+    
+    try {
+      const doctorIdCode = data.doctorId.toUpperCase();
+      
+      const shareResult = await shareProfileWithDoctor(
+        user.uid, 
+        doctorIdCode
+      );
+      
+      if (shareResult.success) {
+        setDoctorName(shareResult.doctorName || '');
+        setShareStatus('success');
+        // Refresh the shared profiles list
+        await fetchSharedProfiles();
+        setTimeout(() => {
+          reset();
+          setShowShareForm(false);
+          setShareStatus(null);
+          setShareErrorMessage('');
+          setDoctorName('');
+        }, 2000);
+      } else {
+        setShareErrorMessage(shareResult.error || 'Failed to share profile');
+        setShareStatus('error');
+      }
+      
+    } catch (error) {
+      console.error("Error sharing profile:", error);
+      setShareErrorMessage('An unexpected error occurred. Please try again.');
+      setShareStatus('error');
+    }
+    
+    setIsSharing(false);
+  };
+
   if (loading) {
     return (
       <div className="relative p-6 shadow-lg text-text border-2 border-surface flex flex-col gap-6 rounded-xl bg-gradient-to-br from-white via-gray-50 to-blue-50 dark:from-gray-800 dark:via-gray-700 dark:to-blue-900">
@@ -90,13 +144,95 @@ const SharedDoctorsBlock = () => {
   return (
   <div className="relative p-6 shadow-lg text-text border-2 border-surface flex flex-col gap-6 rounded-xl bg-[#181F2A] dark:bg-[#181F2A] hover:shadow-xl transition-all duration-300">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <FaUserMd size={24} className="text-blue-600 dark:text-blue-400" />
-        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Shared with Doctors</h2>
-        <span className="ml-auto bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-sm font-medium">
-          {sharedProfiles.length} {sharedProfiles.length === 1 ? 'doctor' : 'doctors'}
-        </span>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <FaUserMd size={24} className="text-blue-600 dark:text-blue-400" />
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Shared with Doctors</h2>
+          <span className="ml-2 flex items-center justify-center bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold min-w-[38px] h-6">
+            {sharedProfiles.length} {sharedProfiles.length === 1 ? 'doctor' : 'doctors'}
+          </span>
+        </div>
+        <button
+          onClick={() => setShowShareForm(!showShareForm)}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
+        >
+          <FaPlus />
+          Share with Doctor
+        </button>
       </div>
+
+      {/* Share Form */}
+      <AnimatePresence>
+        {showShareForm && (
+          <motion.form
+            onSubmit={handleSubmit(handleShare)}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800 space-y-3"
+          >
+            <label className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+              Doctor's ID
+            </label>
+            <div className="space-y-1">
+              <input
+                type="text"
+                placeholder="e.g., DR-HALE-1234"
+                {...register("doctorId", { 
+                  required: "Doctor ID is required",
+                  pattern: {
+                    value: /^DR-[BCDFGHJKLMNPQRSTVWXYZAEIOU]{4}-\d{4}$/i,
+                    message: "Invalid doctor ID format (DR-XXXX-1234)"
+                  }
+                })}
+                className="w-full px-3 py-2 rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-sm uppercase focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                maxLength={12}
+              />
+              {errors.doctorId && (
+                <p className="text-red-500 text-xs">{errors.doctorId.message}</p>
+              )}
+              <p className="text-gray-500 text-xs">
+                Format: DR-XXXX-1234
+              </p>
+            </div>
+            
+            {shareStatus === 'error' && (
+              <div className="text-red-500 text-xs bg-red-50 dark:bg-red-900/30 p-2 rounded">
+                {shareErrorMessage || 'An error occurred. Please try again.'}
+              </div>
+            )}
+            
+            {shareStatus === 'success' && (
+              <div className="text-green-600 dark:text-green-400 text-xs bg-green-50 dark:bg-green-900/30 p-2 rounded">
+                Profile shared successfully{doctorName ? ` with Dr. ${doctorName}!` : '!'}
+              </div>
+            )}
+            
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                disabled={isSharing}
+                className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+              >
+                {isSharing ? "Sharing..." : "Share Profile"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowShareForm(false);
+                  setShareStatus(null);
+                  setShareErrorMessage('');
+                  reset();
+                }}
+                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-colors text-sm font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </motion.form>
+        )}
+      </AnimatePresence>
 
       {/* Notification */}
       {notification && (

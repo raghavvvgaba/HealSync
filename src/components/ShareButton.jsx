@@ -79,7 +79,7 @@ function ShareButton() {
     };
 
     return (
-        <div className="relative">
+    <div className="relative">
             <button
                 onClick={() => setShowShareBox((prev) => !prev)}
                 className="px-3 py-2 text-sm rounded-xl bg-secondary text-white hover:scale-105 transition"
@@ -87,7 +87,7 @@ function ShareButton() {
                 Share To Doctor
             </button>
 
-            <AnimatePresence>
+                        <AnimatePresence>
                 {showShareBox && (
                     <motion.form
                         ref={shareBoxRef}
@@ -96,7 +96,9 @@ function ShareButton() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
-                        className="absolute right-0 mt-2 w-64 bg-background border border-secondary rounded-xl shadow-xl z-50 p-4 space-y-3"
+                                                className="absolute right-0 mt-2 w-72 rounded-xl shadow-2xl z-[110] p-4 space-y-3 pointer-events-auto 
+                                                    bg-white/80 dark:bg-black/70 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-black/60 
+                                                    backdrop-blur border border-secondary/60"
                     >
                         <label className="text-sm text-text font-medium">
                             Doctor's ID
@@ -112,7 +114,8 @@ function ShareButton() {
                                         message: "Invalid doctor ID format (DR-XXXX-1234)"
                                     }
                                 })}
-                                className="w-full px-3 py-2 border rounded-md border-gray-300 dark:border-gray-600 bg-transparent text-text text-sm uppercase"
+                                                                className="w-full px-3 py-2 rounded-md bg-white/70 dark:bg-black/60 supports-[backdrop-filter]:bg-white/50 dark:supports-[backdrop-filter]:bg-black/50 backdrop-blur 
+                                                                    border border-gray-300 dark:border-gray-600 text-text text-sm uppercase"
                                 maxLength={12}
                             />
                             {errors.doctorId && (
@@ -138,7 +141,7 @@ function ShareButton() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full px-3 py-2 bg-green-700 text-white rounded-md hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                            className="w-full px-3 py-2 bg-green-600 dark:bg-green-700 text-white rounded-md hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                         >
                             {isLoading ? "Sharing..." : "Share Profile"}
                         </button>
