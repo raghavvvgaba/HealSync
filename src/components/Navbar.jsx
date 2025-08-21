@@ -54,8 +54,12 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="w-full h-16 px-6 py-4 bg-background text-text shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
+    <nav className="w-full px-2 sm:px-4 text-text sticky top-3 z-50">
+      <div className="max-w-7xl mx-auto">
+        <div className="relative flex flex-row justify-between items-center gap-2 rounded-2xl 
+          bg-white/70 dark:bg-black/70 
+          supports-[backdrop-filter]:bg-white/50 dark:supports-[backdrop-filter]:bg-black/60 
+          backdrop-blur border border-primary shadow-xl overflow-visible px-3 sm:px-4 py-2">
         {/* Logo */}
         <Link to="/">
           <motion.div
@@ -70,59 +74,13 @@ const Navbar = () => {
 
         {/* Right section */}
         <motion.div
-          className="flex items-center gap-6"
+          className="flex flex-row items-center gap-2 sm:gap-6 w-auto"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           {user ? (
-            <div className="flex items-center gap-4 relative">
-              {/* Share Button - Only show for regular users, not doctors */}
-              {userRole === "user" && (
-                <div className="relative">
-                  <button
-                    onClick={() => setShowShareBox((prev) => !prev)}
-                    className="px-3 py-2 text-sm rounded-xl bg-secondary text-white hover:scale-105 transition"
-                  >
-                    Share To Doctor
-                  </button>
-
-                  <AnimatePresence>
-                    {showShareBox && (
-                      <motion.form
-                        ref={shareBoxRef}
-                        onSubmit={handleSubmit((data) => {
-                          console.log("Shared with:", data.shareTo);
-                          reset();
-                          setShowShareBox(false);
-                        })}
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute right-0 mt-2 w-64 bg-background border border-secondary rounded-xl shadow-xl z-50 p-4 space-y-2"
-                      >
-                        <label className="text-sm text-text">
-                          Doctor's Email / ID
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Enter Doctor's ID"
-                          {...register("shareTo", { required: true })}
-                          className="w-full px-3 py-2 border rounded-md border-gray-300 dark:border-gray-600 bg-transparent text-text"
-                        />
-                        <button
-                          type="submit"
-                          className="w-full px-3 py-2 bg-green-700 text-white rounded-md hover:opacity-90 transition"
-                        >
-                          Share Profile
-                        </button>
-                      </motion.form>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
-
+            <div className="flex flex-row items-center gap-2 relative w-auto">
               {/* Avatar Dropdown */}
               <div
                 className="relative"
@@ -140,7 +98,9 @@ const Navbar = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute right-0 mt-2 w-48 bg-background border border-secondary rounded-xl shadow-xl z-50 p-4 text-sm"
+                      className="absolute right-0 mt-2 w-56 rounded-xl shadow-2xl z-[100] p-4 text-sm pointer-events-auto 
+                        bg-white/80 dark:bg-black/70 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-black/60 
+                        backdrop-blur border border-secondary/60"
                     >
                       <div className="font-semibold text-text mb-1">
                         {user?.displayName}
@@ -160,16 +120,16 @@ const Navbar = () => {
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-4">
+            <div className="flex flex-row items-center gap-2 w-auto">
               <Link
                 to="/signup"
-                className="text-sm md:text-base px-4 py-2 rounded-xl bg-primary text-white hover:scale-105 transition"
+                className="text-xs sm:text-sm md:text-base px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-xl bg-primary text-white hover:scale-105 transition text-center min-w-[60px] sm:min-w-[80px]"
               >
                 Sign Up
               </Link>
               <Link
                 to="/login"
-                className="text-sm md:text-base px-4 py-2 rounded-xl bg-accent text-white hover:scale-105 transition"
+                className="text-xs sm:text-sm md:text-base px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-xl bg-accent text-white hover:scale-105 transition text-center min-w-[60px] sm:min-w-[80px]"
               >
                 Login
               </Link>
@@ -179,15 +139,15 @@ const Navbar = () => {
           {/* Theme Toggle - Outside of conditional rendering */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition"
+            className="p-2 sm:p-2 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition"
             aria-label="Toggle Theme"
           >
             {theme === "light" ? <FiSun /> : <FiMoon />}
           </button>
         </motion.div>
+        </div>
       </div>
     </nav>
   );
 };
-
 export default Navbar;
