@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
-import { getSharedProfileRecord, getPatientBasicInfo, getPatientProfile, getDoctorPatientMedicalRecords, addMedicalRecord } from '../../utils/firestoreDoctorService';
-import { FaArrowLeft, FaUser, FaEnvelope, FaPhone, FaCalendar, FaMapMarkerAlt, FaSpinner, FaFileMedicalAlt, FaHeart, FaRunning, FaUtensils, FaPills, FaDownload, FaEye, FaPlus, FaTimes, FaSave, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { getSharedProfileRecord, getPatientBasicInfo, getPatientProfile, getDoctorPatientMedicalRecords, addMedicalRecord, updateMedicalRecord } from '../../utils/firestoreDoctorService';
+import { FaArrowLeft, FaUser, FaEnvelope, FaPhone, FaCalendar, FaMapMarkerAlt, FaSpinner, FaFileMedicalAlt, FaHeart, FaRunning, FaUtensils, FaPills, FaDownload, FaEye, FaPlus, FaTimes, FaSave, FaCheckCircle, FaExclamationCircle, FaEdit, FaTransgender } from 'react-icons/fa';
 import { GiBodyHeight } from 'react-icons/gi';
 import { MdBloodtype, MdSick, MdAccessibility } from 'react-icons/md';
 import { BsCapsulePill, BsEyeFill, BsEarFill } from 'react-icons/bs';
@@ -36,26 +36,44 @@ function PatientProfilePage() {
     const [addingRecord, setAddingRecord] = useState(false);
     const [addRecordError, setAddRecordError] = useState("");
     const [toast, setToast] = useState(null); // {type: 'success'|'error', message: string}
+    const [showEditRecordModal, setShowEditRecordModal] = useState(false);
+    const [recordToEdit, setRecordToEdit] = useState(null);
 
-    // Auto-dismiss toast after a short delay
-    useEffect(() => {
-        if (!toast) return;
-        const t = setTimeout(() => setToast(null), 5000);
-        return () => clearTimeout(t);
-    }, [toast]);
+    const fetchSharedProfile = useCallback(async () => {
+        try {
+            setLoading(true);
+            
+            // Step 1: Get and validate shared profile record
+            const shareResult = await getSharedProfileRecord(shareId, user.uid);
+            if (!shareResult.success) {
+                setError(shareResult.error);
+                return;
+            }
+            setShareRecord(shareResult.data);
 
-    useEffect(() => {
-        if (!user) return;
-        fetchSharedProfile();
-    }, [user, shareId]);
+            // Step 2: Get patient basic info (name, email)
+            const patientInfoResult = await getPatientBasicInfo(shareResult.data.patientId);
+            if (patientInfoResult.success) {
+                setPatientInfo(patientInfoResult.data);
+            }
 
-    useEffect(() => {
-        if (shareRecord && activeTab === 'medical-records') {
-            fetchMedicalRecords();
+            // Step 3: Get patient profile data
+            const profileResult = await getPatientProfile(shareResult.data.patientId);
+            if (!profileResult.success) {
+                setError(profileResult.error);
+                return;
+            }
+            setPatientProfile(profileResult.data);
+
+        } catch (error) {
+            console.error("Error fetching shared profile:", error);
+            setError("Failed to load patient profile. Please try again.");
+        } finally {
+            setLoading(false);
         }
-    }, [shareRecord, activeTab]);
+    }, [shareId, user.uid]);
 
-    const fetchMedicalRecords = async (loadMore = false) => {
+    const fetchMedicalRecords = useCallback(async (loadMore = false) => {
         if (!shareRecord) return;
         
         try {
@@ -86,7 +104,27 @@ function PatientProfilePage() {
         } finally {
             setMedicalRecordsLoading(false);
         }
-    };
+    }, [shareRecord, user.uid, pagination.lastDoc]);
+
+    // Auto-dismiss toast after a short delay
+    useEffect(() => {
+        if (!toast) return;
+        const t = setTimeout(() => setToast(null), 5000);
+        return () => clearTimeout(t);
+    }, [toast]);
+
+    useEffect(() => {
+        if (!user) return;
+        fetchSharedProfile();
+    }, [user, shareId, fetchSharedProfile]);
+
+    useEffect(() => {
+        if (shareRecord && activeTab === 'medical-records') {
+            fetchMedicalRecords();
+        }
+    }, [shareRecord, activeTab, fetchMedicalRecords]);
+
+    
 
     const handleAddMedicalRecord = async (formData) => {
         if (!shareRecord) return;
@@ -104,6 +142,28 @@ function PatientProfilePage() {
         } catch (error) {
             console.error('Error adding medical record:', error);
             setAddRecordError('Failed to add medical record. Please try again.');
+        } finally {
+            setAddingRecord(false);
+        }
+    };
+
+    const handleUpdateMedicalRecord = async (formData) => {
+        if (!recordToEdit) return;
+        setAddRecordError(""); // Reuse the same error state for simplicity
+        try {
+            setAddingRecord(true); // Reuse the same loading state
+            const result = await updateMedicalRecord(String(recordToEdit.id), user.uid, formData);
+            if (result.success) {
+                setShowEditRecordModal(false);
+                setRecordToEdit(null);
+                fetchMedicalRecords();
+                setToast({ type: 'success', message: 'Medical record updated successfully' });
+            } else {
+                setAddRecordError(result.error || 'Failed to update medical record');
+            }
+        } catch (error) {
+            console.error('Error updating medical record:', error);
+            setAddRecordError('Failed to update medical record. Please try again.');
         } finally {
             setAddingRecord(false);
         }
@@ -154,16 +214,16 @@ function PatientProfilePage() {
             handleAddMedicalRecord(processedData);
         };
 
-        if (!showAddRecordModal) return null;
-
-        // Close on Escape
         useEffect(() => {
+            if (!showAddRecordModal) return;
             const onKey = (e) => {
                 if (e.key === 'Escape') setShowAddRecordModal(false);
             };
             window.addEventListener('keydown', onKey);
             return () => window.removeEventListener('keydown', onKey);
         }, []);
+
+        if (!showAddRecordModal) return null;
 
         return (
             <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm p-4 sm:p-6 flex items-center justify-center" onClick={() => setShowAddRecordModal(false)}>
@@ -268,7 +328,7 @@ function PatientProfilePage() {
                                         </>
                                     ) : (
                                         <>
-                                            
+                                            <FaSave />
                                             Save Record
                                         </>
                                     )}
@@ -288,45 +348,171 @@ function PatientProfilePage() {
         );
     };
 
-    const fetchSharedProfile = async () => {
-        try {
-            setLoading(true);
-            
-            // Step 1: Get and validate shared profile record
-            const shareResult = await getSharedProfileRecord(shareId, user.uid);
-            if (!shareResult.success) {
-                setError(shareResult.error);
-                return;
-            }
-            setShareRecord(shareResult.data);
+    const EditMedicalRecordModal = () => {
+        const [formData, setFormData] = useState({
+            visitDate: recordToEdit?.visitDate ? new Date(recordToEdit.visitDate).toISOString().split('T')[0] : '',
+            diagnosis: recordToEdit?.diagnosis || '',
+            symptoms: recordToEdit?.symptoms?.join(', ') || '',
+            medicines: recordToEdit?.medicines?.join(', ') || '',
+            prescribedTests: recordToEdit?.prescribedTests?.join(', ') || '',
+            followUpNotes: recordToEdit?.followUpNotes || ''
+        });
 
-            // Step 2: Get patient basic info (name, email)
-            const patientInfoResult = await getPatientBasicInfo(shareResult.data.patientId);
-            if (patientInfoResult.success) {
-                setPatientInfo(patientInfoResult.data);
+        useEffect(() => {
+            if (recordToEdit) {
+                setFormData({
+                    visitDate: recordToEdit.visitDate ? new Date(recordToEdit.visitDate).toISOString().split('T')[0] : '',
+                    diagnosis: recordToEdit.diagnosis || '',
+                    symptoms: recordToEdit.symptoms?.join(', ') || '',
+                    medicines: recordToEdit.medicines?.join(', ') || '',
+                    prescribedTests: recordToEdit.prescribedTests?.join(', ') || '',
+                    followUpNotes: recordToEdit.followUpNotes || ''
+                });
             }
+        }, []);
 
-            // Step 3: Get patient profile data
-            const profileResult = await getPatientProfile(shareResult.data.patientId);
-            if (!profileResult.success) {
-                setError(profileResult.error);
-                return;
-            }
-            setPatientProfile(profileResult.data);
+        const handleSubmit = (e) => {
+            e.preventDefault();
+            const processedData = {
+                ...formData,
+                symptoms: formData.symptoms.split(',').map(s => s.trim()).filter(s => s),
+                medicines: formData.medicines.split(',').map(m => m.trim()).filter(m => m),
+                prescribedTests: formData.prescribedTests.split(',').map(t => t.trim()).filter(t => t)
+            };
+            handleUpdateMedicalRecord(processedData);
+        };
 
-        } catch (error) {
-            console.error("Error fetching shared profile:", error);
-            setError("Failed to load patient profile. Please try again.");
-        } finally {
-            setLoading(false);
-        }
+        if (!showEditRecordModal) return null;
+
+        return (
+            <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm p-4 sm:p-6 flex items-center justify-center" onClick={() => setShowEditRecordModal(false)}>
+                <div className="glass-elevated rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border soft-divider" onClick={(e) => e.stopPropagation()}>
+                    <div className="p-4 sm:p-6">
+                        <div className="flex items-center justify-between mb-4 sm:mb-6">
+                            <h2 className="text-lg sm:text-xl font-bold text-text">Edit Medical Record</h2>
+                            <button
+                                onClick={() => { setShowEditRecordModal(false); setRecordToEdit(null); }}
+                                className="w-9 h-9 rounded-lg glass border soft-divider text-secondary hover-glow-primary flex items-center justify-center"
+                                aria-label="Close"
+                            >
+                                <FaTimes className="text-sm" />
+                            </button>
+                        </div>
+
+                        {addRecordError && (
+                            <div className="mb-3 sm:mb-4 glass border soft-divider rounded-lg p-3 text-red-400 bg-red-500/10">
+                                {addRecordError}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+                            {/* Form fields are similar to AddMedicalRecordModal, pre-filled with formData */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                <div>
+                                    <label className="block text-xs sm:text-sm font-medium text-secondary mb-1.5">Visit Date</label>
+                                    <input
+                                        type="date"
+                                        value={formData.visitDate}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, visitDate: e.target.value }))}
+                                        className="w-full px-3 py-2 rounded-lg glass border soft-divider text-text placeholder:text-secondary/70 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs sm:text-sm font-medium text-secondary mb-1.5">Diagnosis</label>
+                                    <input
+                                        type="text"
+                                        value={formData.diagnosis}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, diagnosis: e.target.value }))}
+                                        className="w-full px-3 py-2 rounded-lg glass border soft-divider text-text placeholder:text-secondary/70 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent"
+                                        placeholder="Enter diagnosis"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-secondary mb-1.5">Symptoms (comma-separated)</label>
+                                <textarea
+                                    value={formData.symptoms}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, symptoms: e.target.value }))}
+                                    className="w-full px-3 py-2 rounded-lg glass border soft-divider text-text placeholder:text-secondary/70 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent"
+                                    rows="2"
+                                    placeholder="e.g., Headache, Nausea, Fever"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-secondary mb-1.5">Medicines (comma-separated)</label>
+                                <textarea
+                                    value={formData.medicines}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, medicines: e.target.value }))}
+                                    className="w-full px-3 py-2 rounded-lg glass border soft-divider text-text placeholder:text-secondary/70 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent"
+                                    rows="2"
+                                    placeholder="e.g., Paracetamol 500mg, Ibuprofen 200mg"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-secondary mb-1.5">Prescribed Tests (comma-separated)</label>
+                                <textarea
+                                    value={formData.prescribedTests}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, prescribedTests: e.target.value }))}
+                                    className="w-full px-3 py-2 rounded-lg glass border soft-divider text-text placeholder:text-secondary/70 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent"
+                                    rows="2"
+                                    placeholder="e.g., Blood Test, X-Ray, MRI"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-secondary mb-1.5">Follow-up Notes</label>
+                                <textarea
+                                    value={formData.followUpNotes}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, followUpNotes: e.target.value }))}
+                                    className="w-full px-3 py-2 rounded-lg glass border soft-divider text-text placeholder:text-secondary/70 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent"
+                                    rows="3"
+                                    placeholder="Any additional notes or follow-up instructions"
+                                />
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-4">
+                                <button
+                                    type="submit"
+                                    disabled={addingRecord}
+                                    className="flex-1 glass-cta px-4 py-2 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                                >
+                                    {addingRecord ? (
+                                        <>
+                                            <FaSpinner className="animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FaSave />
+                                            Update Record
+                                        </>
+                                    )}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => { setShowEditRecordModal(false); setRecordToEdit(null); }}
+                                    className="px-4 py-2 glass rounded-lg border soft-divider text-text hover-glow-primary"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
-    const InfoCard = ({ title, icon: Icon, children, className = "" }) => (
+    const InfoCard = ({ title, children, className = "", icon: Icon }) => (
         <div className={`glass rounded-2xl p-5 sm:p-6 border soft-divider hover-glow-primary ${className}`}>
             <div className="flex items-center gap-3 mb-4">
                 <div className="w-9 h-9 rounded-lg bg-[rgba(var(--primary-rgb)/0.15)] text-primary flex items-center justify-center">
-                    <Icon className="text-base" />
+                    {Icon && <Icon className="text-base" />}
                 </div>
                 <h3 className="text-base sm:text-lg font-semibold text-text">{title}</h3>
             </div>
@@ -360,8 +546,17 @@ function PatientProfilePage() {
         </div>
     );
 
-    const MedicalRecordCard = ({ record }) => (
-        <div className="glass rounded-2xl p-5 sm:p-6 border soft-divider hover-glow-primary">
+    const MedicalRecordCard = ({ record }) => {
+        const isEditable = () => {
+            if (!record.createdAt) return false;
+            const recordDate = record.createdAt.toDate();
+            const now = new Date();
+            const diffInMinutes = (now.getTime() - recordDate.getTime()) / (1000 * 60);
+            return diffInMinutes < 30;
+        };
+
+        return (
+            <div className="glass rounded-2xl p-5 sm:p-6 border soft-divider hover-glow-primary">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
                 <div>
                     <h4 className="text-base sm:text-lg font-semibold text-text">{record.diagnosis || 'Medical Record'}</h4>
@@ -372,16 +567,29 @@ function PatientProfilePage() {
                         • {record.doctorName || 'Unknown Doctor'}
                     </p>
                 </div>
-                {record.fileName && (
-                    <div className="flex gap-2">
-                        <button className="p-2 text-primary hover:bg-white/10 rounded-lg transition-colors">
-                            <FaEye className="text-sm" />
+                <div className="flex items-center gap-2">
+                    {isEditable() && (
+                        <button 
+                            onClick={() => {
+                                setRecordToEdit(record);
+                                setShowEditRecordModal(true);
+                            }}
+                            className="p-2 text-primary hover:bg-white/10 rounded-lg transition-colors"
+                        >
+                            <FaEdit className="text-sm" />
                         </button>
-                        <button className="p-2 text-primary hover:bg-white/10 rounded-lg transition-colors">
-                            <FaDownload className="text-sm" />
-                        </button>
-                    </div>
-                )}
+                    )}
+                    {record.fileName && (
+                        <div className="flex gap-2">
+                            <button className="p-2 text-primary hover:bg-white/10 rounded-lg transition-colors">
+                                <FaEye className="text-sm" />
+                            </button>
+                            <button className="p-2 text-primary hover:bg-white/10 rounded-lg transition-colors">
+                                <FaDownload className="text-sm" />
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -413,6 +621,7 @@ function PatientProfilePage() {
             </div>
         </div>
     );
+};
 
     if (loading) {
         return (
@@ -514,7 +723,7 @@ function PatientProfilePage() {
                     <InfoCard title="Basic Information" icon={FaUser}>
                         <div className="space-y-3">
                             <DataField label="Full Name" value={patientProfile.basic?.fullName} icon={FaUser} />
-                            <DataField label="Gender" value={patientProfile.basic?.gender} />
+                            <DataField label="Gender" value={patientProfile.basic?.gender} icon={FaTransgender} />
                             <DataField 
                                 label="Date of Birth" 
                                 value={patientProfile.basic?.dob ? new Date(patientProfile.basic.dob).toLocaleDateString() : null} 
@@ -704,6 +913,7 @@ function PatientProfilePage() {
         
         {/* Add Medical Record Modal */}
         <AddMedicalRecordModal />
+        <EditMedicalRecordModal />
     {/* Success Toast */}
     <ToastPortal toast={toast} />
         </>

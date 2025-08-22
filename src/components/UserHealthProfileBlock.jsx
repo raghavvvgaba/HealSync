@@ -55,22 +55,24 @@ const UserHealthProfileBlock = () => {
 
   if (loading) {
     return (
-      <div className="relative p-6 shadow-lg text-text border-2 border-surface flex flex-col gap-6 rounded-xl bg-white dark:bg-gray-800">
-        <div className="animate-pulse h-8 bg-gray-300 rounded w-1/2 mb-2"></div>
-        <div className="animate-pulse h-4 bg-gray-300 rounded w-1/3"></div>
+      <div className="glass rounded-2xl p-6 border soft-divider">
+        <div className="animate-pulse h-7 bg-white/10 rounded w-1/2 mb-2"></div>
+        <div className="animate-pulse h-4 bg-white/10 rounded w-1/3"></div>
       </div>
     );
   }
 
   if (error || !profileData?.basic) {
     return (
-      <div className="relative p-6 shadow-lg text-text border-2 border-surface flex flex-col gap-6 rounded-xl bg-white dark:bg-gray-800">
-        <div className="flex items-center gap-3">
-          <FaUserCircle size={32} className="text-blue-600 dark:text-blue-400" />
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Profile data not available</h2>
+      <div className="glass rounded-2xl p-6 border soft-divider">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-xl bg-[rgba(var(--primary-rgb)/0.15)] text-primary flex items-center justify-center">
+            <FaUserCircle />
+          </div>
+          <h2 className="text-lg font-bold text-text">Profile data not available</h2>
         </div>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">{error || 'Complete your profile to see your health overview.'}</p>
-        <Link to="edit-profile" className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+        <p className="text-secondary mb-4">{error || 'Complete your profile to see your health overview.'}</p>
+        <Link to="edit-profile" className="glass-cta inline-flex items-center gap-2 px-4 py-2">
           <FaEdit /> Complete Profile
         </Link>
       </div>
@@ -82,57 +84,57 @@ const UserHealthProfileBlock = () => {
   const bmi = calculateBMI(basic.weight, basic.height);
 
   return (
-    <div className="relative p-6 shadow-lg text-text border-2 border-surface flex flex-col gap-6 rounded-xl bg-white dark:bg-gray-800">
+    <div className="glass rounded-2xl p-6 border soft-divider hover-glow-primary">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-2">
-        <div className="w-16 h-16 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
-          <FaUserCircle size={32} className="text-blue-600 dark:text-blue-400" />
+      <div className="flex items-center gap-4 mb-3">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center shadow-lg">
+          <FaUserCircle className="text-xl" />
         </div>
-        <div className="flex-1">
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">{basic.fullName || 'Unknown User'}</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Patient ID: {user?.uid?.substring(0, 8).toUpperCase() || 'N/A'}</p>
+        <div className="flex-1 min-w-0">
+          <h2 className="text-lg sm:text-xl font-bold text-text truncate">{basic.fullName || 'Unknown User'}</h2>
+          <p className="text-xs sm:text-sm text-secondary truncate">Patient ID: {user?.uid?.substring(0, 8).toUpperCase() || 'N/A'}</p>
         </div>
       </div>
 
       {/* Info Grid */}
-      <div className="grid grid-cols-2 gap-4 mb-2">
-        <div className="p-4 bg-[#232B38] dark:bg-[#232B38] rounded-xl flex flex-col gap-1">
-          <div className="flex items-center gap-2 mb-1"><FaRulerVertical className="text-blue-400" /><span className="text-xs font-medium text-gray-300">Height</span></div>
-          <span className="text-lg font-bold text-white">{basic.height?.value} {basic.height?.unit || 'cm'}</span>
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-2">
+        <div className="p-4 glass rounded-xl border soft-divider">
+          <div className="flex items-center gap-2 mb-1"><FaRulerVertical className="text-primary" /><span className="text-xs font-medium text-secondary">Height</span></div>
+          <span className="text-lg font-bold text-text">{basic.height?.value} {basic.height?.unit || 'cm'}</span>
         </div>
-        <div className="p-4 bg-[#232B38] dark:bg-[#232B38] rounded-xl flex flex-col gap-1">
-          <div className="flex items-center gap-2 mb-1"><FaWeight className="text-purple-400" /><span className="text-xs font-medium text-gray-300">Weight</span></div>
-          <span className="text-lg font-bold text-white">{basic.weight?.value} {basic.weight?.unit || 'kg'}</span>
+        <div className="p-4 glass rounded-xl border soft-divider">
+          <div className="flex items-center gap-2 mb-1"><FaWeight className="text-accent" /><span className="text-xs font-medium text-secondary">Weight</span></div>
+          <span className="text-lg font-bold text-text">{basic.weight?.value} {basic.weight?.unit || 'kg'}</span>
         </div>
-        <div className="p-4 bg-[#232B38] dark:bg-[#232B38] rounded-xl flex flex-col gap-1">
-          <div className="flex items-center gap-2 mb-1"><FaTint className="text-red-400" /><span className="text-xs font-medium text-gray-300">Blood Group</span></div>
-          <span className="text-lg font-bold text-white">{basic.bloodGroup || 'Not set'}</span>
+        <div className="p-4 glass rounded-xl border soft-divider">
+          <div className="flex items-center gap-2 mb-1"><FaTint className="text-red-400" /><span className="text-xs font-medium text-secondary">Blood Group</span></div>
+          <span className="text-lg font-bold text-text">{basic.bloodGroup || 'Not set'}</span>
         </div>
-        <div className="p-4 bg-[#232B38] dark:bg-[#232B38] rounded-xl flex flex-col gap-1">
-          <div className="flex items-center gap-2 mb-1"><FaCalendarAlt className="text-orange-400" /><span className="text-xs font-medium text-gray-300">Age</span></div>
-          <span className="text-lg font-bold text-white">{age ? `${age} years` : 'Not set'}</span>
+        <div className="p-4 glass rounded-xl border soft-divider">
+          <div className="flex items-center gap-2 mb-1"><FaCalendarAlt className="text-orange-400" /><span className="text-xs font-medium text-secondary">Age</span></div>
+          <span className="text-lg font-bold text-text">{age ? `${age} years` : 'Not set'}</span>
         </div>
-        <div className="p-4 bg-[#232B38] dark:bg-[#232B38] rounded-xl flex flex-col gap-1">
-          <div className="flex items-center gap-2 mb-1"><MdBloodtype className="text-red-400" /><span className="text-xs font-medium text-gray-300">Blood Type</span></div>
-          <span className="text-lg font-bold text-white">{basic.bloodGroup || 'Not set'}</span>
+        <div className="p-4 glass rounded-xl border soft-divider">
+          <div className="flex items-center gap-2 mb-1"><MdBloodtype className="text-red-400" /><span className="text-xs font-medium text-secondary">Blood Type</span></div>
+          <span className="text-lg font-bold text-text">{basic.bloodGroup || 'Not set'}</span>
         </div>
-        <div className="p-4 bg-[#232B38] dark:bg-[#232B38] rounded-xl flex flex-col gap-1">
-          <div className="flex items-center gap-2 mb-1"><MdSick className="text-green-400" /><span className="text-xs font-medium text-gray-300">Gender</span></div>
-          <span className="text-lg font-bold text-white">{basic.gender || 'Not set'}</span>
+        <div className="p-4 glass rounded-xl border soft-divider">
+          <div className="flex items-center gap-2 mb-1"><MdSick className="text-green-400" /><span className="text-xs font-medium text-secondary">Gender</span></div>
+          <span className="text-lg font-bold text-text">{basic.gender || 'Not set'}</span>
         </div>
       </div>
 
       {/* BMI Section */}
       {bmi && (
-        <div className="p-4 bg-[#232B38] dark:bg-[#232B38] rounded-xl border border-gray-700 mt-2">
+        <div className="p-4 glass rounded-xl border soft-divider mt-2">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
               <FaHeartbeat className="text-green-400" />
-              <span className="font-medium text-gray-300">Body Mass Index (BMI)</span>
+              <span className="font-medium text-text">Body Mass Index (BMI)</span>
             </div>
             <span className="text-2xl font-bold text-green-400">{bmi}</span>
           </div>
-          <div className="w-full bg-gray-600 rounded-full h-2 mb-2">
+          <div className="w-full bg-white/10 rounded-full h-2 mb-2">
             <div 
               className={`h-2 rounded-full ${
                 bmi < 18.5 ? 'bg-blue-500' :
@@ -142,7 +144,7 @@ const UserHealthProfileBlock = () => {
               style={{ width: `${Math.min((bmi / 35) * 100, 100)}%` }}
             ></div>
           </div>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-secondary">
             {bmi < 18.5 ? 'Underweight' :
              bmi < 25 ? 'Normal weight' :
              bmi < 30 ? 'Overweight' : 'Obese'}
@@ -152,19 +154,19 @@ const UserHealthProfileBlock = () => {
 
       {/* Medical Conditions */}
       {medical?.conditions && medical.conditions.length > 0 && (
-        <div className="p-4 bg-[#232B38] dark:bg-[#232B38] rounded-xl border border-gray-700 mt-2">
-          <h3 className="font-semibold text-gray-200 mb-3">Medical Conditions</h3>
+        <div className="p-4 glass rounded-xl border soft-divider mt-2">
+          <h3 className="font-semibold text-text mb-3">Medical Conditions</h3>
           <div className="flex flex-wrap gap-2">
             {medical.conditions.slice(0, 4).map((condition, index) => (
               <span 
                 key={index}
-                className="px-3 py-1 bg-orange-900 text-orange-300 rounded-full text-sm"
+                className="px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300"
               >
                 {condition}
               </span>
             ))}
             {medical.conditions.length > 4 && (
-              <span className="px-3 py-1 bg-gray-600 text-gray-300 rounded-full text-sm">
+              <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-secondary">
                 +{medical.conditions.length - 4} more
               </span>
             )}
@@ -173,24 +175,24 @@ const UserHealthProfileBlock = () => {
       )}
 
       {/* Action Buttons */}
-      <div className="flex gap-3 pt-4 border-t border-gray-700">
+      <div className="flex gap-3 pt-4 border-t soft-divider">
         <Link
           to="edit-profile"
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 hover:shadow-lg transform hover:scale-105"
+          className="flex-1 glass-cta flex items-center justify-center gap-2 px-4 py-3"
         >
           <FaEdit className="text-sm" />
           <span className="font-medium">Edit</span>
         </Link>
         <Link
           to="view-profile"
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg transition-all duration-200 hover:shadow-lg transform hover:scale-105"
+          className="flex-1 glass rounded-lg border soft-divider text-text flex items-center justify-center gap-2 px-4 py-3 hover-glow-primary"
         >
           <FaEye className="text-sm" />
           <span className="font-medium">View Full</span>
         </Link>
       </div>
       <div className="pt-2">
-        <p className="text-xs text-gray-400 text-center">
+        <p className="text-xs text-secondary text-center">
           Keep your health information updated for better care
         </p>
       </div>

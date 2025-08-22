@@ -348,7 +348,6 @@ export async function addMedicalRecord(doctorId, patientId, medicalData) {
  */
 export async function updateMedicalRecord(recordId, doctorId, updateData) {
   try {
-    // Get the existing record
     const recordRef = doc(db, "medicalRecords", recordId);
     const recordDoc = await getDoc(recordRef);
     
@@ -360,6 +359,17 @@ export async function updateMedicalRecord(recordId, doctorId, updateData) {
     }
     
     const recordData = recordDoc.data();
+
+    // Verify doctor has active access to patient's profile
+    const shareRef = doc(db, "shared_profiles", recordData.shareRecordId);
+    const shareDoc = await getDoc(shareRef);
+    
+    if (!shareDoc.exists() || shareDoc.data().status !== 'active') {
+      return { 
+        success: false, 
+        error: "You don't have access to this patient's profile." 
+      };
+    }
     
     // Verify doctor authorization
     if (recordData.createdBy !== doctorId) {
@@ -389,17 +399,6 @@ export async function updateMedicalRecord(recordId, doctorId, updateData) {
       return {
         success: false,
         error: "Medical record cannot be updated after 30 minutes of creation."
-      };
-    }
-
-    // Verify active share still exists
-    const shareRef = doc(db, "shared_profiles", recordData.shareRecordId);
-    const shareDoc = await getDoc(shareRef);
-
-    if (!shareDoc.exists() || shareDoc.data().status !== 'active') {
-      return { 
-        success: false, 
-        error: "You no longer have access to this patient's profile." 
       };
     }
 

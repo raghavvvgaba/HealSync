@@ -1,9 +1,9 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+// Removed framer-motion page transitions to avoid scroll side-effects
 import LandingPage from './pages/LandingPage';
 import UserDashboard from './pages/User/UserDashboard';
 import MedicalHistoryPage from './components/MedicalHistoryPage';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import PrivateRoute from './components/PrivateRoute';
@@ -16,6 +16,31 @@ import Onboarding from './components/Onboarding';
 import { Profile } from './pages/User/Profile';
 
 // https://www.hover.dev/components/navigation Use this for prebuilt components
+
+// Scroll to top on route change to avoid preserved scroll positions between pages
+const ScrollToTop = () => {
+  const location = useLocation();
+  useLayoutEffect(() => {
+    // Disable browser scroll restoration
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    
+    // Multiple scroll reset attempts
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // Force another reset after micro-task
+    Promise.resolve().then(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    });
+    
+  }, [location.pathname]);
+  return null;
+};
 
 const App = () => {
   const location = useLocation();
@@ -34,7 +59,7 @@ const App = () => {
 
   return (
     <div className="relative min-h-screen w-full bg-background text-text">
-      <AnimatePresence mode="wait">
+      <ScrollToTop />
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/signup" element={<Signup />} />
@@ -50,8 +75,7 @@ const App = () => {
             <Route index element={<DoctorDashboard />} />
             <Route path="shared-profile/:shareId" element={<PatientProfilePage />} />
           </Route>
-        </Routes>
-      </AnimatePresence>
+  </Routes>
     </div>
   );
 };

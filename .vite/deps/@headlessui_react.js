@@ -7149,17 +7149,17 @@ function useInteractions(propsList) {
   const itemDeps = propsList.map((key) => key == null ? void 0 : key.item);
   const getReferenceProps = React3.useCallback(
     (userProps) => mergeProps(userProps, propsList, "reference"),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     referenceDeps
   );
   const getFloatingProps = React3.useCallback(
     (userProps) => mergeProps(userProps, propsList, "floating"),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     floatingDeps
   );
   const getItemProps = React3.useCallback(
     (userProps) => mergeProps(userProps, propsList, "item"),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     itemDeps
   );
   return React3.useMemo(() => ({

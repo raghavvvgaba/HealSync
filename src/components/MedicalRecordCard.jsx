@@ -51,7 +51,7 @@ const MedicalRecordCard = ({ record }) => {
       {/* Doctor Info */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-3 font-medium">
         <MdPerson className="text-accent shrink-0" />
-        <span className="break-words">{doctor?.name} (ID: {doctor?.id})</span>
+        <span className="break-words">{record.doctorName || doctor?.name || 'Unknown Doctor'} {doctor?.id ? `(ID: ${doctor.id})` : ''}</span>
       </div>
 
       {/* Symptoms */}

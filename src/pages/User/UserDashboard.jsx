@@ -67,52 +67,51 @@ const UserDashboard = () => {
     };
 
     return (
-    <div className="min-h-screen bg-background p-6">
-            {/* Header */}
-            <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-4">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-1">
-                                {getGreeting()}, <span className="text-blue-600 dark:text-blue-400">{user?.displayName || user?.email?.split('@')[0] || 'User'}</span>
+        <div className="min-h-screen bg-background aurora-bg">
+            {/* Header - gradient ribbon */}
+            <div className="relative bg-gradient-to-br from-primary/25 via-accent/20 to-transparent px-3 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b soft-divider">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-6">
+                    <div className="flex items-start gap-4 sm:gap-5">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl glass flex items-center justify-center shadow-lg">
+                            <FaUser className="text-primary text-xl sm:text-2xl" />
+                        </div>
+                        <div className="min-w-0">
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text leading-tight break-words">
+                                {getGreeting()}, <span className="text-primary">{user?.displayName || user?.email?.split('@')[0] || 'User'}</span>
                             </h1>
-                            <p className="text-gray-600 dark:text-gray-400 text-base">
-                                Welcome to your health dashboard. <span className="inline-block bg-blue-50 dark:bg-blue-950 px-2 py-1 rounded text-blue-700 dark:text-blue-300 ml-1">Here's your overview for today.</span>
-                            </p>
+                            <div className="mt-3 inline-flex items-center gap-2 glass rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-secondary">
+                                Your personalized health overview
+                            </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                            <FaClock className="text-blue-600 dark:text-blue-400" />
-                            <span className="text-sm text-gray-600 dark:text-gray-300">
-                                {new Date().toLocaleDateString('en-US', { 
-                                    weekday: 'long',
-                                    year: 'numeric', 
-                                    month: 'long', 
-                                    day: 'numeric' 
-                                })}
-                            </span>
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="glass rounded-xl sm:rounded-2xl px-4 sm:px-5 py-2.5 sm:py-3 flex items-center gap-3 shadow-lg">
+                            <FaClock className="text-primary shrink-0" />
+                            <div className="min-w-0">
+                                <div className="text-[10px] sm:text-xs text-secondary">Today</div>
+                                <div className="text-xs sm:text-sm font-semibold text-text truncate">
+                                    {new Date().toLocaleDateString('en-US', {
+                                        weekday: 'long', month: 'short', day: 'numeric'
+                                    })}
+                                </div>
+                            </div>
                         </div>
-                        <button className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 relative">
-                            <FaBell className="text-lg" />
-                            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                        <button className="relative rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-white shadow-xl bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 transition-all">
+                            <FaBell className="text-base sm:text-lg" />
+                            <span className="absolute -top-1 -right-1 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-accent shadow"></span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            {/* Main Dashboard Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Main Grid */}
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
                 {/* Left Column */}
-                <div className="lg:col-span-8 space-y-6">
-                    {/* Top Row - Profile and Health Overview */}
-                    <div className="grid grid-cols-1 gap-6">
+                <div className="lg:col-span-8 space-y-6 sm:space-y-8 min-w-0">
+                    <div className="min-w-0">
                         <UserHealthProfileBlock />
                     </div>
-
-                    {/* Middle Row - Medical History */}
-                    <div className="grid grid-cols-1 gap-6">
-                                                {/* Medical History */}
+                    <div className="min-w-0">
                         <MedicalHistoryBlock 
                             records={medicalRecords}
                             loading={recordsLoading}
@@ -120,24 +119,19 @@ const UserDashboard = () => {
                             onRefresh={fetchMedicalRecords}
                         />
                     </div>
-
                 </div>
 
                 {/* Right Column */}
-                <div className="lg:col-span-4 space-y-6">
-                    {/* Shared Doctors */}
+                <div className="lg:col-span-4 space-y-6 sm:space-y-8 min-w-0">
                     <SharedDoctorsBlock />
 
-
                     {/* Health Tips Widget */}
-                    <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-green-200 dark:border-green-700">
-                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
-                            💡 Health Tip of the Day
-                        </h3>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                    <div className="glass rounded-2xl p-5 sm:p-6 border soft-divider hover-glow-primary">
+                        <h3 className="text-lg sm:text-xl font-bold text-text mb-3">💡 Health Tip of the Day</h3>
+                        <p className="text-sm text-secondary leading-relaxed">
                             Stay hydrated! Aim to drink at least 8 glasses of water throughout the day to maintain optimal health and energy levels.
                         </p>
-                        <button className="mt-3 text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium">
+                        <button className="mt-3 text-sm text-primary hover:opacity-80 font-medium">
                             Learn more →
                         </button>
                     </div>

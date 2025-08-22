@@ -128,38 +128,42 @@ const SharedDoctorsBlock = () => {
 
   if (loading) {
     return (
-      <div className="relative p-6 shadow-lg text-text border-2 border-surface flex flex-col gap-6 rounded-xl bg-gradient-to-br from-white via-gray-50 to-blue-50 dark:from-gray-800 dark:via-gray-700 dark:to-blue-900">
+      <div className="glass rounded-2xl p-6 border soft-divider">
         <div className="flex items-center gap-3">
-          <FaUserMd size={24} className="text-blue-600 dark:text-blue-400" />
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Shared with Doctors</h2>
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-r from-primary to-accent text-white flex items-center justify-center">
+            <FaUserMd className="text-sm" />
+          </div>
+          <h2 className="text-lg sm:text-xl font-bold text-text">Shared with Doctors</h2>
         </div>
-        <div className="flex items-center justify-center py-8">
-          <FaSpinner className="animate-spin text-blue-600 dark:text-blue-400 text-2xl" />
-          <span className="ml-3 text-gray-600 dark:text-gray-300">Loading shared profiles...</span>
+        <div className="flex items-center justify-center py-8 text-secondary">
+          <FaSpinner className="animate-spin text-primary text-2xl" />
+          <span className="ml-3">Loading shared profiles...</span>
         </div>
       </div>
     );
   }
 
   return (
-  <div className="relative p-6 shadow-lg text-text border-2 border-surface flex flex-col gap-6 rounded-xl bg-[#181F2A] dark:bg-[#181F2A] hover:shadow-xl transition-all duration-300">
+  <div className="glass rounded-2xl p-6 border soft-divider flex flex-col gap-6 hover-glow-primary xl:max-w-5xl xl:mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <FaUserMd size={24} className="text-blue-600 dark:text-blue-400" />
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Shared with Doctors</h2>
-          <span className="ml-2 flex items-center justify-center bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full text-xs font-semibold min-w-[38px] h-6">
-            {sharedProfiles.length} {sharedProfiles.length === 1 ? 'doctor' : 'doctors'}
-          </span>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center shadow-inner flex-shrink-0">
+          <FaUserMd className="text-lg" />
         </div>
-        <button
-          onClick={() => setShowShareForm(!showShareForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
-        >
-          <FaPlus />
-          Share with Doctor
-        </button>
+        <h2 className="text-xl font-bold text-text leading-tight">Shared with Doctors</h2>
+        <span className="glass px-2.5 py-1 rounded-full text-[11px] font-medium tracking-wide text-secondary border soft-divider uppercase whitespace-nowrap leading-none ml-2">
+          {sharedProfiles.length} {sharedProfiles.length === 1 ? 'doctor' : 'doctors'}
+        </span>
       </div>
+      <button
+        onClick={() => setShowShareForm(!showShareForm)}
+        className="glass-cta flex items-center gap-2 h-12 px-5 rounded-xl text-base font-medium w-full justify-center whitespace-nowrap"
+      >
+        <FaPlus className="text-lg" />
+        <span>Share with Doctor</span>
+      </button>
+    </div>
 
       {/* Share Form */}
       <AnimatePresence>
@@ -170,7 +174,7 @@ const SharedDoctorsBlock = () => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800 space-y-3"
+            className="p-4 glass rounded-lg border soft-divider space-y-3"
           >
             <label className="text-sm text-gray-700 dark:text-gray-300 font-medium">
               Doctor's ID
@@ -186,34 +190,34 @@ const SharedDoctorsBlock = () => {
                     message: "Invalid doctor ID format (DR-XXXX-1234)"
                   }
                 })}
-                className="w-full px-3 py-2 rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-sm uppercase focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 rounded-md glass border soft-divider text-text placeholder:text-secondary/70 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent"
                 maxLength={12}
               />
               {errors.doctorId && (
-                <p className="text-red-500 text-xs">{errors.doctorId.message}</p>
+                <p className="text-red-400 text-xs">{errors.doctorId.message}</p>
               )}
-              <p className="text-gray-500 text-xs">
+              <p className="text-secondary text-xs">
                 Format: DR-XXXX-1234
               </p>
             </div>
             
             {shareStatus === 'error' && (
-              <div className="text-red-500 text-xs bg-red-50 dark:bg-red-900/30 p-2 rounded">
+              <div className="text-red-400 text-xs glass border soft-divider p-2 rounded">
                 {shareErrorMessage || 'An error occurred. Please try again.'}
               </div>
             )}
             
             {shareStatus === 'success' && (
-              <div className="text-green-600 dark:text-green-400 text-xs bg-green-50 dark:bg-green-900/30 p-2 rounded">
+              <div className="text-green-400 text-xs glass border soft-divider p-2 rounded">
                 Profile shared successfully{doctorName ? ` with Dr. ${doctorName}!` : '!'}
               </div>
             )}
             
-            <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
               <button
                 type="submit"
                 disabled={isSharing}
-                className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+        className="flex-1 glass-cta px-3 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSharing ? "Sharing..." : "Share Profile"}
               </button>
@@ -225,7 +229,7 @@ const SharedDoctorsBlock = () => {
                   setShareErrorMessage('');
                   reset();
                 }}
-                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-colors text-sm font-medium"
+                className="px-4 py-2 glass rounded-md border soft-divider text-text hover-glow-primary text-sm font-medium"
               >
                 Cancel
               </button>
@@ -236,18 +240,16 @@ const SharedDoctorsBlock = () => {
 
       {/* Notification */}
       {notification && (
-        <div className={`p-4 rounded-lg border-l-4 ${
-          notification.type === 'success' 
-            ? 'bg-green-50 border-green-400 text-green-700 dark:bg-green-900 dark:text-green-300' 
-            : 'bg-red-50 border-red-400 text-red-700 dark:bg-red-900 dark:text-red-300'
+        <div className={`glass border soft-divider p-4 rounded-lg ${
+          notification.type === 'success' ? 'text-green-400' : 'text-red-400'
         }`}>
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             {notification.type === 'success' ? (
-              <FaCheckCircle className="mr-2" />
+              <FaCheckCircle />
             ) : (
-              <FaExclamationTriangle className="mr-2" />
+              <FaExclamationTriangle />
             )}
-            {notification.message}
+            <span className="text-text">{notification.message}</span>
           </div>
         </div>
       )}
@@ -267,38 +269,38 @@ const SharedDoctorsBlock = () => {
       )}
 
       {/* No Shared Profiles */}
-      {!error && sharedProfiles.length === 0 && (
+    {!error && sharedProfiles.length === 0 && (
         <div className="text-center py-8">
-          <FaUserMd className="text-gray-400 text-4xl mb-4 mx-auto" />
-          <p className="text-gray-600 dark:text-gray-400 mb-2">No doctors have access to your profile yet</p>
-          <p className="text-sm text-gray-500 dark:text-gray-500">Share your profile with doctors to see them here</p>
+      <FaUserMd className="text-secondary text-4xl mb-4 mx-auto" />
+      <p className="text-secondary mb-2">No doctors have access to your profile yet</p>
+      <p className="text-sm text-secondary">Share your profile with doctors to see them here</p>
         </div>
       )}
 
       {/* Shared Profiles List */}
-      {!error && sharedProfiles.length > 0 && (
-        <div className="space-y-4 max-h-96 overflow-y-auto">
+  {!error && sharedProfiles.length > 0 && (
+    <div className="space-y-4 md:max-h-96 md:overflow-y-auto">
           {sharedProfiles.map((profile) => (
             <div 
               key={profile.id} 
-              className="p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all duration-200"
+              className="p-4 glass rounded-lg border soft-divider hover-glow-primary"
             >
-              <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <FaUserMd className="text-blue-600 dark:text-blue-400" />
+                    <FaUserMd className="text-primary" />
                     <div>
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+                      <h3 className="font-semibold text-text">
                         {profile.doctorName || 'Unknown Doctor'}
                       </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-secondary">
                         ID: {profile.doctorIdCode}
                       </p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                    <FaCalendarAlt className="text-gray-400" />
+                  <div className="flex items-center gap-2 text-sm text-secondary">
+                    <FaCalendarAlt className="text-secondary" />
                     <span>
                       Shared on {profile.sharedAt?.toDate ? 
                         profile.sharedAt.toDate().toLocaleDateString('en-US', {
@@ -313,20 +315,20 @@ const SharedDoctorsBlock = () => {
                 </div>
 
                 {confirmPopover.doctorId === profile.doctorId ? (
-                  <div className="ml-4 flex flex-col items-end gap-2">
-                    <div className="p-3 bg-red-100 dark:bg-red-900 rounded-lg border border-red-300 dark:border-red-700 shadow-lg">
-                      <p className="text-sm text-red-700 dark:text-red-300 mb-2">Are you sure you want to revoke <span className="font-bold">{profile.doctorName}</span>'s access?</p>
+      <div className="sm:ml-4 w-full sm:w-auto flex flex-col sm:items-end gap-2">
+        <div className="p-3 glass rounded-lg border soft-divider w-full sm:w-auto">
+                      <p className="text-sm text-text mb-2">Are you sure you want to revoke <span className="font-bold">{profile.doctorName}</span>'s access?</p>
                       <div className="flex gap-2">
                         <button
                           onClick={confirmRevoke}
-                          className="px-3 py-1 rounded-lg bg-red-600 text-white hover:bg-red-700 font-semibold text-sm"
+                          className="px-3 py-1 rounded-lg glass-cta font-semibold text-sm"
                           disabled={revoking === profile.doctorId}
                         >
                           {revoking === profile.doctorId ? 'Revoking...' : 'Confirm'}
                         </button>
                         <button
                           onClick={() => setConfirmPopover({ doctorId: null, doctorName: '' })}
-                          className="px-3 py-1 rounded-lg bg-gray-700 text-gray-200 hover:bg-gray-600 text-sm"
+          className="px-3 py-1 rounded-lg glass border soft-divider text-text hover-glow-primary text-sm"
                           disabled={revoking === profile.doctorId}
                         >
                           Cancel
@@ -338,7 +340,7 @@ const SharedDoctorsBlock = () => {
                   <button
                     onClick={() => handleRevokeAccess(profile.doctorId, profile.doctorName)}
                     disabled={revoking === profile.doctorId}
-                    className="ml-4 flex items-center gap-2 px-3 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-700 dark:text-red-300 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+        className="sm:ml-4 w-full sm:w-auto justify-center sm:justify-start mt-2 sm:mt-0 flex items-center gap-2 px-3 py-2 glass rounded-lg border soft-divider text-red-400 hover-glow-primary transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
                   >
                     {revoking === profile.doctorId ? (
                       <FaSpinner className="animate-spin" />
@@ -356,8 +358,8 @@ const SharedDoctorsBlock = () => {
 
       {/* Footer */}
       {sharedProfiles.length > 0 && (
-        <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+        <div className="pt-4 border-t soft-divider">
+          <p className="text-xs text-secondary text-center">
             Revoked access cannot be restored. The doctor will need a new invitation to access your profile again.
           </p>
         </div>
