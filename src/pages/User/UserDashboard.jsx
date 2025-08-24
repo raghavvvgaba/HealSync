@@ -17,12 +17,19 @@ const dummyUser = {
 
 const UserDashboard = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, userProfile } = useAuth();
     
     // State for medical records
     const [medicalRecords, setMedicalRecords] = useState([]);
     const [recordsLoading, setRecordsLoading] = useState(true);
     const [recordsError, setRecordsError] = useState(null);
+
+    // Check if onboarding is completed, redirect if not
+    useEffect(() => {
+        if (userProfile && userProfile.onboardingCompleted === false) {
+            navigate('/user/onboarding');
+        }
+    }, [userProfile, navigate]);
 
     // Fetch medical records when component mounts
     useEffect(() => {

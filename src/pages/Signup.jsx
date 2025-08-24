@@ -9,16 +9,17 @@ export default function Signup() {
     const navigate = useNavigate();
     const { signup, user, userRole, loading } = useAuth();
 
+    // Track if we just completed a signup to control redirect timing
+    const [justSignedUp, setJustSignedUp] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+
     // Redirect if user is already logged in
     useEffect(() => {
+        if (justSignedUp) return; // allow manual delayed navigation so toast is visible
         if (!loading && user && userRole) {
-            if (userRole === "doctor") {
-                navigate("/doctor");
-            } else {
-                navigate("/user");
-            }
+            navigate(userRole === 'doctor' ? '/doctor' : '/user');
         }
-    }, [user, userRole, loading, navigate]);
+    }, [user, userRole, loading, navigate, justSignedUp]);
 
     const [form, setForm] = useState({
         name: "",
@@ -81,16 +82,14 @@ export default function Signup() {
         }
 
         try {
-            // Use the signup function from authContext
+            setJustSignedUp(true);
             await signup(form.name, form.email, form.password, form.role);
-
-            // Redirect user based on role
-            if (form.role === "doctor") {
-                navigate("/doctor");
-            } else {
-                // For regular users, always go to onboarding on first signup
-                navigate("/user/onboarding");
-            }
+            // Show toast then navigate after short delay so user sees confirmation
+            setShowToast(true);
+            const destination = form.role === 'doctor' ? '/doctor' : '/user/onboarding';
+            setTimeout(() => {
+                navigate(destination);
+            }, 1400); // 1.4s visibility
         } catch (error) {
             console.error("Signup failed:", error.message);
             console.error("Full error:", error);
@@ -167,6 +166,18 @@ export default function Signup() {
                     transition={{ duration: 0.8 }}
                 >
                     <div className="w-full max-w-md">
+                        {showToast && (
+                            <motion.div
+                                initial={{ opacity: 0, x: 40, y: -20 }}
+                                animate={{ opacity: 1, x: 0, y: 0 }}
+                                exit={{ opacity: 0, x: 20, y: -10 }}
+                                role="alert"
+                                className="fixed top-5 right-5 z-50 px-5 py-4 rounded-2xl shadow-xl bg-primary text-white text-sm font-medium flex items-center gap-2 max-w-[90vw] sm:max-w-xs w-auto"
+                                style={{ pointerEvents: 'auto' }}
+                            >
+                                <span>Account created successfully! Redirecting…</span>
+                            </motion.div>
+                        )}
                         {/* Mobile Header */}
                         <div className="lg:hidden text-center mb-8">
                             <motion.div 

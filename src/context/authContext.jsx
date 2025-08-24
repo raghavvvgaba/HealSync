@@ -9,32 +9,49 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
-        // Fetch user role from Firestore
-        await fetchUserRole(firebaseUser.uid);
+        // Fetch user profile and role from Firestore
+        await fetchUserProfile(firebaseUser.uid);
       } else {
         setUser(null);
         setUserRole(null);
+        setUserProfile(null);
       }
       setLoading(false);
     });
     return () => unsubscribe();
   }, []);
 
-  const fetchUserRole = async (uid) => {
+  const fetchUserProfile = async (uid) => {
     try {
+      // Fetch user role from users collection
       const userDocRef = doc(db, "users", uid);
       const userDoc = await getDoc(userDocRef);
       if (userDoc.exists()) {
-        setUserRole(userDoc.data().role);
+        const userData = userDoc.data();
+        setUserRole(userData.role);
+        
+        // Also fetch profile data from userProfile collection
+        const profileDocRef = doc(db, "userProfile", uid);
+        const profileDoc = await getDoc(profileDocRef);
+        if (profileDoc.exists()) {
+          setUserProfile({
+            ...userData, // Include users collection data
+            ...profileDoc.data(), // Include userProfile collection data
+          });
+        } else {
+          // No profile data yet, but include onboardingCompleted status from users
+          setUserProfile(userData);
+        }
       }
     } catch (error) {
-      console.error("Error fetching user role:", error);
+      console.error("Error fetching user profile:", error);
     }
   };
 
@@ -59,6 +76,7 @@ export const AuthProvider = ({ children }) => {
         email,
         role,
         createdAt: new Date().toISOString(),
+        onboardingCompleted: false, // Add this field for new users
       };
       
       // Add doctor ID if user is a doctor
@@ -68,8 +86,12 @@ export const AuthProvider = ({ children }) => {
       
       await setDoc(userDocRef, userData);
       
-      // Update local state
+      // Update local state  
       setUserRole(role);
+      setUserProfile({
+        ...userData,
+        onboardingCompleted: false // Will be updated when onboarding is complete
+      });
       
       return userCredential;
     } catch (error) {
@@ -92,10 +114,17 @@ export const AuthProvider = ({ children }) => {
     await signOut(auth);
     setUser(null);
     setUserRole(null);
+    setUserProfile(null);
+  };
+
+  const refreshUserProfile = async () => {
+    if (user?.uid) {
+      await fetchUserProfile(user.uid);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, userRole, loading, signup, login, logout }}>
+    <AuthContext.Provider value={{ user, userRole, userProfile, loading, signup, login, logout, refreshUserProfile }}>
       {children}
     </AuthContext.Provider>
   );

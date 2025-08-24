@@ -98,14 +98,14 @@ const Navbar = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute right-0 mt-2 w-56 rounded-xl shadow-2xl z-[100] p-4 text-sm pointer-events-auto 
-                        bg-white/80 dark:bg-black/70 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-black/60 
-                        backdrop-blur border border-secondary/60"
+                      className="absolute right-0 mt-2 w-40 max-w-[80vw] sm:w-56 sm:max-w-xs rounded-xl shadow-2xl z-[100] p-2 sm:p-4 text-sm pointer-events-auto 
+                        bg-white dark:bg-black border border-secondary/60"
+                      style={{ minWidth: '140px' }}
                     >
-                      <div className="font-semibold text-text mb-1">
+                      <div className="font-semibold text-text mb-1 truncate">
                         {user?.displayName}
                       </div>
-                      <div className="text-xs text-gray-500 mb-3 capitalize">
+                      <div className="text-xs text-gray-500 mb-3 capitalize truncate">
                         {userRole || "Loading..."}
                       </div>
                       <button

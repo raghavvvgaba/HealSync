@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import { Listbox } from '@headlessui/react';
 import { addUserProfile } from '../utils/firestoreService';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../config/firebase';
 
 // Progress steps
 const steps = [
@@ -41,37 +43,57 @@ const preferenceOptions = [
 ];
 
 const chronicConditionsOptions = [
-	'High Blood Pressure','Diabetes Type 1','Diabetes Type 2','Asthma','Heart Disease','Cancer','Stroke','Arthritis','Depression','Anxiety','COPD','Kidney Disease','Liver Disease','Thyroid Disorder','Migraine','Epilepsy','Fibromyalgia','Chronic Fatigue Syndrome','Osteoporosis','Bipolar Disorder','Schizophrenia','Multiple Sclerosis','Parkinson\'s Disease','Alzheimer\'s Disease','IBS','Crohn\'s Disease','Ulcerative Colitis','Celiac Disease'
+	'High Blood Pressure','Diabetes Type 1','Diabetes Type 2','Asthma','Heart Disease','Cancer','Stroke','Arthritis','Depression','Anxiety','COPD','Kidney Disease','Liver Disease','Thyroid Disorder','Migraine','Epilepsy','Fibromyalgia','Chronic Fatigue Syndrome','Osteoporosis','Bipolar Disorder','Schizophrenia','Multiple Sclerosis','Parkinson\'s Disease','Alzheimer\'s Disease','IBS','Crohn\'s Disease','Ulcerative Colitis','Celiac Disease','Other'
 ];
 
 const allergiesOptions = [
-	'Penicillin','Sulfa Drugs','NSAIDs','Aspirin','Latex','Peanuts','Tree Nuts','Milk','Eggs','Wheat','Soy','Fish','Shellfish','Pollen','Dust Mites','Pet Dander','Mold','Bee Stings','Contrast Dye'
+	'Penicillin','Sulfa Drugs','NSAIDs','Aspirin','Latex','Peanuts','Tree Nuts','Milk','Eggs','Wheat','Soy','Fish','Shellfish','Pollen','Dust Mites','Pet Dander','Mold','Bee Stings','Contrast Dye','Other'
 ];
 
 const medicationsOptions = [
-	'Lisinopril','Atorvastatin','Levothyroxine','Metformin','Amlodipine','Metoprolol','Omeprazole','Simvastatin','Losartan','Albuterol','Gabapentin','Hydrochlorothiazide','Sertraline','Acetaminophen','Ibuprofen','Fluoxetine','Amoxicillin','Prednisone','Escitalopram','Tramadol','Furosemide','Antihypertensives','Antidiabetics','Statins','Anticoagulants','Beta Blockers','Antidepressants','Antibiotics','Pain Relievers','Anti-inflammatories','Antihistamines','Inhalers','Thyroid Medications','Vitamins & Supplements'
+	'Lisinopril','Atorvastatin','Levothyroxine','Metformin','Amlodipine','Metoprolol','Omeprazole','Simvastatin','Losartan','Albuterol','Gabapentin','Hydrochlorothiazide','Sertraline','Acetaminophen','Ibuprofen','Fluoxetine','Amoxicillin','Prednisone','Escitalopram','Tramadol','Furosemide','Antihypertensives','Antidiabetics','Statins','Anticoagulants','Beta Blockers','Antidepressants','Antibiotics','Pain Relievers','Anti-inflammatories','Antihistamines','Inhalers','Thyroid Medications','Vitamins & Supplements','Other'
 ];
 
-// Shared UI helpers
+// Shared UI helpers (consistent mobile-friendly + opaque backgrounds)
 const inputClassName = (error) => `
-	mt-2 block w-full rounded-xl glass border soft-divider px-4 py-3 text-sm font-medium text-text placeholder-secondary
-	focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all duration-200
-	${error ? 'border-red-500/60 bg-red-50/50 dark:bg-red-900/20 focus:ring-red-400/30' : ''}
-`.trim();
+	mt-2 block w-full rounded-xl px-3 py-3 text-sm font-medium placeholder-secondary
+	bg-white dark:bg-neutral-900 border border-gray-200 dark:border-white/10 text-text
+	focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/50 shadow-sm
+	transition-all duration-150
+	${error ? 'border-red-500 focus:ring-red-400 focus:border-red-500' : ''}
+`.replace(/\s+/g,' ').trim();
 
 const selectableItemClassName = (isSelected) => `
-	px-4 py-3 rounded-xl cursor-pointer transition-all duration-200 text-sm font-medium text-center
-	${isSelected ? 'glass-cta text-white shadow-lg scale-[1.02]' : 'glass border soft-divider text-text hover-glow-primary'}
-`.trim();
+	px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-150 text-xs sm:text-sm font-medium text-center
+	${isSelected ? 'bg-primary text-white shadow-md' : 'bg-white dark:bg-neutral-900 border border-gray-200 dark:border-white/10 text-text hover:border-primary/50'}
+`.replace(/\s+/g,' ').trim();
 
 const selectClassName = (error) => `
-	mt-1 block w-full rounded-xl glass border soft-divider sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all
-	${error ? 'border-red-500/60 bg-red-50/50 dark:bg-red-900/20' : ''}
-`.trim();
+	mt-2 block w-full rounded-xl px-3 py-3 text-sm text-left
+	bg-white dark:bg-neutral-900 border border-primary/30 dark:border-primary/30
+	focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/60 shadow-[0_0_0_1px_var(--color-primary)]
+	transition-all duration-150 text-text
+	${error ? 'border-red-500 focus:ring-red-400 focus:border-red-500 shadow-none' : ''}
+`.replace(/\s+/g,' ').trim();
+
+// Compact select (for units) matching input height
+const compactUnitSelectClass = `
+	mt-2 rounded-xl px-3 py-3 text-sm font-medium
+	bg-white dark:bg-neutral-900 border border-gray-200 dark:border-white/10
+	focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/50 shadow-sm
+	transition-all duration-150
+	h-[46px] leading-none min-w-[70px] text-text
+`.replace(/\s+/g,' ').trim();
+
+// Themed Listbox (dropdown) styling (solid background + brand accents)
+const listboxMenuClass = `absolute z-30 mt-2 max-h-60 w-full overflow-auto rounded-xl
+ bg-white dark:bg-neutral-900 border border-primary/40 dark:border-primary/40 shadow-xl ring-1 ring-primary/10 dark:ring-primary/20`;
+const listboxOptionClass = (active, selected) => `cursor-pointer select-none px-4 py-2.5 text-sm transition-all duration-150 rounded-lg
+	${selected ? 'bg-primary text-white font-semibold shadow-md' : active ? 'bg-primary/10 dark:bg-primary/20 text-text' : 'text-text'}`;
 
 function Onboarding() {
 	const navigate = useNavigate();
-	const { user } = useAuth();
+	const { user, userProfile, refreshUserProfile, loading: authLoading } = useAuth();
 	const [currentStep, setCurrentStep] = useState(1);
 	const [loading, setLoading] = useState(false);
 	const [errors, setErrors] = useState({});
@@ -84,6 +106,7 @@ function Onboarding() {
 		},
 		medical: {
 			chronicConditions: [], allergies: [], currentMedications: [],
+			customChronicCondition: '', customAllergy: '', customMedication: '',
 			vision: { leftEye: '', rightEye: '', wearsGlasses: false }, hearingAids: false
 		},
 		lifestyle: { habits: [], preferences: [] },
@@ -91,8 +114,22 @@ function Onboarding() {
 	});
 
 	useEffect(() => {
-		if (user && user.onboarding === true) navigate('/user');
-	}, [user, navigate]);
+		// Only redirect if userProfile is loaded and onboarding is completed
+		if (userProfile && userProfile.onboardingCompleted === true) {
+			navigate('/user');
+		}
+	}, [userProfile, navigate]);
+
+	// Show loading while auth is loading
+	if (authLoading) {
+		return (
+			<div className="min-h-screen bg-background aurora-bg flex items-center justify-center">
+				<div className="text-center">
+					<div className="text-primary text-lg">Loading...</div>
+				</div>
+			</div>
+		);
+	}
 
 	// Handlers
 	const handleBasicInfoChange = (e) => {
@@ -106,6 +143,10 @@ function Onboarding() {
 	};
 
 	const handleArrayFieldChange = (section, field, value) => {
+		setFormData((prev) => ({ ...prev, [section]: { ...prev[section], [field]: value } }));
+	};
+
+	const handleCustomInputChange = (section, field, value) => {
 		setFormData((prev) => ({ ...prev, [section]: { ...prev[section], [field]: value } }));
 	};
 
@@ -126,7 +167,30 @@ function Onboarding() {
 		setErrors(newErrors);
 		return Object.keys(newErrors).length === 0;
 	};
-	const validateMedicalInfo = () => { setErrors({}); return true; };
+	
+	const validateMedicalInfo = () => {
+		const newErrors = {};
+		const { medical } = formData;
+		
+		// Check if "Other" is selected for chronic conditions but no custom input provided
+		if (medical.chronicConditions.includes('Other') && !medical.customChronicCondition.trim()) {
+			newErrors.customChronicCondition = 'Please specify your chronic condition';
+		}
+		
+		// Check if "Other" is selected for allergies but no custom input provided
+		if (medical.allergies.includes('Other') && !medical.customAllergy.trim()) {
+			newErrors.customAllergy = 'Please specify your allergy';
+		}
+		
+		// Check if "Other" is selected for medications but no custom input provided
+		if (medical.currentMedications.includes('Other') && !medical.customMedication.trim()) {
+			newErrors.customMedication = 'Please specify your medication';
+		}
+		
+		setErrors(newErrors);
+		return Object.keys(newErrors).length === 0;
+	};
+	
 	const validateLifestyleInfo = () => { setErrors({}); return true; };
 
 	// Next step + save
@@ -137,17 +201,42 @@ function Onboarding() {
 
 		try {
 			setLoading(true);
-			const payload =
-				currentStep === 1 ? { basic: formData.basic, onboardingCompleted: true } :
-				currentStep === 2 ? { medical: formData.medical } :
-				currentStep === 3 ? { lifestyle: formData.lifestyle } : {};
-
-			if (user?.uid && Object.keys(payload).length > 0) {
-				const res = await addUserProfile(user.uid, payload);
+			
+		// Save profile data to userProfile collection
+		const profilePayload =
+			currentStep === 1 ? { basic: formData.basic } :
+			currentStep === 2 ? { 
+				medical: {
+					...formData.medical,
+					// Add custom conditions/allergies to arrays if they exist
+					chronicConditions: formData.medical.customChronicCondition 
+						? [...formData.medical.chronicConditions.filter(c => c !== 'Other'), formData.medical.customChronicCondition]
+						: formData.medical.chronicConditions.filter(c => c !== 'Other'),
+					allergies: formData.medical.customAllergy
+						? [...formData.medical.allergies.filter(a => a !== 'Other'), formData.medical.customAllergy]
+						: formData.medical.allergies.filter(a => a !== 'Other'),
+					currentMedications: formData.medical.customMedication
+						? [...formData.medical.currentMedications.filter(m => m !== 'Other'), formData.medical.customMedication]
+						: formData.medical.currentMedications.filter(m => m !== 'Other')
+				}
+			} :
+			currentStep === 3 ? { lifestyle: formData.lifestyle } : {};			if (user?.uid && Object.keys(profilePayload).length > 0) {
+				const res = await addUserProfile(user.uid, profilePayload);
 				if (!res.success) throw new Error(res.error || 'Failed to save profile');
 			}
 
-			if (currentStep === 3) { navigate('/user'); return; }
+			// For step 1, also update onboardingCompleted status in users collection
+			if (currentStep === 1 && user?.uid) {
+				const userDocRef = doc(db, "users", user.uid);
+				await updateDoc(userDocRef, { onboardingCompleted: true });
+			}
+
+			if (currentStep === 3) { 
+				// Refresh user profile and then navigate
+				await refreshUserProfile();
+				navigate('/user');
+				return; 
+			}
 			setCurrentStep((prev) => prev + 1);
 		} catch (error) {
 			console.error('Error saving data:', error);
@@ -185,9 +274,9 @@ function Onboarding() {
 												{genderOptions.find((opt) => opt.value === formData.basic.gender)?.label || 'Select Gender'}
 											</span>
 										</Listbox.Button>
-										<Listbox.Options className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-xl glass-elevated border soft-divider shadow-xl">
+										<Listbox.Options className={listboxMenuClass}>
 											{genderOptions.slice(1).map((option) => (
-												<Listbox.Option key={option.value} value={option.value} className={({ active, selected }) => `cursor-pointer select-none px-4 py-3 text-sm ${active ? 'bg-white/10' : ''} ${selected ? 'text-primary font-semibold' : 'text-text'}`}>
+												<Listbox.Option key={option.value} value={option.value} className={({ active, selected }) => listboxOptionClass(active, selected)}>
 													{option.label}
 												</Listbox.Option>
 											))}
@@ -206,9 +295,9 @@ function Onboarding() {
 												{bloodGroupOptions.find((opt) => opt.value === formData.basic.bloodGroup)?.label || 'Select Blood Group'}
 											</span>
 										</Listbox.Button>
-										<Listbox.Options className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-xl glass-elevated border soft-divider shadow-xl">
+										<Listbox.Options className={listboxMenuClass}>
 											{bloodGroupOptions.slice(1).map((option) => (
-												<Listbox.Option key={option.value} value={option.value} className={({ active, selected }) => `cursor-pointer select-none px-4 py-3 text-sm ${active ? 'bg-white/10' : ''} ${selected ? 'text-primary font-semibold' : 'text-text'}`}>
+												<Listbox.Option key={option.value} value={option.value} className={({ active, selected }) => listboxOptionClass(active, selected)}>
 													{option.label}
 												</Listbox.Option>
 											))}
@@ -222,7 +311,7 @@ function Onboarding() {
 								<label className="block text-sm font-semibold text-text mb-1">Height *</label>
 								<div className="flex gap-2">
 									<input type="number" name="height.value" value={formData.basic.height.value} onChange={handleBasicInfoChange} placeholder="165" className={`${inputClassName(errors.height)} flex-1`} />
-									<select name="height.unit" value={formData.basic.height.unit} onChange={handleBasicInfoChange} className="rounded-xl glass border soft-divider px-4 py-3 text-sm font-medium w-20">
+									<select name="height.unit" value={formData.basic.height.unit} onChange={handleBasicInfoChange} className={compactUnitSelectClass}>
 										<option value="cm">cm</option>
 										<option value="ft">ft</option>
 									</select>
@@ -234,7 +323,7 @@ function Onboarding() {
 								<label className="block text-sm font-semibold text-text mb-1">Weight *</label>
 								<div className="flex gap-2">
 									<input type="number" name="weight.value" value={formData.basic.weight.value} onChange={handleBasicInfoChange} placeholder="70" className={`${inputClassName(errors.weight)} flex-1`} />
-									<select name="weight.unit" value={formData.basic.weight.unit} onChange={handleBasicInfoChange} className="rounded-xl glass border soft-divider px-4 py-3 text-sm font-medium w-20">
+									<select name="weight.unit" value={formData.basic.weight.unit} onChange={handleBasicInfoChange} className={compactUnitSelectClass}>
 										<option value="kg">kg</option>
 										<option value="lbs">lbs</option>
 									</select>
@@ -270,19 +359,35 @@ function Onboarding() {
 											{formData.medical.chronicConditions.length ? formData.medical.chronicConditions.join(', ') : 'Select chronic conditions'}
 										</span>
 									</Listbox.Button>
-									<Listbox.Options className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-xl glass-elevated border soft-divider shadow-xl">
+									<Listbox.Options className={listboxMenuClass}>
 										{chronicConditionsOptions.map((item) => (
-											<Listbox.Option key={item} value={item} className={({ active, selected }) => `cursor-pointer select-none px-4 py-3 text-sm ${active ? 'bg-white/10' : ''} ${selected ? 'text-primary font-semibold' : 'text-text'}`}>
+											<Listbox.Option key={item} value={item} className={({ active, selected }) => listboxOptionClass(active, selected)}>
 												{item}
 											</Listbox.Option>
 										))}
 									</Listbox.Options>
 								</div>
 							</Listbox>
+							{formData.medical.chronicConditions.includes('Other') && (
+								<div className="mt-3">
+									<input 
+										type="text" 
+										placeholder="Please specify your condition" 
+										value={formData.medical.customChronicCondition}
+										onChange={(e) => handleCustomInputChange('medical', 'customChronicCondition', e.target.value)}
+										className={inputClassName(errors.customChronicCondition)}
+									/>
+									{errors.customChronicCondition && <p className="mt-2 text-sm text-red-500">{errors.customChronicCondition}</p>}
+								</div>
+							)}
 							{formData.medical.chronicConditions.length > 0 && (
 								<div className="flex flex-wrap gap-2 mt-3">
 									{formData.medical.chronicConditions.map((cond, idx) => (
-										<span key={idx} className="px-3 py-1.5 rounded-lg text-xs glass border soft-divider">{cond}</span>
+										<span key={idx} className="px-3 py-1.5 rounded-lg text-xs glass border soft-divider">
+											{cond === 'Other' && formData.medical.customChronicCondition 
+												? formData.medical.customChronicCondition 
+												: cond}
+										</span>
 									))}
 								</div>
 							)}
@@ -298,19 +403,35 @@ function Onboarding() {
 											{formData.medical.allergies.length ? formData.medical.allergies.join(', ') : 'Select allergies'}
 										</span>
 									</Listbox.Button>
-									<Listbox.Options className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-xl glass-elevated border soft-divider shadow-xl">
+									<Listbox.Options className={listboxMenuClass}>
 										{allergiesOptions.map((item) => (
-											<Listbox.Option key={item} value={item} className={({ active, selected }) => `cursor-pointer select-none px-4 py-3 text-sm ${active ? 'bg-white/10' : ''} ${selected ? 'text-primary font-semibold' : 'text-text'}`}>
+											<Listbox.Option key={item} value={item} className={({ active, selected }) => listboxOptionClass(active, selected)}>
 												{item}
 											</Listbox.Option>
 										))}
 									</Listbox.Options>
 								</div>
 							</Listbox>
+							{formData.medical.allergies.includes('Other') && (
+								<div className="mt-3">
+									<input 
+										type="text" 
+										placeholder="Please specify your allergy" 
+										value={formData.medical.customAllergy}
+										onChange={(e) => handleCustomInputChange('medical', 'customAllergy', e.target.value)}
+										className={inputClassName(errors.customAllergy)}
+									/>
+									{errors.customAllergy && <p className="mt-2 text-sm text-red-500">{errors.customAllergy}</p>}
+								</div>
+							)}
 							{formData.medical.allergies.length > 0 && (
 								<div className="flex flex-wrap gap-2 mt-3">
 									{formData.medical.allergies.map((alg, idx) => (
-										<span key={idx} className="px-3 py-1.5 rounded-lg text-xs glass border soft-divider">{alg}</span>
+										<span key={idx} className="px-3 py-1.5 rounded-lg text-xs glass border soft-divider">
+											{alg === 'Other' && formData.medical.customAllergy 
+												? formData.medical.customAllergy 
+												: alg}
+										</span>
 									))}
 								</div>
 							)}
@@ -326,19 +447,35 @@ function Onboarding() {
 											{formData.medical.currentMedications.length ? formData.medical.currentMedications.join(', ') : 'Select medications'}
 										</span>
 									</Listbox.Button>
-									<Listbox.Options className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-xl glass-elevated border soft-divider shadow-xl">
+									<Listbox.Options className={listboxMenuClass}>
 										{medicationsOptions.map((item) => (
-											<Listbox.Option key={item} value={item} className={({ active, selected }) => `cursor-pointer select-none px-4 py-3 text-sm ${active ? 'bg-white/10' : ''} ${selected ? 'text-primary font-semibold' : 'text-text'}`}>
+											<Listbox.Option key={item} value={item} className={({ active, selected }) => listboxOptionClass(active, selected)}>
 												{item}
 											</Listbox.Option>
 										))}
 									</Listbox.Options>
 								</div>
 							</Listbox>
+							{formData.medical.currentMedications.includes('Other') && (
+								<div className="mt-3">
+									<input 
+										type="text" 
+										placeholder="Please specify your medication" 
+										value={formData.medical.customMedication}
+										onChange={(e) => handleCustomInputChange('medical', 'customMedication', e.target.value)}
+										className={inputClassName(errors.customMedication)}
+									/>
+									{errors.customMedication && <p className="mt-2 text-sm text-red-500">{errors.customMedication}</p>}
+								</div>
+							)}
 							{formData.medical.currentMedications.length > 0 && (
 								<div className="flex flex-wrap gap-2 mt-3">
 									{formData.medical.currentMedications.map((med, idx) => (
-										<span key={idx} className="px-3 py-1.5 rounded-lg text-xs glass border soft-divider">{med}</span>
+										<span key={idx} className="px-3 py-1.5 rounded-lg text-xs glass border soft-divider">
+											{med === 'Other' && formData.medical.customMedication 
+												? formData.medical.customMedication 
+												: med}
+										</span>
 									))}
 								</div>
 							)}
