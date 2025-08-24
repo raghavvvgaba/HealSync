@@ -1,4 +1,4 @@
-# HealSync v3 - Healthcare Platform with AI
+# HealSync v3 - Healthcare Platform with AI.
 
 HealSync is a comprehensive healthcare platform that enables secure patient-doctor interactions, medical record management, and AI-powered health assistance.
 
