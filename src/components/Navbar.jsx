@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiSun, FiMoon } from "react-icons/fi";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../context/authContext";
+import HealSyncLogo from "../assets/HealSyncLogo.png";
 
 const Navbar = () => {
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
@@ -63,12 +64,19 @@ const Navbar = () => {
         {/* Logo */}
         <Link to="/">
           <motion.div
-            className="text-2xl font-bold text-primary"
+            className="flex items-center gap-2"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            HealSync
+            <img 
+              src={HealSyncLogo} 
+              alt="HealSync Logo" 
+              className="h-8 w-8 object-contain"
+            />
+            <span className="text-xl font-bold text-primary hidden sm:block">
+              HealSync
+            </span>
           </motion.div>
         </Link>
 

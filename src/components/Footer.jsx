@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { FaGithub, FaLinkedin, FaEnvelope } from "react-icons/fa";
+import HealSyncLogo from "../assets/HealSyncLogo.png";
 
 // Minimal, theme-aligned footer: subtle glass panel, single row on desktop, stacked on mobile
 const Footer = () => {
@@ -13,11 +14,18 @@ const Footer = () => {
             <div className="pointer-events-none absolute inset-0 opacity-[0.35] bg-gradient-to-br from-primary/25 via-accent/10 to-transparent" />
           <div className="relative flex flex-col gap-6 md:gap-4 md:flex-row md:items-center md:justify-between">
             {/* Brand */}
-            <div className="flex flex-col gap-2 max-w-sm">
-              <span className="text-lg font-semibold tracking-tight bg-gradient-to-r from-text to-text/70 dark:from-white dark:to-white/70 bg-clip-text text-transparent">HealSync</span>
-              <p className="text-xs md:text-sm text-secondary leading-relaxed">
-                Unified, secure & shareable health records.
-              </p>
+            <div className="flex items-center gap-3 max-w-sm">
+              <img 
+                src={HealSyncLogo} 
+                alt="HealSync Logo" 
+                className="h-6 w-6 object-contain"
+              />
+              <div>
+                <span className="text-lg font-semibold tracking-tight bg-gradient-to-r from-text to-text/70 dark:from-white dark:to-white/70 bg-clip-text text-transparent">HealSync</span>
+                <p className="text-xs md:text-sm text-secondary leading-relaxed">
+                  Unified, secure & shareable health records.
+                </p>
+              </div>
             </div>
             {/* Social Icons */}
             <nav aria-label="Social" className="flex gap-6 md:gap-7 items-center">

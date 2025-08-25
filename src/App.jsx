@@ -1,19 +1,27 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
-// Removed framer-motion page transitions to avoid scroll side-effects
-import LandingPage from './pages/LandingPage';
-import UserDashboard from './pages/User/UserDashboard';
-import MedicalHistoryPage from './components/MedicalHistoryPage';
-import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
-import Signup from './pages/Signup';
-import Login from './pages/Login';
+import React, { useEffect, useRef, useState, useLayoutEffect, Suspense, lazy } from 'react';
 import PrivateRoute from './components/PrivateRoute';
-import UserLayout from './pages/User/UserLayout';
-import DoctorLayout  from './pages/Doctor/DoctorLayout';
-import DoctorDashboard from './pages/Doctor/DoctorDashboard';
-import PatientProfilePage from './pages/Doctor/PatientProfilePage';
-import EditProfile from './pages/User/EditProfile';
-import Onboarding from './components/Onboarding';
-import { Profile } from './pages/User/Profile';
+
+// Lazy load page components for better code splitting
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const UserDashboard = lazy(() => import('./pages/User/UserDashboard'));
+const MedicalHistoryPage = lazy(() => import('./components/MedicalHistoryPage'));
+const Signup = lazy(() => import('./pages/Signup'));
+const Login = lazy(() => import('./pages/Login'));
+const UserLayout = lazy(() => import('./pages/User/UserLayout'));
+const DoctorLayout = lazy(() => import('./pages/Doctor/DoctorLayout'));
+const DoctorDashboard = lazy(() => import('./pages/Doctor/DoctorDashboard'));
+const PatientProfilePage = lazy(() => import('./pages/Doctor/PatientProfilePage'));
+const EditProfile = lazy(() => import('./pages/User/EditProfile'));
+const Onboarding = lazy(() => import('./components/Onboarding'));
+const Profile = lazy(() => import('./pages/User/Profile').then(module => ({ default: module.Profile })));
+
+// Loading component
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen bg-background">
+    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
 
 // https://www.hover.dev/components/navigation Use this for prebuilt components
 
@@ -60,6 +68,7 @@ const App = () => {
   return (
     <div className="relative min-h-screen w-full bg-background text-text">
       <ScrollToTop />
+      <Suspense fallback={<LoadingSpinner />}>
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/signup" element={<Signup />} />
@@ -71,11 +80,12 @@ const App = () => {
             <Route path='edit-profile' element={<EditProfile />} />
             <Route path='view-profile' element={<Profile />} />
           </Route>
-                    <Route path="/doctor" element={<PrivateRoute><DoctorLayout /></PrivateRoute>} >
+          <Route path="/doctor" element={<PrivateRoute><DoctorLayout /></PrivateRoute>} >
             <Route index element={<DoctorDashboard />} />
             <Route path="shared-profile/:shareId" element={<PatientProfilePage />} />
           </Route>
-  </Routes>
+        </Routes>
+      </Suspense>
     </div>
   );
 };
