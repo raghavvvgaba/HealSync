@@ -310,7 +310,22 @@ const LandingPage = () => {
             <div className="absolute w-[38rem] h-[38rem] -top-40 -left-40 rounded-full bg-gradient-to-br from-primary/35 to-accent/20 blur-3xl opacity-40 animate-pulse" />
             <div className="absolute w-[30rem] h-[30rem] top-1/3 -right-40 rounded-full bg-gradient-to-tl from-accent/30 to-primary/20 blur-3xl opacity-40 animate-[pulse_9s_ease-in-out_infinite_alternate]" />
           </div>
-          {/* Illustration removed (previous external SVG was failing to load) */}
+          {/* Illustration (remote) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.7 }}
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-5xl pointer-events-none select-none hidden md:block"
+            aria-hidden="true"
+          >
+            {/* Using an open-license illustration source (undraw) – user can self-host later */}
+            <img
+              src="https://undraw.cloud/img/undraw_medical_care_movn.svg"
+              alt="Medical collaboration illustration"
+              className="w-full h-auto opacity-90 drop-shadow-xl"
+              loading="lazy"
+            />
+          </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
@@ -356,19 +371,13 @@ const LandingPage = () => {
               ))}
             </div>
           </motion.div>
-          {/* Minimal Scroll Arrow */}
-          <motion.button
-            type="button"
-            onClick={() => {
-              const el = document.getElementById("features");
-              if (el) el.scrollIntoView({ behavior: "smooth" });
-            }}
-            initial={{ opacity: 0, y: 12 }}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.55 }}
-            className="absolute bottom-8 md:bottom-10 w-10 h-10 rounded-full flex items-center justify-center text-accent hover:bg-accent/10 transition-all"
-            aria-label="Scroll to features"
+            transition={{ delay: 0.9, duration: 0.6 }}
+            className="absolute bottom-6 md:bottom-10 flex flex-col items-center gap-2 text-accent/80"
           >
+            <span className="text-[11px] tracking-wide uppercase font-semibold">Scroll</span>
             <svg
               className="w-5 h-5 animate-bounce"
               fill="none"
@@ -378,7 +387,7 @@ const LandingPage = () => {
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
-          </motion.button>
+          </motion.div>
         </section>
 
         {/* ------------------------------ FEATURE GRID ------------------------------ */}
