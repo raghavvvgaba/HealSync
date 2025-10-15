@@ -99,14 +99,60 @@ body {
 .shine-on-hover:hover::after { transform: rotate(8deg) translate3d(35%,0,0); opacity: 1; }
 
 /* CTA button with accent gradient + glow */
-.glass-cta { color: white; border-radius: 1rem; background: linear-gradient(90deg, var(--color-accent), color-mix(in oklab, var(--color-accent), black 20%)); box-shadow: 0 8px 22px rgb(var(--accent-rgb) / 0.25); transition: filter 160ms, transform 160ms, box-shadow 160ms; }
-.glass-cta:hover { filter: brightness(1.03); transform: translateY(-1px); box-shadow: 0 10px 28px rgb(var(--accent-rgb) / 0.35); }
+.glass-cta { color: white; border-radius: 1rem; background: linear-gradient(90deg, var(--color-accent), color-mix(in oklab, var(--color-accent), black 20%)); box-shadow: 0 8px 22px rgb(var(--accent-rgb) / 0.25); transition: filter 170ms ease, transform 170ms ease, box-shadow 170ms ease; }
+.glass-cta:hover { filter: brightness(1.03); transform: translateY(-3px); box-shadow: 0 16px 36px rgb(var(--accent-rgb) / 0.45), 0 4px 10px rgb(0 0 0 / 0.10); }
+.glass-cta:active { transform: translateY(-1px); box-shadow: 0 12px 30px rgb(var(--accent-rgb) / 0.38); }
 
 /* Ensure root element covers full height */
 #root {
   min-height: 100vh;
   background-color: var(--color-background);
 }
+
+/* Interactive card hover utility: smooth scale, glow, subtle glass lift */
+.interactive-card {
+  position: relative;
+  transition: transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1),
+              box-shadow 560ms ease,
+              background 520ms ease,
+              border-color 520ms ease,
+              filter 520ms ease;
+  will-change: transform, box-shadow;
+}
+.interactive-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow:
+    0 18px 55px rgb(var(--primary-rgb) / 0.22),
+    0 8px 28px rgb(var(--accent-rgb) / 0.18),
+    0 1px 0 rgb(255 255 255 / 0.06) inset;
+  /* Subtle glass lift */
+  filter: saturate(1.05) brightness(1.02);
+}
+.interactive-card:hover {
+  /* Lightly enrich glass background and border without changing theme */
+  background: color-mix(in oklab, var(--glass-bg) 86%, rgb(var(--primary-rgb) / 0.10));
+  border-color: color-mix(in oklab, var(--glass-border), rgb(var(--primary-rgb) / 0.45));
+}
+
+/* Focus-visible parity for a11y */
+.interactive-card:focus-visible {
+  outline: none;
+  transform: translateY(-2px) scale(1.01);
+  box-shadow:
+    0 12px 40px rgb(var(--primary-rgb) / 0.20),
+    0 6px 20px rgb(var(--accent-rgb) / 0.16);
+}
+
+/* Snappy hover for secondary/neutral buttons */
+.btn-elevate {
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+.btn-elevate:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgb(var(--primary-rgb) / 0.20), 0 4px 10px rgb(0 0 0 / 0.08);
+  filter: brightness(1.02) saturate(1.02);
+}
+.btn-elevate:active { transform: translateY(-1px); }
 /* :root {
   --text: #020008;
   --background: #F0F0F0;

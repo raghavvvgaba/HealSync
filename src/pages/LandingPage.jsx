@@ -177,9 +177,11 @@ const FeatureCard = ({ feature, idx }) => {
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.4 }}
       transition={{ duration: 0.55, delay: idx * 0.08 }}
-      className="relative group rounded-2xl p-6 md:p-7 glass-elevated lift-on-hover shine-on-hover overflow-hidden"
+      className="relative group rounded-2xl p-6 md:p-7 glass-elevated interactive-card shine-on-hover overflow-hidden"
     >
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-accent/10 via-transparent to-primary/10" />
+      {/* Glow behind card on hover */}
+  <div className="pointer-events-none absolute -inset-6 rounded-3xl blur-2xl opacity-0 group-hover:opacity-80 transition-opacity duration-600 bg-[radial-gradient(60%_60%_at_50%_50%,rgba(var(--primary-rgb)/0.25),transparent_70%)]" />
       <div className="flex items-center gap-4 mb-4 relative z-10">
         <span className="flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 via-surface/60 to-surface shadow-inner border border-white/10">
           {feature.icon}
@@ -215,8 +217,10 @@ const JourneyStep = ({ step, index }) => (
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, amount: 0.5 }}
     transition={{ duration: 0.55, delay: index * 0.1 }}
-    className="relative flex flex-col gap-4 p-6 rounded-2xl glass-elevated lift-on-hover"
+    className="relative group flex flex-col gap-4 p-6 rounded-2xl glass-elevated interactive-card"
   >
+    {/* Glow layer */}
+  <div className="pointer-events-none absolute -inset-6 rounded-3xl blur-2xl opacity-0 group-hover:opacity-80 transition-opacity duration-600 bg-[radial-gradient(60%_60%_at_50%_50%,rgba(var(--accent-rgb)/0.25),transparent_70%)]" />
     <div className="flex items-center gap-4">
       <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-accent/30 to-primary/30 text-accent text-xl font-bold border border-white/10 shadow-inner">
         {step.icon}
@@ -238,9 +242,11 @@ const TestimonialCard = ({ t, idx }) => (
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
     transition={{ duration: 0.55, delay: idx * 0.08 }}
-    className="relative rounded-2xl p-6 glass-elevated shine-on-hover"
+    className="relative group rounded-2xl p-6 glass-elevated interactive-card shine-on-hover"
   >
     <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/15 via-transparent to-accent/20 opacity-60" />
+    {/* Glow layer */}
+  <div className="pointer-events-none absolute -inset-6 rounded-3xl blur-2xl opacity-0 group-hover:opacity-80 transition-opacity duration-600 bg-[radial-gradient(60%_60%_at_50%_50%,rgba(var(--primary-rgb)/0.22),transparent_70%)]" />
     <div className="relative">
       <p className="text-sm md:text-base text-text/90 dark:text-white/90 leading-relaxed italic">
         "{t.quote}"
@@ -256,7 +262,9 @@ const TestimonialCard = ({ t, idx }) => (
 const FAQItem = ({ question, answer }) => {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-xl border soft-divider overflow-hidden backdrop-blur-sm bg-surface/60 dark:bg-surface/40 border-white/10">
+    <div className="relative group rounded-xl border soft-divider overflow-hidden backdrop-blur-sm bg-surface/60 dark:bg-surface/40 border-white/10 interactive-card">
+      {/* Glow layer */}
+      <div className="pointer-events-none absolute -inset-6 rounded-3xl blur-2xl opacity-0 group-hover:opacity-80 transition-opacity duration-700 bg-[radial-gradient(60%_60%_at_50%_50%,rgba(var(--accent-rgb)/0.2),transparent_70%)]" />
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex justify-between items-center px-5 py-4 text-left text-base md:text-lg font-semibold text-text dark:text-white hover:bg-white/40 dark:hover:bg-white/5 transition-colors"
@@ -340,7 +348,7 @@ const LandingPage = () => {
               </button>
               <a
                 href="#features"
-                className="px-7 py-3.5 rounded-xl font-semibold text-sm md:text-base bg-white/70 dark:bg-white/5 backdrop-blur-md border border-white/20 hover:bg-white/90 dark:hover:bg-white/10 transition-colors text-text dark:text-white lift-on-hover"
+                className="px-7 py-3.5 rounded-xl font-semibold text-sm md:text-base bg-white/70 dark:bg-white/5 backdrop-blur-md border border-white/20 hover:bg-white/90 dark:hover:bg-white/10 transition-colors text-text dark:text-white btn-elevate"
               >
                 Explore Features
               </a>
@@ -398,9 +406,11 @@ const LandingPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative rounded-2xl p-8 md:p-10 flex flex-col justify-between overflow-hidden glass-elevated col-span-full xl:col-span-1"
+              className="relative group rounded-2xl p-8 md:p-10 flex flex-col justify-between overflow-hidden glass-elevated interactive-card col-span-full xl:col-span-1"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-accent/20 via-primary/10 to-transparent" />
+              {/* Glow layer */}
+              <div className="pointer-events-none absolute -inset-8 rounded-3xl blur-3xl opacity-0 group-hover:opacity-90 transition-opacity duration-700 bg-[radial-gradient(60%_60%_at_50%_50%,rgba(var(--accent-rgb)/0.22),transparent_70%)]" />
               <div className="relative">
                 <h3 className="text-2xl font-bold mb-4 text-text dark:text-white flex items-center gap-3">
                   <FaLock className="text-accent" /> Built on Security
@@ -486,7 +496,7 @@ const LandingPage = () => {
                   </button>
                   <a
                     href="#faq"
-                    className="px-8 py-4 rounded-xl font-semibold text-sm md:text-base bg-white/70 dark:bg-white/5 backdrop-blur-md border border-white/20 hover:bg-white/90 dark:hover:bg-white/10 transition-colors text-text dark:text-white lift-on-hover"
+                    className="px-8 py-4 rounded-xl font-semibold text-sm md:text-base bg-white/70 dark:bg-white/5 backdrop-blur-md border border-white/20 hover:bg-white/90 dark:hover:bg-white/10 transition-colors text-text dark:text-white btn-elevate"
                   >
                     Questions?
                   </a>
