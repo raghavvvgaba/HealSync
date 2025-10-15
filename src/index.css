@@ -30,11 +30,11 @@ body {
   position: fixed;
   inset: -20% -10% -10% -10%;
   z-index: -2;
-  background: radial-gradient(60% 50% at 20% 20%, rgb(var(--primary-rgb) / 0.35) 0%, transparent 60%),
-              radial-gradient(50% 40% at 80% 10%, rgb(var(--accent-rgb) / 0.32) 0%, transparent 60%),
-              radial-gradient(40% 35% at 70% 80%, rgb(var(--primary-rgb) / 0.28) 0%, transparent 70%),
+  background: radial-gradient(60% 50% at 20% 20%, rgb(var(--primary-rgb) / 0.22) 0%, transparent 60%),
+              radial-gradient(50% 40% at 80% 10%, rgb(var(--accent-rgb) / 0.18) 0%, transparent 60%),
+              radial-gradient(40% 35% at 70% 80%, rgb(var(--primary-rgb) / 0.16) 0%, transparent 70%),
               linear-gradient(180deg, rgba(255 255 255 / 0.02), rgba(0 0 0 / 0.02));
-  filter: blur(40px) saturate(160%);
+  filter: blur(32px) saturate(125%);
 }
 
 /* Animated aurora layer */
@@ -43,10 +43,57 @@ body {
   position: fixed;
   inset: -30% -20% -20% -20%;
   z-index: -3;
-  background: radial-gradient(45% 45% at 10% 70%, rgb(var(--primary-rgb) / 0.25) 0%, transparent 70%),
-              radial-gradient(50% 50% at 90% 30%, rgb(var(--accent-rgb) / 0.22) 0%, transparent 70%);
-  filter: blur(55px) saturate(160%);
+  background: radial-gradient(45% 45% at 10% 70%, rgb(var(--primary-rgb) / 0.18) 0%, transparent 70%),
+              radial-gradient(50% 50% at 90% 30%, rgb(var(--accent-rgb) / 0.16) 0%, transparent 70%);
+  filter: blur(42px) saturate(130%);
   animation: auroraMove 28s ease-in-out infinite alternate;
+}
+
+/* Aurora intensity variants */
+.aurora-bg.aurora-subtle::before {
+  background:
+    radial-gradient(60% 50% at 20% 20%, rgb(var(--primary-rgb) / 0.14) 0%, transparent 60%),
+    radial-gradient(50% 40% at 80% 10%, rgb(var(--accent-rgb) / 0.12) 0%, transparent 60%),
+    radial-gradient(40% 35% at 70% 80%, rgb(var(--primary-rgb) / 0.12) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(255 255 255 / 0.01), rgba(0 0 0 / 0.01));
+  filter: blur(24px) saturate(115%);
+}
+.aurora-bg.aurora-subtle::after {
+  background:
+    radial-gradient(45% 45% at 10% 70%, rgb(var(--primary-rgb) / 0.12) 0%, transparent 70%),
+    radial-gradient(50% 50% at 90% 30%, rgb(var(--accent-rgb) / 0.10) 0%, transparent 70%);
+  filter: blur(30px) saturate(115%);
+}
+
+.aurora-bg.aurora-vivid::before {
+  background:
+    radial-gradient(60% 50% at 20% 20%, rgb(var(--primary-rgb) / 0.26) 0%, transparent 60%),
+    radial-gradient(50% 40% at 80% 10%, rgb(var(--accent-rgb) / 0.22) 0%, transparent 60%),
+    radial-gradient(40% 35% at 70% 80%, rgb(var(--primary-rgb) / 0.20) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(255 255 255 / 0.02), rgba(0 0 0 / 0.02));
+  filter: blur(36px) saturate(140%);
+}
+.aurora-bg.aurora-vivid::after {
+  background:
+    radial-gradient(45% 45% at 10% 70%, rgb(var(--primary-rgb) / 0.22) 0%, transparent 70%),
+    radial-gradient(50% 50% at 90% 30%, rgb(var(--accent-rgb) / 0.20) 0%, transparent 70%);
+  filter: blur(38px) saturate(140%);
+}
+
+/* Extra faint variant for dense data screens */
+.aurora-bg.aurora-faint::before {
+  background:
+    radial-gradient(60% 50% at 20% 20%, rgb(var(--primary-rgb) / 0.08) 0%, transparent 60%),
+    radial-gradient(50% 40% at 80% 10%, rgb(var(--accent-rgb) / 0.06) 0%, transparent 60%),
+    radial-gradient(40% 35% at 70% 80%, rgb(var(--primary-rgb) / 0.06) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(255 255 255 / 0.01), rgba(0 0 0 / 0.01));
+  filter: blur(20px) saturate(110%);
+}
+.aurora-bg.aurora-faint::after {
+  background:
+    radial-gradient(45% 45% at 10% 70%, rgb(var(--primary-rgb) / 0.06) 0%, transparent 70%),
+    radial-gradient(50% 50% at 90% 30%, rgb(var(--accent-rgb) / 0.05) 0%, transparent 70%);
+  filter: blur(22px) saturate(110%);
 }
 
 @keyframes auroraMove {
@@ -66,10 +113,10 @@ body {
 
 /* Variant for elevated glass panels */
 .glass-elevated {
-  background: color-mix(in oklab, var(--glass-bg) 92%, rgb(var(--primary-rgb) / 0.06));
+  background: color-mix(in oklab, var(--glass-bg) 94%, rgb(var(--primary-rgb) / 0.05));
   backdrop-filter: blur(28px) saturate(160%);
   -webkit-backdrop-filter: blur(28px) saturate(160%);
-  border: 1px solid color-mix(in oklab, var(--glass-border), rgb(var(--primary-rgb) / 0.35));
+  border: 1px solid color-mix(in oklab, var(--glass-border), rgb(var(--primary-rgb) / 0.25));
   box-shadow: 0 12px 40px rgba(0,0,0,0.35);
 }
 

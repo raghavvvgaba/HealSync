@@ -226,7 +226,7 @@ function EditProfile() {
   // Loading skeleton --------------------------------------------------------
   if (loading) {
     return (
-      <div className="min-h-screen aurora-bg px-4 sm:px-8 py-10">
+  <div className="min-h-screen aurora-bg aurora-subtle px-4 sm:px-8 py-10">
         <div className="max-w-5xl mx-auto animate-pulse space-y-8">
           <div className="h-10 w-60 glass rounded-xl" />
           <div className="glass rounded-3xl p-6 border soft-divider space-y-4">
@@ -239,7 +239,7 @@ function EditProfile() {
 
   // Render ------------------------------------------------------------------
   return (
-    <div className="min-h-screen aurora-bg px-3 sm:px-6 py-8 sm:py-12">
+  <div className="min-h-screen aurora-bg aurora-subtle px-3 sm:px-6 py-8 sm:py-12">
       <div className="max-w-5xl mx-auto space-y-10">
         {/* Progress Steps (desktop/tablet) */}
         <div className="hidden sm:block glass rounded-2xl p-5 sm:p-6 border soft-divider">

@@ -17,7 +17,7 @@ function DoctorDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-background aurora-bg">
+    <div className="min-h-screen bg-background aurora-bg aurora-subtle">
             {/* Header - gradient ribbon */}
             <div className="relative bg-gradient-to-br from-primary/25 via-accent/20 to-transparent px-3 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b soft-divider">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-6">

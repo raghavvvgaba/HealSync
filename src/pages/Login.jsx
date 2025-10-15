@@ -86,9 +86,9 @@ export default function Login() {
   };
 
   return (
-    <>
+    <div className="h-screen w-full overflow-hidden flex flex-col">
       <Navbar />
-      <div className="min-h-screen w-full bg-gradient-to-br from-primary/10 via-background to-secondary/10 flex">
+      <div className="flex-1 w-full bg-gradient-to-br from-primary/10 via-background to-secondary/10 flex overflow-hidden">
         {/* Left Side - Illustration and Features */}
         <motion.div 
           className="hidden lg:flex lg:w-1/2 flex-col justify-center items-center p-12 relative overflow-hidden"
@@ -141,12 +141,12 @@ export default function Login() {
 
         {/* Right Side - Login Form */}
         <motion.div 
-          className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12"
+          className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 overflow-y-auto"
           initial={{ x: 100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.8 }}
         >
-          <div className="w-full max-w-md">
+          <div className="w-full max-w-md my-auto">
             {/* Mobile Header */}
             <div className="lg:hidden text-center mb-8">
               <motion.div 
@@ -257,14 +257,12 @@ export default function Login() {
                 </div>
               </div>
 
-              <motion.button
+              <button
                 type="submit"
-                className="w-full bg-primary text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                className="w-full bg-primary text-white py-4 rounded-xl font-semibold text-lg shadow-lg btn-elevate"
               >
                 Log In as {form.role === "doctor" ? "Doctor" : "User"}
-              </motion.button>
+              </button>
 
               <div className="text-center pt-4">
                 <p className="text-text/70">
@@ -278,6 +276,6 @@ export default function Login() {
           </div>
         </motion.div>
       </div>
-    </>
+    </div>
   );
 }

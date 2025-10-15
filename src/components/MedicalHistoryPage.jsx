@@ -154,7 +154,7 @@ const MedicalHistoryPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background aurora-bg text-text px-3 sm:px-6 py-6">
+  <div className="min-h-screen bg-background aurora-bg aurora-faint text-text px-3 sm:px-6 py-6">
       {/* Add ref to container for scroll debugging */}
       <div ref={(el) => {
         if (el) {

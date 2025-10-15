@@ -131,13 +131,13 @@ const Navbar = () => {
             <div className="flex flex-row items-center gap-2 w-auto">
               <Link
                 to="/signup"
-                className="text-xs sm:text-sm md:text-base px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-xl bg-primary text-white hover:scale-105 transition text-center min-w-[60px] sm:min-w-[80px]"
+                className="text-xs sm:text-sm md:text-base px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-xl bg-primary text-white btn-elevate text-center min-w-[60px] sm:min-w-[80px]"
               >
                 Sign Up
               </Link>
               <Link
                 to="/login"
-                className="text-xs sm:text-sm md:text-base px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-xl bg-accent text-white hover:scale-105 transition text-center min-w-[60px] sm:min-w-[80px]"
+                className="text-xs sm:text-sm md:text-base px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-xl bg-accent text-white btn-elevate text-center min-w-[60px] sm:min-w-[80px]"
               >
                 Login
               </Link>

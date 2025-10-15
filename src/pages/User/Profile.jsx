@@ -31,7 +31,7 @@ export function Profile() {
   // Skeleton (unchanged) -----------------------------------------------------
   if (loading) {
     return (
-      <div className="min-h-screen bg-background aurora-bg px-4 sm:px-8 py-8">
+  <div className="min-h-screen bg-background aurora-bg aurora-subtle px-4 sm:px-8 py-8">
         <div className="max-w-7xl mx-auto animate-pulse space-y-8">
           <div className="h-10 w-56 glass rounded-xl" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -46,7 +46,7 @@ export function Profile() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background aurora-bg flex items-center justify-center px-4">
+  <div className="min-h-screen bg-background aurora-bg aurora-subtle flex items-center justify-center px-4">
         <div className="glass rounded-3xl p-10 border soft-divider max-w-md w-full text-center space-y-6">
           <h2 className="text-2xl font-bold text-text">Profile Error</h2>
           <p className="text-secondary text-sm">{error}</p>
@@ -58,7 +58,7 @@ export function Profile() {
 
   if (!profileData) {
     return (
-      <div className="min-h-screen bg-background aurora-bg flex items-center justify-center px-4">
+  <div className="min-h-screen bg-background aurora-bg aurora-subtle flex items-center justify-center px-4">
         <div className="glass rounded-3xl p-10 border soft-divider max-w-md w-full text-center space-y-6">
           <h2 className="text-2xl font-bold text-text">Profile Not Found</h2>
           <p className="text-secondary text-sm">We couldn't find your profile data.</p>
@@ -113,7 +113,7 @@ export function Profile() {
 
   // Layout -------------------------------------------------------------------
   return (
-    <div className="min-h-screen bg-background aurora-bg px-3 sm:px-6 py-6 sm:py-10">
+  <div className="min-h-screen bg-background aurora-bg aurora-subtle px-3 sm:px-6 py-6 sm:py-10">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">

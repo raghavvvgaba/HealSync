@@ -105,9 +105,9 @@ export default function Signup() {
     };
 
     return (
-        <>
+        <div className="h-screen w-full overflow-hidden flex flex-col">
             <Navbar />
-            <div className="min-h-screen w-full bg-gradient-to-br from-secondary/10 via-background to-primary/10 flex">
+            <div className="flex-1 w-full bg-gradient-to-br from-secondary/10 via-background to-primary/10 flex overflow-hidden">
                 {/* Left Side - Illustration and Features */}
                 <motion.div 
                     className="hidden lg:flex lg:w-1/2 flex-col justify-center items-center p-12 relative overflow-hidden"
@@ -160,12 +160,12 @@ export default function Signup() {
 
                 {/* Right Side - Signup Form */}
                 <motion.div 
-                    className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 "
+                    className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 overflow-y-auto"
                     initial={{ x: 100, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ duration: 0.8 }}
                 >
-                    <div className="w-full max-w-md">
+                    <div className="w-full max-w-md my-auto">
                         {showToast && (
                             <motion.div
                                 initial={{ opacity: 0, x: 40, y: -20 }}
@@ -331,16 +331,12 @@ export default function Signup() {
                                 )}
                             </div>
 
-                            <motion.button
-                                type="submit"
-                                className="w-full bg-primary text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                            >
-                                Create {form.role === "doctor" ? "Doctor" : "User"} Account
-                            </motion.button>
-
-                            <div className="text-center pt-4">
+            <button
+                type="submit"
+                className="w-full bg-primary text-white py-4 rounded-xl font-semibold text-lg shadow-lg btn-elevate"
+            >
+                Create {form.role === "doctor" ? "Doctor" : "User"} Account
+            </button>                            <div className="text-center pt-4">
                                 <p className="text-text/70">
                                     Already have an account?{" "}
                                     <Link to="/login" className="text-secondary font-semibold hover:underline transition-all">
@@ -352,6 +348,6 @@ export default function Signup() {
                     </div>
                 </motion.div>
             </div>
-        </>
+        </div>
     );
 }

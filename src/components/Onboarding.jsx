@@ -123,7 +123,7 @@ function Onboarding() {
 	// Show loading while auth is loading
 	if (authLoading) {
 		return (
-			<div className="min-h-screen bg-background aurora-bg flex items-center justify-center">
+			<div className="min-h-screen bg-background aurora-bg aurora-subtle flex items-center justify-center">
 				<div className="text-center">
 					<div className="text-primary text-lg">Loading...</div>
 				</div>
@@ -544,7 +544,7 @@ function Onboarding() {
 	};
 
 	return (
-		<div className="min-h-screen bg-background aurora-bg px-3 sm:px-6 py-6 sm:py-8">
+		<div className="min-h-screen bg-background aurora-bg aurora-subtle px-3 sm:px-6 py-6 sm:py-8">
 			<div className="max-w-5xl mx-auto">
 				{/* Progress Steps */}
 				<div className="mb-8 sm:mb-10">

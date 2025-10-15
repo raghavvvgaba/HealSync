@@ -310,13 +310,13 @@ const LandingPage = () => {
   return (
     <>
       <Navbar />
-      <div className="aurora-bg min-h-screen w-full overflow-x-hidden text-text dark:text-white selection:bg-accent/30 selection:text-text">
+  <div className="aurora-bg aurora-vivid min-h-screen w-full overflow-x-hidden text-text dark:text-white selection:bg-accent/30 selection:text-text">
         {/* ------------------------------ HERO ------------------------------ */}
         <section className="relative flex flex-col justify-center items-center min-h-[92vh] px-6 pt-28 md:pt-32 text-center">
           {/* Decorative orchestrated moving orbs */}
           <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-            <div className="absolute w-[38rem] h-[38rem] -top-40 -left-40 rounded-full bg-gradient-to-br from-primary/35 to-accent/20 blur-3xl opacity-40 animate-pulse" />
-            <div className="absolute w-[30rem] h-[30rem] top-1/3 -right-40 rounded-full bg-gradient-to-tl from-accent/30 to-primary/20 blur-3xl opacity-40 animate-[pulse_9s_ease-in-out_infinite_alternate]" />
+            <div className="absolute w-[38rem] h-[38rem] -top-40 -left-40 rounded-full bg-gradient-to-br from-primary/30 to-accent/16 blur-3xl opacity-30 animate-pulse" />
+            <div className="absolute w-[30rem] h-[30rem] top-1/3 -right-40 rounded-full bg-gradient-to-tl from-accent/24 to-primary/16 blur-3xl opacity-28 animate-[pulse_9s_ease-in-out_infinite_alternate]" />
           </div>
           {/* Illustration removed (previous external SVG was failing to load) */}
           <motion.div
