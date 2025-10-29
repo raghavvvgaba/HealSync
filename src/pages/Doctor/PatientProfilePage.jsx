@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
@@ -38,6 +38,18 @@ function PatientProfilePage() {
     const [toast, setToast] = useState(null); // {type: 'success'|'error', message: string}
     const [showEditRecordModal, setShowEditRecordModal] = useState(false);
     const [recordToEdit, setRecordToEdit] = useState(null);
+
+    // Simple passphrase prompt provider (cached during session)
+    const passphraseRef = useRef(null);
+    const getPassphrase = async (promptText) => {
+        if (passphraseRef.current) return passphraseRef.current;
+        const entered = window.prompt(promptText || 'Enter encryption passphrase');
+        if (entered && entered.trim()) {
+            passphraseRef.current = entered.trim();
+            return passphraseRef.current;
+        }
+        throw new Error('Passphrase required');
+    };
 
     const fetchSharedProfile = useCallback(async () => {
         try {
@@ -85,7 +97,8 @@ function PatientProfilePage() {
                 user.uid, 
                 shareRecord.patientId, 
                 lastDoc, 
-                20
+                20,
+                getPassphrase
             );
             
             if (result.success) {
@@ -131,7 +144,7 @@ function PatientProfilePage() {
         setAddRecordError("");
         try {
             setAddingRecord(true);
-            const result = await addMedicalRecord(user.uid, shareRecord.patientId, formData);
+            const result = await addMedicalRecord(user.uid, shareRecord.patientId, formData, getPassphrase);
             if (result.success) {
                 setShowAddRecordModal(false);
                 fetchMedicalRecords();
@@ -152,7 +165,7 @@ function PatientProfilePage() {
         setAddRecordError(""); // Reuse the same error state for simplicity
         try {
             setAddingRecord(true); // Reuse the same loading state
-            const result = await updateMedicalRecord(String(recordToEdit.id), user.uid, formData);
+            const result = await updateMedicalRecord(String(recordToEdit.id), user.uid, formData, getPassphrase);
             if (result.success) {
                 setShowEditRecordModal(false);
                 setRecordToEdit(null);
@@ -349,12 +362,13 @@ function PatientProfilePage() {
     };
 
     const EditMedicalRecordModal = () => {
+        const toCSV = (v) => Array.isArray(v) ? v.join(', ') : (typeof v === 'string' ? v : '');
         const [formData, setFormData] = useState({
             visitDate: recordToEdit?.visitDate ? new Date(recordToEdit.visitDate).toISOString().split('T')[0] : '',
             diagnosis: recordToEdit?.diagnosis || '',
-            symptoms: recordToEdit?.symptoms?.join(', ') || '',
-            medicines: recordToEdit?.medicines?.join(', ') || '',
-            prescribedTests: recordToEdit?.prescribedTests?.join(', ') || '',
+            symptoms: toCSV(recordToEdit?.symptoms),
+            medicines: toCSV(recordToEdit?.medicines),
+            prescribedTests: toCSV(recordToEdit?.prescribedTests),
             followUpNotes: recordToEdit?.followUpNotes || ''
         });
 
@@ -363,9 +377,9 @@ function PatientProfilePage() {
                 setFormData({
                     visitDate: recordToEdit.visitDate ? new Date(recordToEdit.visitDate).toISOString().split('T')[0] : '',
                     diagnosis: recordToEdit.diagnosis || '',
-                    symptoms: recordToEdit.symptoms?.join(', ') || '',
-                    medicines: recordToEdit.medicines?.join(', ') || '',
-                    prescribedTests: recordToEdit.prescribedTests?.join(', ') || '',
+                    symptoms: toCSV(recordToEdit.symptoms),
+                    medicines: toCSV(recordToEdit.medicines),
+                    prescribedTests: toCSV(recordToEdit.prescribedTests),
                     followUpNotes: recordToEdit.followUpNotes || ''
                 });
             }
@@ -534,10 +548,10 @@ function PatientProfilePage() {
 
     const TagList = ({ items, colorClass = "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300" }) => (
         <div className="flex flex-wrap gap-2">
-            {items && items.length > 0 ? (
+            {Array.isArray(items) && items.length > 0 ? (
                 items.map((item, index) => (
                     <span key={index} className={`px-3 py-1 rounded-full text-xs font-medium ${colorClass}`}>
-                        {item}
+                        {typeof item === 'string' ? item : String(item)}
                     </span>
                 ))
             ) : (

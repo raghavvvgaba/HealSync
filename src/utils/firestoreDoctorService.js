@@ -13,6 +13,9 @@ import {
   startAfter
 } from "firebase/firestore";
 import { db } from "../config/firebase";
+import { importPublicKeyJwk } from "./webcrypto";
+import { encryptMedicalRecordPayload, decryptWithWrappedKey } from "./recordEncryptionService";
+import { ensureUserKeyMaterial, unlockPrivateKey } from "./keyManager";
 
 /**
  * Generates a human-readable doctor ID in the format: DR-XXXX-YYYY
@@ -253,7 +256,7 @@ export async function getPatientProfile(patientId) {
  * @param {Object} medicalData - The medical record data
  * @returns {Promise<Object>} - Success/error result
  */
-export async function addMedicalRecord(doctorId, patientId, medicalData) {
+export async function addMedicalRecord(doctorId, patientId, medicalData, getPassphrase) {
   try {
     // Step 1: Verify doctor has active access to patient's profile
     const shareId = `${doctorId}_${patientId}`;
@@ -320,9 +323,52 @@ export async function addMedicalRecord(doctorId, patientId, medicalData) {
       isActive: true
     };
     
-    // Step 4: Add the medical record
+    // Step 4: Encrypt sensitive fields with per-record DEK and wrap for doctor+patient
+    // Fetch public keys for recipients
+    const doctorUserRef = doc(db, "users", doctorId);
+    const patientUserRef = doc(db, "users", patientId);
+    const [doctorUserSnap, patientUserSnap] = await Promise.all([getDoc(doctorUserRef), getDoc(patientUserRef)]);
+
+    // Ensure current doctor has encryption material (init if missing)
+    if (!doctorUserSnap.exists()) {
+      return { success: false, error: "Doctor user record missing." };
+    }
+    let doctorEnc = doctorUserSnap.data().enc;
+    if (!doctorEnc) {
+      await ensureUserKeyMaterial(doctorId, getPassphrase);
+      const refreshed = await getDoc(doctorUserRef);
+      doctorEnc = refreshed.data().enc;
+    }
+
+    if (!patientUserSnap.exists()) {
+      return { success: false, error: "Patient user record missing." };
+    }
+    const patientEnc = patientUserSnap.data().enc;
+
+    if (!patientEnc || !patientEnc.pub) {
+      return { success: false, error: "Patient has not initialized encryption yet." };
+    }
+
+    if (!doctorEnc || !doctorEnc.pub) {
+      return { success: false, error: "Doctor encryption initialization failed." };
+    }
+
+    const [doctorPubKey, patientPubKey] = await Promise.all([
+      importPublicKeyJwk(doctorEnc.pub),
+      importPublicKeyJwk(patientEnc.pub),
+    ]);
+
+    const encryptedPayload = await encryptMedicalRecordPayload(
+      recordData,
+      [
+        { id: patientId, publicKey: patientPubKey },
+        { id: doctorId, publicKey: doctorPubKey },
+      ]
+    );
+
+    // Step 5: Add the encrypted medical record
     const medicalRecordsRef = collection(db, "medicalRecords");
-    const docRef = await addDoc(medicalRecordsRef, recordData);
+    const docRef = await addDoc(medicalRecordsRef, encryptedPayload);
     
     return { 
       success: true, 
@@ -346,7 +392,7 @@ export async function addMedicalRecord(doctorId, patientId, medicalData) {
  * @param {Object} updateData - The data to update
  * @returns {Promise<Object>} - Success/error result
  */
-export async function updateMedicalRecord(recordId, doctorId, updateData) {
+export async function updateMedicalRecord(recordId, doctorId, updateData, getPassphrase) {
   try {
     const recordRef = doc(db, "medicalRecords", recordId);
     const recordDoc = await getDoc(recordRef);
@@ -402,13 +448,65 @@ export async function updateMedicalRecord(recordId, doctorId, updateData) {
       };
     }
 
-    // Update the record
-    const updatePayload = {
+    // Prepare recipient public keys (doctor + patient)
+    const [doctorIdFromShare, patientId] = recordData.shareRecordId.split('_');
+
+    // Load doctor+patient enc materials
+    const doctorUserRef = doc(db, "users", doctorId);
+    const patientUserRef = doc(db, "users", patientId);
+    const [doctorUserSnap, patientUserSnap] = await Promise.all([getDoc(doctorUserRef), getDoc(patientUserRef)]);
+
+    if (!doctorUserSnap.exists() || !patientUserSnap.exists()) {
+      return { success: false, error: "Doctor or patient record missing." };
+    }
+
+    // Ensure doctor has enc material
+    let doctorEnc = doctorUserSnap.data().enc;
+    if (!doctorEnc) {
+      await ensureUserKeyMaterial(doctorId, getPassphrase);
+      const refreshed = await getDoc(doctorUserRef);
+      doctorEnc = refreshed.data().enc;
+    }
+
+    const patientEnc = patientUserSnap.data().enc;
+    if (!patientEnc || !patientEnc.pub || !doctorEnc || !doctorEnc.pub) {
+      return { success: false, error: "Encryption material not initialized for one of the users." };
+    }
+
+    const [doctorPubKey, patientPubKey] = await Promise.all([
+      importPublicKeyJwk(doctorEnc.pub),
+      importPublicKeyJwk(patientEnc.pub),
+    ]);
+
+    // Decrypt existing record if it has _enc, so we can preserve fields not being updated
+    let baseRecord = { ...recordData };
+    const wrappedForDoctor = recordData?._enc?.wrappedKeys?.[doctorId];
+    if (wrappedForDoctor) {
+      try {
+        const { privateKey } = await unlockPrivateKey(doctorId, getPassphrase);
+        baseRecord = await decryptWithWrappedKey(recordData, wrappedForDoctor, privateKey);
+      } catch (e) {
+        return { success: false, error: "Decryption failed: incorrect passphrase or missing key." };
+      }
+    }
+
+    // Merge updates into decrypted/plain base
+    const merged = {
+      ...baseRecord,
       ...updateData,
-      lastModifiedAt: serverTimestamp()
+      lastModifiedAt: serverTimestamp(),
     };
 
-    await updateDoc(recordRef, updatePayload);
+    // Re-encrypt sensitive fields with new DEK and wrap for both recipients
+    const reEncrypted = await encryptMedicalRecordPayload(
+      merged,
+      [
+        { id: patientId, publicKey: patientPubKey },
+        { id: doctorId, publicKey: doctorPubKey },
+      ]
+    );
+
+    await updateDoc(recordRef, reEncrypted);
 
     return { 
       success: true, 
@@ -479,7 +577,7 @@ export async function deactivateMedicalRecord(recordId, doctorId) {
  * @param {number} pageSize - Number of records per page (default: 20)
  * @returns {Promise<Object>} - Success/error result with medical records and pagination info
  */
-export async function getDoctorPatientMedicalRecords(doctorId, patientId, lastDoc = null, pageSize = 20) {
+export async function getDoctorPatientMedicalRecords(doctorId, patientId, lastDoc = null, pageSize = 20, getPassphrase) {
   try {
     // Verify doctor has active access to patient's profile
     const shareId = `${doctorId}_${patientId}`;
@@ -520,9 +618,39 @@ export async function getDoctorPatientMedicalRecords(doctorId, patientId, lastDo
       return dateB - dateA;
     });
 
+    // Unlock doctor's private key for decryption
+    let privateKeyHandle = null;
+    try {
+      const { privateKey } = await unlockPrivateKey(doctorId, getPassphrase);
+      privateKeyHandle = privateKey;
+    } catch (e) {
+      return { success: false, error: "Decryption unavailable: passphrase required or incorrect." };
+    }
+
+    // Decrypt records where possible
+    const decryptedRecords = activeRecords.map((record) => {
+      const wrappedKey = record?._enc?.wrappedKeys?.[doctorId];
+      if (!wrappedKey) return record; // Possibly plaintext or not shared for doctor
+      try {
+        return decryptWithWrappedKey(record, wrappedKey, privateKeyHandle);
+      } catch (e) {
+        return record; // Fallback to raw if decryption fails
+      }
+    });
+
+    // Resolve all decryptions (some return promises)
+    const resolvedRecords = await Promise.all(decryptedRecords);
+
+    // Sort records by visitDate in descending order (newest first) after decryption
+    resolvedRecords.sort((a, b) => {
+      const dateA = new Date(a.visitDate || a.createdAt?.toDate?.() || 0);
+      const dateB = new Date(b.visitDate || b.createdAt?.toDate?.() || 0);
+      return dateB - dateA;
+    });
+
     // Apply pagination
-    const paginatedRecords = activeRecords.slice(0, pageSize);
-    const hasMore = activeRecords.length > pageSize;
+    const paginatedRecords = resolvedRecords.slice(0, pageSize);
+    const hasMore = resolvedRecords.length > pageSize;
     
     return { 
       success: true, 
