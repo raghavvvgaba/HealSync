@@ -8,7 +8,7 @@ const AIHealthAssistant = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
@@ -158,18 +158,16 @@ Error: ${error.message}`,
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/30 to-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full sm:max-w-4xl h-[85vh] sm:h-[80vh] flex flex-col rounded-t-3xl sm:rounded-3xl shadow-xl sm:shadow-2xl border border-gray-200/70 dark:border-white/10 bg-white/90 dark:bg-[#0e1116]/90 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-[#0e1116]/75 transition-colors">
-        {/* Subtle gradient bar */}
-  <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-primary via-accent to-primary/60 opacity-70" />
+      <div className="relative w-full sm:max-w-4xl h-[85vh] sm:h-[80vh] flex flex-col rounded-t-3xl sm:rounded-3xl shadow-xl sm:shadow-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#0e1116] transition-colors">
         {/* Header */}
-  <div className="flex items-center justify-between px-5 sm:px-6 py-4 sm:py-5 border-b border-gray-200/80 dark:border-white/10 bg-gradient-to-br from-white/80 to-white/50 dark:from-[#161b22]/70 dark:to-[#161b22]/40 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-[#161b22]/60">
+  <div className="flex items-center justify-between px-5 sm:px-6 py-4 sm:py-5 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-[#0e1116]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center shadow-md ring-1 ring-white/40">
+            <div className="w-10 h-10 rounded-2xl bg-accent flex items-center justify-center shadow-md">
               <FaRobot className="text-white text-base" />
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100 tracking-tight">AI Health Assistant</h2>
-              <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 uppercase font-medium">General health guidance</p>
+              <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 uppercase font-medium">Powered by AI</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -187,6 +185,16 @@ Error: ${error.message}`,
             >
               <FaTimes className="text-sm" />
             </button>
+          </div>
+        </div>
+
+        {/* Medical Disclaimer Banner */}
+        <div className="px-4 sm:px-6 py-2.5 bg-amber-50 border-b border-amber-200 dark:bg-amber-900/20 dark:border-amber-700/50">
+          <div className="flex items-start gap-2 text-[10px] sm:text-xs text-amber-800 dark:text-amber-200">
+            <span className="shrink-0 mt-0.5">⚠️</span>
+            <p className="leading-snug">
+              <strong>Medical Disclaimer:</strong> This AI provides educational information only. Always consult healthcare professionals for medical advice.
+            </p>
           </div>
         </div>
 
@@ -232,12 +240,12 @@ Error: ${error.message}`,
                   <span className="hidden sm:inline">Suggested Questions</span>
                   <span className="sm:hidden">Try Asking</span>
                 </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                  {suggestions.map((suggestion, index) => (
+        <div className="grid grid-cols-2 gap-2">
+                  {suggestions.slice(0, 4).map((suggestion, index) => (
                     <button
                       key={index}
                       onClick={() => handleSuggestionClick(suggestion)}
-          className="text-left p-2.5 sm:p-3 rounded-xl border border-gray-200 dark:border-white/10 hover:border-primary/40 dark:hover:border-indigo-400/50 hover:bg-primary/5 dark:hover:bg-white/10 active:scale-[.98] transition-all text-[11px] sm:text-sm text-gray-700 dark:text-gray-200 font-medium bg-white/70 dark:bg-white/5 backdrop-blur-sm"
+          className="text-left p-2 sm:p-2.5 rounded-xl border border-gray-200 dark:border-white/10 hover:border-primary/40 dark:hover:border-indigo-400/50 hover:bg-primary/5 dark:hover:bg-white/10 active:scale-[.98] transition-all text-[9px] sm:text-[11px] text-gray-700 dark:text-gray-200 font-medium bg-white/70 dark:bg-white/5 backdrop-blur-sm"
                     >
                       {suggestion}
                     </button>
@@ -249,11 +257,11 @@ Error: ${error.message}`,
         <h3 className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3 tracking-wide">
                   💡 Quick Tips
                 </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
                   {healthTips.slice(0, 4).map((tip, index) => (
                     <div
                       key={index}
-          className="p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10 border border-emerald-200/70 dark:border-emerald-500/30 text-[11px] sm:text-sm text-emerald-800 dark:text-emerald-200 font-medium shadow-sm"
+          className="p-2 sm:p-2.5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10 border border-emerald-200/70 dark:border-emerald-500/30 text-[9px] sm:text-[11px] text-emerald-800 dark:text-emerald-200 font-medium shadow-sm"
                     >
                       {tip}
                     </div>
@@ -267,7 +275,7 @@ Error: ${error.message}`,
         </div>
 
         {/* Input Area */}
-        <div className="px-4 sm:px-6 py-4 border-t border-gray-200/80 dark:border-white/10 bg-gradient-to-b from-white/60 to-white/70 dark:from-[#0e1116]/70 dark:to-[#0e1116]/60 backdrop-blur supports-[backdrop-filter]:bg-white/50 dark:supports-[backdrop-filter]:bg-[#0e1116]/60">
+        <div className="px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#0e1116]">
           <div className="flex gap-2 sm:gap-3 items-end">
             <div className="flex-1 relative">
               <textarea
@@ -276,7 +284,7 @@ Error: ${error.message}`,
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask a health question..."
-                className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl border border-gray-300 dark:border-white/10 bg-white/80 dark:bg-white/5 text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 dark:focus:ring-indigo-500/40 focus:border-primary/40 dark:focus:border-indigo-400/40 min-h-[44px] max-h-32 shadow-inner"
+                className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl border border-gray-300 dark:border-white/10 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 dark:focus:ring-indigo-500/40 focus:border-primary/40 dark:focus:border-indigo-400/40 min-h-[44px] max-h-32 shadow-inner"
                 rows={2}
                 disabled={isLoading || isStreaming}
               />
@@ -284,17 +292,12 @@ Error: ${error.message}`,
             <button
               onClick={handleSendMessage}
               disabled={!inputMessage.trim() || isLoading || isStreaming}
-              className="px-4 sm:px-6 py-3 bg-gradient-to-r from-primary via-indigo-500 to-accent text-white rounded-2xl font-medium hover:brightness-110 active:scale-[.97] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 shrink-0 shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 dark:focus:ring-indigo-500/40"
+              className="px-4 sm:px-6 py-3 bg-accent text-white rounded-2xl font-medium hover:brightness-110 active:scale-[.97] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 shrink-0 shadow-md focus:outline-none focus:ring-2 focus:ring-accent/40 dark:focus:ring-accent/40"
             >
               <FaPaperPlane className="text-sm" />
               Send
             </button>
           </div>
-          
-          {/* Disclaimer */}
-          <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-3 text-center leading-snug">
-            This AI provides general health information only. Consult healthcare professionals for personal medical advice.
-          </p>
         </div>
       </div>
     </div>

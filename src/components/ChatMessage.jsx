@@ -12,13 +12,13 @@ const ChatMessage = ({ message, isTyping = false }) => {
         {/* Avatar */}
         <div className={`
           w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 mt-1 shadow-inner ring-1 ring-black/5 dark:ring-0
-          ${isUser 
-            ? 'bg-gradient-to-br from-primary to-primary/80 text-white' 
-            : isEmergency 
+          ${isUser
+            ? 'bg-accent text-white'
+            : isEmergency
               ? 'bg-red-500 text-white'
               : isError
                 ? 'bg-yellow-500 text-white'
-                : 'bg-white/80 text-gray-600 dark:bg-gray-700 dark:text-gray-300 backdrop-blur'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
           }
         `}>
           {isUser ? (
@@ -33,13 +33,13 @@ const ChatMessage = ({ message, isTyping = false }) => {
         {/* Message Bubble */}
         <div className={`
           group rounded-2xl sm:rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 border text-[13px] sm:text-sm leading-relaxed shadow-sm transition-colors
-          ${isUser 
-            ? 'bg-gradient-to-r from-primary to-primary/80 text-white border-primary/70 shadow-primary/20 shadow-md' 
+          ${isUser
+            ? 'bg-accent text-white border-accent shadow-accent/20 shadow-md'
             : isEmergency
               ? 'bg-red-50 border-red-200 dark:bg-red-900/25 dark:border-red-700/70'
               : isError
                 ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/25 dark:border-yellow-700/70'
-                : 'bg-white/90 border-gray-200 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-[#1e242c]/80 dark:border-white/10 dark:supports-[backdrop-filter]:bg-[#1e242c]/60'
+                : 'bg-white border-gray-200 dark:bg-gray-800 dark:border-white/10'
           }
         `}>
           {/* Message Content */}
@@ -127,23 +127,10 @@ const ChatMessage = ({ message, isTyping = false }) => {
               text-[10px] sm:text-xs mt-2 opacity-70 select-none
               ${isUser ? 'text-white/80' : 'text-gray-500 dark:text-secondary'}
             `}>
-              {new Date(message.timestamp).toLocaleTimeString([], { 
-                hour: '2-digit', 
-                minute: '2-digit' 
+              {new Date(message.timestamp).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
               })}
-            </div>
-          )}
-
-          {/* Disclaimer for AI responses */}
-          {!isUser && !isTyping && message.disclaimer && (
-            <div className={`
-              text-[10px] sm:text-xs mt-3 p-2 rounded-lg border-t leading-snug tracking-tight
-              ${isEmergency
-                ? 'bg-red-100/70 border-red-300 text-red-700 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300'
-                : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300'
-              }
-            `}>
-              {message.disclaimer}
             </div>
           )}
         </div>
