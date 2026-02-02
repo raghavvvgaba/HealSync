@@ -3,7 +3,7 @@ import DoctorIdDisplay from '../../components/DoctorIdDisplay';
 import SharedProfilesList from '../../components/SharedProfilesList';
 import AIHealthAssistant from '../../components/AIHealthAssistant';
 import { useAuth } from '../../context/authContext';
-import { FaClock, FaBell, FaUsers, FaHeartbeat, FaStethoscope, FaChartLine, FaRobot, FaComments } from 'react-icons/fa';
+import { FaClock, FaBell, FaUsers, FaHeartbeat, FaStethoscope, FaChartLine, FaCommentDots } from 'react-icons/fa';
 
 function DoctorDashboard() {
     const { user } = useAuth();
@@ -101,39 +101,16 @@ function DoctorDashboard() {
                 {/* Right column */}
                 <div className="lg:col-span-4 space-y-6 sm:space-y-8 min-w-0">
                     <DoctorIdDisplay />
-
-                    {/* AI Health Assistant Widget */}
-                    <div className="glass rounded-2xl p-5 sm:p-6 border soft-divider hover-glow-primary">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                                <FaRobot className="text-white text-lg" />
-                            </div>
-                            <div>
-                                <h3 className="text-lg sm:text-xl font-bold text-text">AI Health Assistant</h3>
-                                <p className="text-xs text-secondary">Medical reference & support</p>
-                            </div>
-                        </div>
-                        <p className="text-sm text-secondary leading-relaxed mb-4">
-                            Access medical reference information, get explanations of conditions and treatments, and stay updated with health guidelines.
-                        </p>
-                        <button 
-                            onClick={() => setIsAIAssistantOpen(true)}
-                            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all flex items-center justify-center gap-2"
-                        >
-                            <FaComments />
-                            Consult AI Assistant
-                        </button>
-                    </div>
                 </div>
             </div>
 
             {/* Floating AI Assistant Button */}
             <button
                 onClick={() => setIsAIAssistantOpen(true)}
-                className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center z-40 lg:hidden"
+                className="fixed bottom-6 right-6 w-16 h-16 bg-accent text-white rounded-full shadow-2xl hover:rotate-45 hover:shadow-accent/25 active:scale-95 transition-all duration-300 flex items-center justify-center z-40"
                 title="Open AI Health Assistant"
             >
-                <FaRobot className="text-xl" />
+                <FaCommentDots className="text-xl" />
             </button>
 
             {/* AI Health Assistant Modal */}

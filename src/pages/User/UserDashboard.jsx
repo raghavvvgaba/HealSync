@@ -6,7 +6,7 @@ import AIHealthAssistant from '../../components/AIHealthAssistant';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../../context/authContext';
 import { getPatientMedicalRecords } from '../../utils/firestoreService';
-import { FaUser, FaClock, FaBell, FaRobot, FaComments } from 'react-icons/fa';
+import { FaUser, FaClock, FaBell, FaCommentDots } from 'react-icons/fa';
 
 const dummyUser = {
     firstName: 'Ravi',
@@ -136,29 +136,6 @@ const UserDashboard = () => {
                 <div className="lg:col-span-4 space-y-6 sm:space-y-8 min-w-0">
                     <SharedDoctorsBlock />
 
-                    {/* AI Health Assistant Widget */}
-                    <div className="glass rounded-2xl p-5 sm:p-6 border soft-divider hover-glow-primary">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                                <FaRobot className="text-white text-lg" />
-                            </div>
-                            <div>
-                                <h3 className="text-lg sm:text-xl font-bold text-text">AI Health Assistant</h3>
-                                <p className="text-xs text-secondary">24/7 health guidance</p>
-                            </div>
-                        </div>
-                        <p className="text-sm text-secondary leading-relaxed mb-4">
-                            Get instant answers to your health questions, understand medical terms, and receive personalized wellness tips from our AI assistant.
-                        </p>
-                        <button 
-                            onClick={() => setIsAIAssistantOpen(true)}
-                            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all flex items-center justify-center gap-2"
-                        >
-                            <FaComments />
-                            Start Conversation
-                        </button>
-                    </div>
-
                     {/* Health Tips Widget */}
                     <div className="glass rounded-2xl p-5 sm:p-6 border soft-divider hover-glow-primary">
                         <h3 className="text-lg sm:text-xl font-bold text-text mb-3">💡 Health Tip of the Day</h3>
@@ -175,10 +152,10 @@ const UserDashboard = () => {
             {/* Floating AI Assistant Button */}
             <button
                 onClick={() => setIsAIAssistantOpen(true)}
-                className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center z-40 lg:hidden"
+                className="fixed bottom-6 right-6 w-16 h-16 bg-accent text-white rounded-full shadow-2xl hover:rotate-45 hover:shadow-accent/25 active:scale-95 transition-all duration-300 flex items-center justify-center z-40"
                 title="Open AI Health Assistant"
             >
-                <FaRobot className="text-xl" />
+                <FaCommentDots className="text-xl" />
             </button>
 
             {/* AI Health Assistant Modal */}
