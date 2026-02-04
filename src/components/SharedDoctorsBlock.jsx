@@ -130,7 +130,7 @@ const SharedDoctorsBlock = () => {
     return (
       <div className="glass rounded-2xl p-6 border soft-divider">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-r from-primary to-accent text-white flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg glass-cta text-white flex items-center justify-center">
             <FaUserMd className="text-sm" />
           </div>
           <h2 className="text-lg sm:text-xl font-bold text-text">Shared with Doctors</h2>
@@ -148,7 +148,7 @@ const SharedDoctorsBlock = () => {
       {/* Header */}
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center shadow-inner flex-shrink-0">
+        <div className="w-10 h-10 rounded-xl glass-cta text-white flex items-center justify-center shadow-inner flex-shrink-0">
           <FaUserMd className="text-lg" />
         </div>
         <h2 className="text-xl font-bold text-text leading-tight">Shared with Doctors</h2>
@@ -176,7 +176,7 @@ const SharedDoctorsBlock = () => {
             transition={{ duration: 0.3 }}
             className="p-4 glass rounded-lg border soft-divider space-y-3"
           >
-            <label className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+            <label className="text-sm text-secondary font-medium">
               Doctor's ID
             </label>
             <div className="space-y-1">
@@ -261,7 +261,7 @@ const SharedDoctorsBlock = () => {
           <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
           <button 
             onClick={fetchSharedProfiles}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 glass-cta rounded-lg transition-colors"
           >
             Try Again
           </button>

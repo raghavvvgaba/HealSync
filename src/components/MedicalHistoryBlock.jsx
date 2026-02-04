@@ -12,7 +12,7 @@ const MedicalHistoryBlock = ({ records, loading, error, onRefresh }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-r from-primary to-accent text-white flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg glass-cta text-white flex items-center justify-center">
             <FaFileMedicalAlt className="text-sm" />
           </div>
           <h2 className="text-lg sm:text-xl font-bold text-text">Medical History</h2>
@@ -101,13 +101,13 @@ const MedicalHistoryBlock = ({ records, loading, error, onRefresh }) => {
                       {record.symptoms.slice(0, 3).map((symptom, idx) => (
                         <span 
                           key={idx}
-                          className="px-2 py-1 rounded text-xs bg-white/10 text-secondary"
+                          className="px-2 py-1 rounded text-xs bg-surface/10 text-secondary"
                         >
                           {symptom}
                         </span>
                       ))}
                       {record.symptoms.length > 3 && (
-                        <span className="px-2 py-1 rounded text-xs bg-white/10 text-secondary">
+                        <span className="px-2 py-1 rounded text-xs bg-surface/10 text-secondary">
                           +{record.symptoms.length - 3} more
                         </span>
                       )}
@@ -118,7 +118,7 @@ const MedicalHistoryBlock = ({ records, loading, error, onRefresh }) => {
             </div>
           ) : (
             <div className="text-center py-8">
-              <FaFileMedicalAlt className="text-gray-400 text-4xl mb-4 mx-auto" />
+              <FaFileMedicalAlt className="text-secondary text-4xl mb-4 mx-auto" />
               <p className="text-secondary mb-2">No medical records yet</p>
               <p className="text-sm text-secondary">Your medical history will appear here</p>
             </div>

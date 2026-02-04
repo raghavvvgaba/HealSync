@@ -56,8 +56,8 @@ const UserHealthProfileBlock = () => {
   if (loading) {
     return (
       <div className="glass rounded-2xl p-6 border soft-divider">
-        <div className="animate-pulse h-7 bg-white/10 rounded w-1/2 mb-2"></div>
-        <div className="animate-pulse h-4 bg-white/10 rounded w-1/3"></div>
+        <div className="animate-pulse h-7 bg-surface/10 rounded w-1/2 mb-2"></div>
+        <div className="animate-pulse h-4 bg-surface/10 rounded w-1/3"></div>
       </div>
     );
   }
@@ -87,7 +87,7 @@ const UserHealthProfileBlock = () => {
     <div className="glass rounded-2xl p-6 border soft-divider hover-glow-primary">
       {/* Header */}
       <div className="flex items-center gap-4 mb-3">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center shadow-lg">
+        <div className="w-14 h-14 rounded-2xl glass-cta text-white flex items-center justify-center shadow-lg">
           <FaUserCircle className="text-xl" />
         </div>
         <div className="flex-1 min-w-0">
@@ -134,7 +134,7 @@ const UserHealthProfileBlock = () => {
             </div>
             <span className="text-2xl font-bold text-green-400">{bmi}</span>
           </div>
-          <div className="w-full bg-white/10 rounded-full h-2 mb-2">
+          <div className="w-full bg-surface/10 rounded-full h-2 mb-2">
             <div 
               className={`h-2 rounded-full ${
                 bmi < 18.5 ? 'bg-blue-500' :
@@ -166,7 +166,7 @@ const UserHealthProfileBlock = () => {
               </span>
             ))}
             {medical.conditions.length > 4 && (
-              <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-secondary">
+              <span className="px-3 py-1 rounded-full text-xs font-medium bg-surface/10 text-secondary">
                 +{medical.conditions.length - 4} more
               </span>
             )}

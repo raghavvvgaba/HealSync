@@ -553,7 +553,7 @@ function Onboarding() {
 							{steps.map((step, stepIdx) => (
 								<div key={step.id} className="flex items-center flex-1 min-w-0">
 									<div className="flex flex-col items-center w-full">
-										<div className={`rounded-full h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center font-bold text-base sm:text-lg shadow-lg ${currentStep >= step.id ? 'bg-gradient-to-r from-primary to-accent text-white' : 'glass border soft-divider text-secondary'}`}>
+										<div className={`rounded-full h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center font-bold text-base sm:text-lg shadow-lg ${currentStep >= step.id ? 'glass-cta text-white' : 'glass border soft-divider text-secondary'}`}>
 											{currentStep > step.id ? <span className="text-xl">✓</span> : <span>{step.id}</span>}
 										</div>
 										<div className="mt-2 text-center min-w-0">

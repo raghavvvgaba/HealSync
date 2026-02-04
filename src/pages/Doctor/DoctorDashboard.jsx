@@ -19,19 +19,18 @@ function DoctorDashboard() {
     return (
     <div className="min-h-screen bg-background aurora-bg aurora-subtle">
             {/* Header - gradient ribbon */}
-            <div className="relative bg-gradient-to-br from-primary/25 via-accent/20 to-transparent px-3 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b soft-divider">
+            <div className="relative glass px-3 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b soft-divider">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-6">
                     <div className="flex items-start gap-4 sm:gap-5">
                         <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl glass flex items-center justify-center shadow-lg">
-                            <FaStethoscope className="text-primary text-xl sm:text-2xl" />
+                            <FaUserMd className="text-primary text-xl sm:text-2xl" />
                         </div>
                         <div className="min-w-0">
                             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text leading-tight break-words">
-                                {getGreeting()}, <span className="text-primary">Dr. {user?.displayName || user?.email?.split('@')[0] || 'Doctor'}</span>
+                                {getGreeting()}, <span className="text-primary">Dr. {user?.displayName?.split(' ')[1] || user?.displayName || 'Doctor'}</span>
                             </h1>
                             <div className="mt-3 inline-flex items-center gap-2 glass rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-secondary">
-                                <FaHeartbeat className="text-accent" />
-                                Manage patient care with precision
+                                Your medical practice dashboard
                             </div>
                         </div>
                     </div>
@@ -47,7 +46,7 @@ function DoctorDashboard() {
                                 </div>
                             </div>
                         </div>
-                        <button className="relative rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-white shadow-xl bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 transition-all">
+                        <button className="relative rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-white shadow-xl glass-cta transition-all">
                             <FaBell className="text-base sm:text-lg" />
                             <span className="absolute -top-1 -right-1 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-accent shadow"></span>
                         </button>
@@ -62,7 +61,7 @@ function DoctorDashboard() {
                     {/* Quick Actions */}
                     <div className="glass-elevated rounded-2xl sm:rounded-3xl p-4 sm:p-6 hover-glow-primary">
                         <h3 className="text-lg sm:text-xl font-bold text-text mb-4 sm:mb-6 flex items-center gap-3">
-                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-r from-primary to-accent text-white flex items-center justify-center">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg glass-cta text-white flex items-center justify-center">
                                 <FaChartLine className="text-xs sm:text-sm" />
                             </div>
                             Quick Actions
@@ -75,7 +74,7 @@ function DoctorDashboard() {
                                     <div className="text-secondary text-xs sm:text-sm mt-1">Manage patient records</div>
                                 </div>
                             </button>
-                              <button className="group rounded-xl sm:rounded-2xl p-4 sm:p-6 lift-on-hover hover-glow-accent transition-all border soft-divider bg-gradient-to-br from-accent/25 to-accent/10 snap-start min-w-[240px] md:min-w-0">
+                              <button className="group rounded-xl sm:rounded-2xl p-4 sm:p-6 lift-on-hover hover-glow-accent transition-all border soft-divider glass snap-start min-w-[240px] md:min-w-0">
                                 <FaHeartbeat className="text-accent text-xl sm:text-2xl mb-2" />
                                 <div className="text-left">
                                     <div className="font-semibold text-text text-base sm:text-[1.05rem]">Schedule Appointment</div>

@@ -78,9 +78,9 @@ const UserDashboard = () => {
     };
 
     return (
-    <div className="min-h-screen bg-background aurora-bg aurora-subtle">
+    <div className="min-h-screen bg-background aurora-bg aurora-subtle pt-4">
             {/* Header - gradient ribbon */}
-            <div className="relative bg-gradient-to-br from-primary/25 via-accent/20 to-transparent px-3 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b soft-divider">
+            <div className="relative glass px-3 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b soft-divider">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-6">
                     <div className="flex items-start gap-4 sm:gap-5">
                         <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl glass flex items-center justify-center shadow-lg">
@@ -107,9 +107,9 @@ const UserDashboard = () => {
                                 </div>
                             </div>
                         </div>
-                        <button className="relative rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-white shadow-xl bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 transition-all">
+                        <button className="relative rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 text-white shadow-xl glass-cta transition-all">
                             <FaBell className="text-base sm:text-lg" />
-                            <span className="absolute -top-1 -right-1 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-accent shadow"></span>
+                            <span className="absolute -top-1 -right-1 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-red-500 shadow"></span>
                         </button>
                     </div>
                 </div>

@@ -30,7 +30,7 @@ const MedicalRecordCard = ({ record }) => {
     'bg-surface rounded-xl p-3 shadow border-2 border-accent break-words w-full sm:w-auto transition-colors duration-200 hover:bg-accent-30';
 
   return (
-    <div className="bg-surface w-full p-3 sm:p-4 shadow text-text border border-gray-600/20 flex flex-col gap-4 sm:gap-6 rounded-xl text-sm sm:text-base">
+    <div className="glass w-full p-3 sm:p-4 shadow text-text border soft-divider flex flex-col gap-4 sm:gap-6 rounded-xl text-sm sm:text-base hover-glow-primary">
       
       {/* Visit Date */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-3 font-medium">
@@ -40,7 +40,7 @@ const MedicalRecordCard = ({ record }) => {
 
       {/* Creation Time */}
       {record.createdAt && (
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm text-secondary">
           <span>📝</span>
           <span className="break-words">
             Record created at {new Date(record.createdAt.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

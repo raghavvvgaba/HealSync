@@ -36,7 +36,7 @@ const disabilitiesOptions = ['Mobility Impairment','Visual Impairment','Hearing 
 // Shared styling helpers (glass theme) --------------------------------------
 const inputClass = `w-full rounded-xl glass border soft-divider px-4 py-3 text-sm font-medium text-text placeholder-secondary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all`;
 const selectButtonClass = `w-full rounded-xl glass border soft-divider px-4 py-3 text-left text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40`;
-const listboxOptionClass = (active, selected) => `cursor-pointer select-none px-4 py-3 text-sm rounded-lg mx-1 my-0.5 ${active ? 'bg-white/10' : ''} ${selected ? 'text-primary font-semibold' : 'text-text'}`;
+const listboxOptionClass = (active, selected) => `cursor-pointer select-none px-4 py-3 text-sm rounded-lg mx-1 my-0.5 ${active ? 'bg-surface/10' : ''} ${selected ? 'text-primary font-semibold' : 'text-text'}`;
 const multiselectChip = (selected) => `px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all border soft-divider ${selected ? 'glass-cta text-white shadow-lg scale-[1.02]' : 'glass text-text hover-glow-primary'}`;
 
 // Components -----------------------------------------------------------------
@@ -259,7 +259,7 @@ function EditProfile() {
                     <p className={`text-[10px] sm:text-xs font-semibold uppercase tracking-wide truncate transition-colors ${currentStep===step.id? 'text-text':'group-hover:text-text text-secondary'}`}>{step.name}</p>
                   </div>
                 </button>
-                {idx !== steps.length-1 && (<div className={`flex-1 h-1 mx-1 sm:mx-3 rounded-full transition-colors ${currentStep>step.id? 'bg-primary/60':'bg-white/15 dark:bg-black/20 group-hover:bg-primary/40'}`} />)}
+                {idx !== steps.length-1 && (<div className={`flex-1 h-1 mx-1 sm:mx-3 rounded-full transition-colors ${currentStep>step.id? 'bg-primary/60':'bg-surface/15 group-hover:bg-primary/40'}`} />)}
               </div>
             ))}
           </div>

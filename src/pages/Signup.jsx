@@ -107,7 +107,7 @@ export default function Signup() {
     return (
         <div className="h-screen w-full overflow-hidden flex flex-col">
             <Navbar />
-            <div className="flex-1 w-full bg-gradient-to-br from-secondary/10 via-background to-primary/10 flex overflow-hidden">
+            <div className="flex-1 w-full bg-background flex overflow-hidden">
                 {/* Left Side - Illustration and Features */}
                 <motion.div 
                     className="hidden lg:flex lg:w-1/2 flex-col justify-center items-center p-12 relative overflow-hidden"
@@ -126,7 +126,7 @@ export default function Signup() {
                     <div className="relative z-10 mb-8">
                         <div className="relative">
                             {/* Medical Plus Background */}
-                            <div className="w-52 h-52 bg-gradient-to-br from-secondary to-primary rounded-3xl flex items-center justify-center shadow-2xl transform -rotate-6">
+                            <div className="w-52 h-52 bg-primary rounded-3xl flex items-center justify-center shadow-2xl transform -rotate-6">
                                 <div className="w-36 h-36 bg-white rounded-2xl flex items-center justify-center">
                                     <FaClipboardList className="text-7xl text-secondary" />
                                 </div>
@@ -181,7 +181,7 @@ export default function Signup() {
                         {/* Mobile Header */}
                         <div className="lg:hidden text-center mb-8">
                             <motion.div 
-                                className="w-20 h-20 bg-gradient-to-br from-secondary to-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+                                className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 transition={{ delay: 0.3, type: "spring" }}
@@ -194,25 +194,25 @@ export default function Signup() {
 
                         <motion.form 
                             onSubmit={handleSignup} 
-                            className="bg-white/90 dark:bg-white/5 backdrop-blur-xl border border-accent-40 p-8 rounded-3xl shadow-2xl dark:shadow-white/5 space-y-6"
+                            className="glass-elevated p-8 rounded-3xl space-y-6"
                             initial={{ y: 50, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.4 }}
                         >
                             <div className="text-center mb-6">
-                                <h2 className="text-3xl lg:text-3xl font-bold text-secondary">Create Account</h2>
-                                <p className="text-text/70 mt-2">Choose your account type and get started</p>
+                                <h2 className="text-3xl lg:text-3xl font-bold text-primary">Create Account</h2>
+                                <p className="text-secondary mt-2">Choose your account type and get started</p>
                             </div>
 
                             {/* Role Selection */}
-                            <div className="flex gap-3 p-2 bg-gray-100/80 dark:bg-white/5 rounded-2xl backdrop-blur-sm">
+                            <div className="flex gap-3 p-2 glass rounded-2xl">
                                 <button
                                     type="button"
                                     onClick={() => handleRoleSelect("user")}
                                     className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
                                         form.role === "user"
-                                            ? "bg-white dark:bg-white/10 text-primary dark:text-primary shadow-lg dark:shadow-[0_4px_8px_0_rgba(255,255,255,0.10)] transform scale-105 backdrop-blur-sm"
-                                            : "text-text/70 hover:text-primary hover:bg-white/50 dark:hover:bg-white/5"
+                                            ? "glass-elevated text-primary shadow-lg transform scale-105"
+                                            : "text-secondary hover:text-primary hover:bg-surface/50"
                                     }`}
                                 >
                                     <FaUserAlt className="text-sm" />
@@ -223,8 +223,8 @@ export default function Signup() {
                                     onClick={() => handleRoleSelect("doctor")}
                                     className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
                                         form.role === "doctor"
-                                            ? "bg-white dark:bg-white/10 text-primary dark:text-primary shadow-lg dark:shadow-[0_4px_8px_0_rgba(255,255,255,0.10)] transform scale-105 backdrop-blur-sm"
-                                            : "text-text/70 hover:text-primary hover:bg-white/50 dark:hover:bg-white/5"
+                                            ? "glass-elevated text-primary shadow-lg transform scale-105"
+                                            : "text-secondary hover:text-primary hover:bg-surface/50"
                                     }`}
                                 >
                                     <FaUserMd className="text-sm" />
@@ -234,7 +234,7 @@ export default function Signup() {
 
                             {formError && (
                                 <motion.div 
-                                    className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl"
+                                    className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm px-4 py-3 rounded-xl"
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                 >
@@ -247,7 +247,7 @@ export default function Signup() {
                                 <label className="text-sm font-medium text-text/80">Full Name</label>
                                 <div className="relative">
                                     <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                                        <FaUser className="text-text drop-shadow-none" />
+                                        <FaUser className="text-secondary drop-shadow-none" />
                                     </div>
                                         <input
                                             name="name"
@@ -256,7 +256,7 @@ export default function Signup() {
                                             required
                                             value={form.name}
                                             onChange={handleChange}
-                                            className="w-full pl-12 pr-4 py-4 bg-gray-50/80 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] focus:border dark:focus:border-[var(--color-primary)] transition-all backdrop-blur-sm"
+                                            className="w-full pl-12 pr-4 py-4 glass border border-primary/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-text placeholder:text-secondary/50"
                                         />
                                 </div>
                             </div>
@@ -266,7 +266,7 @@ export default function Signup() {
                                 <label className="text-sm font-medium text-text/80">Email Address</label>
                                 <div className="relative">
                                     <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                                        <FaEnvelope className="text-text drop-shadow-none" />
+                                        <FaEnvelope className="text-secondary drop-shadow-none" />
                                     </div>
                                         <input
                                             name="email"
@@ -275,7 +275,7 @@ export default function Signup() {
                                             required
                                             value={form.email}
                                             onChange={handleChange}
-                                            className="w-full pl-12 pr-4 py-4 bg-gray-50/80 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] focus:border dark:focus:border-[var(--color-primary)] transition-all backdrop-blur-sm"
+                                            className="w-full pl-12 pr-4 py-4 glass border border-primary/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-text placeholder:text-secondary/50"
                                         />
                                 </div>
                             </div>
@@ -285,7 +285,7 @@ export default function Signup() {
                                 <label className="text-sm font-medium text-text/80">Password</label>
                                 <div className="relative">
                                     <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                                        <FaLock className="text-text drop-shadow-none" />
+                                        <FaLock className="text-secondary drop-shadow-none" />
                                     </div>
                                         <input
                                             name="password"
@@ -294,12 +294,12 @@ export default function Signup() {
                                             required
                                             value={form.password}
                                             onChange={handlePasswordChange}
-                                            className="w-full pl-12 pr-12 py-4 bg-gray-50/80 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] focus:border dark:focus:border-[var(--color-primary)] transition-all backdrop-blur-sm"
+                                            className="w-full pl-12 pr-12 py-4 glass border border-primary/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-text placeholder:text-secondary/50"
                                         />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword((prev) => !prev)}
-                                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-text/50 hover:text-secondary transition-colors"
+                                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-secondary hover:text-primary transition-colors"
                                     >
                                         {showPassword ? <FaEyeSlash /> : <FaEye />}
                                     </button>
@@ -316,7 +316,7 @@ export default function Signup() {
                                                 {passwordStrength.charAt(0).toUpperCase() + passwordStrength.slice(1)}
                                             </span>
                                         </div>
-                                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div className="h-2 bg-gray-200/50 rounded-full overflow-hidden">
                                             <div
                                                 className={`h-full transition-all duration-500 ${
                                                     passwordStrength === "weak"
@@ -333,13 +333,13 @@ export default function Signup() {
 
             <button
                 type="submit"
-                className="w-full bg-primary text-white py-4 rounded-xl font-semibold text-lg shadow-lg btn-elevate"
+                className="w-full glass-cta py-4 rounded-xl font-semibold text-lg shadow-lg"
             >
                 Create {form.role === "doctor" ? "Doctor" : "User"} Account
             </button>                            <div className="text-center pt-4">
-                                <p className="text-text/70">
+                                <p className="text-secondary">
                                     Already have an account?{" "}
-                                    <Link to="/login" className="text-secondary font-semibold hover:underline transition-all">
+                                    <Link to="/login" className="text-primary font-semibold hover:underline transition-all">
                                         Sign In
                                     </Link>
                                 </p>

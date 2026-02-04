@@ -18,7 +18,7 @@ const ChatMessage = ({ message, isTyping = false }) => {
               ? 'bg-red-500 text-white'
               : isError
                 ? 'bg-yellow-500 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                : 'glass text-secondary'
           }
         `}>
           {isUser ? (
@@ -36,10 +36,10 @@ const ChatMessage = ({ message, isTyping = false }) => {
           ${isUser
             ? 'bg-accent text-white border-accent shadow-accent/20 shadow-md'
             : isEmergency
-              ? 'bg-red-50 border-red-200 dark:bg-red-900/25 dark:border-red-700/70'
+              ? 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'
               : isError
-                ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/25 dark:border-yellow-700/70'
-                : 'bg-white border-gray-200 dark:bg-gray-800 dark:border-white/10'
+                ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-600 dark:text-yellow-400'
+                : 'glass border soft-divider'
           }
         `}>
           {/* Message Content */}
@@ -51,7 +51,7 @@ const ChatMessage = ({ message, isTyping = false }) => {
                 ? 'text-red-800 dark:text-red-200'
                 : isError
                   ? 'text-yellow-800 dark:text-yellow-200'
-                  : 'text-gray-800 dark:text-gray-100'
+                  : 'text-text'
             }
           `}>
             {isTyping ? (
@@ -125,7 +125,7 @@ const ChatMessage = ({ message, isTyping = false }) => {
           {message.timestamp && !isTyping && (
             <div className={`
               text-[10px] sm:text-xs mt-2 opacity-70 select-none
-              ${isUser ? 'text-white/80' : 'text-gray-500 dark:text-secondary'}
+              ${isUser ? 'text-white/80' : 'text-secondary'}
             `}>
               {new Date(message.timestamp).toLocaleTimeString([], {
                 hour: '2-digit',

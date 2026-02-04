@@ -153,7 +153,7 @@ const SectionHeading = ({ eyebrow, title, sub }) => (
       initial={{ opacity: 0, y: 14 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="text-3xl md:text-4xl font-bold bg-gradient-to-br from-text to-text/70 dark:from-white dark:to-white/70 bg-clip-text text-transparent"
+      className="text-3xl md:text-4xl font-bold text-text"
     >
       {title}
     </motion.h2>
@@ -179,11 +179,10 @@ const FeatureCard = ({ feature, idx }) => {
       transition={{ duration: 0.55, delay: idx * 0.08 }}
       className="relative group rounded-2xl p-6 md:p-7 glass-elevated interactive-card shine-on-hover overflow-hidden"
     >
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-accent/10 via-transparent to-primary/10" />
       {/* Glow behind card on hover */}
   <div className="pointer-events-none absolute -inset-6 rounded-3xl blur-2xl opacity-0 group-hover:opacity-80 transition-opacity duration-600 bg-[radial-gradient(60%_60%_at_50%_50%,rgba(var(--primary-rgb)/0.25),transparent_70%)]" />
       <div className="flex items-center gap-4 mb-4 relative z-10">
-        <span className="flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 via-surface/60 to-surface shadow-inner border border-white/10">
+        <span className="flex items-center justify-center w-14 h-14 rounded-xl glass shadow-inner border soft-divider">
           {feature.icon}
         </span>
         <h3 className="text-xl font-semibold text-text dark:text-white">
@@ -204,9 +203,7 @@ const FeatureCard = ({ feature, idx }) => {
           </li>
         ))}
       </ul>
-      <div
-        className={`pointer-events-none absolute -top-1/2 left-0 right-0 h-full blur-3xl opacity-50 bg-gradient-to-b ${feature.accent}`}
-      />
+
     </motion.div>
   );
 };
@@ -222,7 +219,7 @@ const JourneyStep = ({ step, index }) => (
     {/* Glow layer */}
   <div className="pointer-events-none absolute -inset-6 rounded-3xl blur-2xl opacity-0 group-hover:opacity-80 transition-opacity duration-600 bg-[radial-gradient(60%_60%_at_50%_50%,rgba(var(--accent-rgb)/0.25),transparent_70%)]" />
     <div className="flex items-center gap-4">
-      <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-accent/30 to-primary/30 text-accent text-xl font-bold border border-white/10 shadow-inner">
+      <div className="w-12 h-12 rounded-xl flex items-center justify-center glass text-accent text-xl font-bold border border-white/10 shadow-inner">
         {step.icon}
       </div>
       <div>
@@ -230,7 +227,7 @@ const JourneyStep = ({ step, index }) => (
         <p className="text-secondary text-sm mt-1">{step.text}</p>
       </div>
     </div>
-    <span className="absolute -top-3 -right-3 text-[11px] px-2 py-1 rounded-full bg-gradient-to-r from-primary/40 to-accent/40 backdrop-blur-md border border-white/10 text-white/90 font-semibold shadow">
+    <span className="absolute -top-3 -right-3 text-[11px] px-2 py-1 rounded-full glass border border-white/10 text-white/90 font-semibold shadow">
       {index + 1}
     </span>
   </motion.div>
@@ -244,7 +241,6 @@ const TestimonialCard = ({ t, idx }) => (
     transition={{ duration: 0.55, delay: idx * 0.08 }}
     className="relative group rounded-2xl p-6 glass-elevated interactive-card shine-on-hover"
   >
-    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/15 via-transparent to-accent/20 opacity-60" />
     {/* Glow layer */}
   <div className="pointer-events-none absolute -inset-6 rounded-3xl blur-2xl opacity-0 group-hover:opacity-80 transition-opacity duration-600 bg-[radial-gradient(60%_60%_at_50%_50%,rgba(var(--primary-rgb)/0.22),transparent_70%)]" />
     <div className="relative">
@@ -310,14 +306,9 @@ const LandingPage = () => {
   return (
     <>
       <Navbar />
-  <div className="aurora-bg aurora-vivid min-h-screen w-full overflow-x-hidden text-text dark:text-white selection:bg-accent/30 selection:text-text">
+  <div className="aurora-bg aurora-vivid min-h-screen w-full overflow-x-hidden text-text selection:bg-accent/30 selection:text-text">
         {/* ------------------------------ HERO ------------------------------ */}
         <section className="relative flex flex-col justify-center items-center min-h-[92vh] px-6 pt-28 md:pt-32 text-center">
-          {/* Decorative orchestrated moving orbs */}
-          <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-            <div className="absolute w-[38rem] h-[38rem] -top-40 -left-40 rounded-full bg-gradient-to-br from-primary/30 to-accent/16 blur-3xl opacity-30 animate-pulse" />
-            <div className="absolute w-[30rem] h-[30rem] top-1/3 -right-40 rounded-full bg-gradient-to-tl from-accent/24 to-primary/16 blur-3xl opacity-28 animate-[pulse_9s_ease-in-out_infinite_alternate]" />
-          </div>
           {/* Illustration removed (previous external SVG was failing to load) */}
           <motion.div
             initial={{ opacity: 0, y: 28 }}
@@ -333,7 +324,7 @@ const LandingPage = () => {
             >
               <FaLock className="text-accent" /> Secure • Share • Thrive
             </motion.span>
-            <h1 className="mt-6 text-4xl md:text-6xl font-extrabold leading-tight bg-[linear-gradient(92deg,var(--color-text),rgba(var(--primary-rgb)/0.85))] dark:bg-[linear-gradient(92deg,#fff,rgba(var(--primary-rgb)/0.85))] bg-clip-text text-transparent">
+            <h1 className="mt-6 text-4xl md:text-6xl font-extrabold leading-tight text-text">
               Your Complete Health Profile, Digitized
             </h1>
             <p className="mt-6 text-base md:text-xl text-secondary max-w-2xl mx-auto leading-relaxed">
@@ -348,7 +339,7 @@ const LandingPage = () => {
               </button>
               <a
                 href="#features"
-                className="px-7 py-3.5 rounded-xl font-semibold text-sm md:text-base bg-white/70 dark:bg-white/5 backdrop-blur-md border border-white/20 hover:bg-white/90 dark:hover:bg-white/10 transition-colors text-text dark:text-white btn-elevate"
+                className="px-7 py-3.5 rounded-xl font-semibold text-sm md:text-base glass hover:bg-surface/50 transition-colors text-text btn-elevate"
               >
                 Explore Features
               </a>
@@ -408,7 +399,6 @@ const LandingPage = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="relative group rounded-2xl p-8 md:p-10 flex flex-col justify-between overflow-hidden glass-elevated interactive-card col-span-full xl:col-span-1"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-accent/20 via-primary/10 to-transparent" />
               {/* Glow layer */}
               <div className="pointer-events-none absolute -inset-8 rounded-3xl blur-3xl opacity-0 group-hover:opacity-90 transition-opacity duration-700 bg-[radial-gradient(60%_60%_at_50%_50%,rgba(var(--accent-rgb)/0.22),transparent_70%)]" />
               <div className="relative">
@@ -475,9 +465,9 @@ const LandingPage = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="relative max-w-4xl mx-auto rounded-3xl overflow-hidden p-[1.5px] bg-gradient-to-br from-primary/40 via-accent/40 to-primary/10"
+            className="relative max-w-4xl mx-auto rounded-3xl overflow-hidden glass p-[1.5px]"
           >
-            <div className="relative rounded-3xl p-10 md:p-16 bg-[radial-gradient(circle_at_30%_20%,rgba(var(--primary-rgb)/0.25),rgba(var(--surface-rgb)/0.5)_60%)] backdrop-blur-xl border border-white/15">
+            <div className="relative rounded-3xl p-10 md:p-16 glass-elevated border border-white/15">
               <div className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-40 bg-[linear-gradient(120deg,rgba(255,255,255,0.08),transparent_60%)]" />
               <div className="text-center relative z-10">
                 <MdOutlineHealthAndSafety className="text-5xl md:text-6xl text-accent mx-auto mb-6 drop-shadow" />
@@ -496,7 +486,7 @@ const LandingPage = () => {
                   </button>
                   <a
                     href="#faq"
-                    className="px-8 py-4 rounded-xl font-semibold text-sm md:text-base bg-white/70 dark:bg-white/5 backdrop-blur-md border border-white/20 hover:bg-white/90 dark:hover:bg-white/10 transition-colors text-text dark:text-white btn-elevate"
+                    className="px-8 py-4 rounded-xl font-semibold text-sm md:text-base glass hover:bg-surface/50 transition-colors text-text btn-elevate"
                   >
                     Questions?
                   </a>
