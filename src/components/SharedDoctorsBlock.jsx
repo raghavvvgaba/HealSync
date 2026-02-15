@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/authContext';
 import { getPatientSharedProfiles, revokeProfileAccess, shareProfileWithDoctor } from '../utils/firestoreService';
-import { FaUserMd, FaCalendarAlt, FaTrashAlt, FaSpinner, FaExclamationTriangle, FaCheckCircle, FaPlus } from 'react-icons/fa';
+import { FaUserMd, FaCalendarAlt, FaSpinner, FaExclamationTriangle, FaCheckCircle, FaPlus, FaChevronRight } from 'react-icons/fa';
 import { MdCancel } from 'react-icons/md';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -103,7 +103,6 @@ const SharedDoctorsBlock = () => {
       if (shareResult.success) {
         setDoctorName(shareResult.doctorName || '');
         setShareStatus('success');
-        // Refresh the shared profiles list
         await fetchSharedProfiles();
         setTimeout(() => {
           reset();
@@ -128,17 +127,9 @@ const SharedDoctorsBlock = () => {
 
   if (loading) {
     return (
-      <div className="glass rounded-2xl p-6 border soft-divider">
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg glass-cta text-white flex items-center justify-center">
-            <FaUserMd className="text-sm" />
-          </div>
-          <h2 className="text-lg sm:text-xl font-bold text-text">Shared with Doctors</h2>
-        </div>
-        <div className="flex items-center justify-center py-8 text-secondary">
-          <FaSpinner className="animate-spin text-primary text-2xl" />
-          <span className="ml-3">Loading shared profiles...</span>
-        </div>
+      <div className="glass rounded-2xl p-6 border soft-divider flex flex-col items-center justify-center py-12">
+        <FaSpinner className="animate-spin text-primary text-3xl mb-3" />
+        <span className="text-secondary text-sm">Loading shared profiles...</span>
       </div>
     );
   }
@@ -146,122 +137,116 @@ const SharedDoctorsBlock = () => {
   return (
   <div className="glass rounded-2xl p-6 border soft-divider flex flex-col gap-6 hover-glow-primary xl:max-w-5xl xl:mx-auto">
       {/* Header */}
-    <div className="flex flex-col gap-4">
+    <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl glass-cta text-white flex items-center justify-center shadow-inner flex-shrink-0">
+        <div className="w-10 h-10 rounded-xl glass-cta text-white flex items-center justify-center shadow-lg">
           <FaUserMd className="text-lg" />
         </div>
-        <h2 className="text-xl font-bold text-text leading-tight">Shared with Doctors</h2>
-        <span className="glass px-2.5 py-1 rounded-full text-[11px] font-medium tracking-wide text-secondary border soft-divider uppercase whitespace-nowrap leading-none ml-2">
-          {sharedProfiles.length} {sharedProfiles.length === 1 ? 'doctor' : 'doctors'}
-        </span>
+        <div>
+          <h2 className="text-lg font-bold text-text leading-tight">Shared with Doctors</h2>
+          <p className="text-xs text-secondary">{sharedProfiles.length} active {sharedProfiles.length === 1 ? 'share' : 'shares'}</p>
+        </div>
       </div>
       <button
         onClick={() => setShowShareForm(!showShareForm)}
-        className="glass-cta flex items-center gap-2 h-12 px-5 rounded-xl text-base font-medium w-full justify-center whitespace-nowrap"
+        className="glass p-2 rounded-lg text-primary hover:bg-primary/10 transition-colors border soft-divider"
+        title="Share with new doctor"
       >
-        <FaPlus className="text-lg" />
-        <span>Share with Doctor</span>
+        <FaPlus />
       </button>
     </div>
 
       {/* Share Form */}
       <AnimatePresence>
         {showShareForm && (
-          <motion.form
-            onSubmit={handleSubmit(handleShare)}
+          <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="p-4 glass rounded-lg border soft-divider space-y-3"
+            transition={{ duration: 0.15 }}
+            className="overflow-hidden"
           >
-            <label className="text-sm text-secondary font-medium">
-              Doctor's ID
-            </label>
-            <div className="space-y-1">
-              <input
-                type="text"
-                placeholder="e.g., DR-HALE-1234"
-                {...register("doctorId", { 
-                  required: "Doctor ID is required",
-                  pattern: {
-                    value: /^DR-[BCDFGHJKLMNPQRSTVWXYZAEIOU]{4}-\d{4}$/i,
-                    message: "Invalid doctor ID format (DR-XXXX-1234)"
-                  }
-                })}
-                className="w-full px-3 py-2 rounded-md glass border soft-divider text-text placeholder:text-secondary/70 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-transparent"
-                maxLength={12}
-              />
-              {errors.doctorId && (
-                <p className="text-red-400 text-xs">{errors.doctorId.message}</p>
+            <form
+              onSubmit={handleSubmit(handleShare)}
+              className="p-4 bg-surface/50 rounded-xl border soft-divider space-y-3 mb-4"
+            >
+              <h3 className="text-sm font-bold text-text">Share Profile</h3>
+              <div className="space-y-1">
+                <input
+                  type="text"
+                  placeholder="Enter Doctor ID (e.g., DR-HALE-1234)"
+                  {...register("doctorId", { 
+                    required: "Doctor ID is required",
+                    pattern: {
+                      value: /^DR-[BCDFGHJKLMNPQRSTVWXYZAEIOU]{4}-\d{4}$/i,
+                      message: "Invalid doctor ID format"
+                    }
+                  })}
+                  className="w-full px-3 py-2.5 rounded-lg glass border soft-divider text-text placeholder:text-secondary/60 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  maxLength={12}
+                />
+                {errors.doctorId && (
+                  <p className="text-red-500 text-xs mt-1">{errors.doctorId.message}</p>
+                )}
+              </div>
+              
+              {shareStatus === 'error' && (
+                <div className="text-red-500 text-xs bg-red-500/10 p-2 rounded border border-red-500/20">
+                  {shareErrorMessage || 'An error occurred.'}
+                </div>
               )}
-              <p className="text-secondary text-xs">
-                Format: DR-XXXX-1234
-              </p>
-            </div>
-            
-            {shareStatus === 'error' && (
-              <div className="text-red-400 text-xs glass border soft-divider p-2 rounded">
-                {shareErrorMessage || 'An error occurred. Please try again.'}
+              
+              {shareStatus === 'success' && (
+                <div className="text-green-500 text-xs bg-green-500/10 p-2 rounded border border-green-500/20">
+                  Shared successfully{doctorName ? ` with Dr. ${doctorName}` : ''}!
+                </div>
+              )}
+              
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="submit"
+                  disabled={isSharing}
+                  className="flex-1 glass-cta px-3 py-2 text-sm font-semibold rounded-lg disabled:opacity-50"
+                >
+                  {isSharing ? "Sharing..." : "Share Access"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowShareForm(false);
+                    setShareStatus(null);
+                    setShareErrorMessage('');
+                    reset();
+                  }}
+                  className="px-3 py-2 text-sm font-medium text-secondary hover:text-text transition-colors"
+                >
+                  Cancel
+                </button>
               </div>
-            )}
-            
-            {shareStatus === 'success' && (
-              <div className="text-green-400 text-xs glass border soft-divider p-2 rounded">
-                Profile shared successfully{doctorName ? ` with Dr. ${doctorName}!` : '!'}
-              </div>
-            )}
-            
-      <div className="flex flex-col sm:flex-row gap-2">
-              <button
-                type="submit"
-                disabled={isSharing}
-        className="flex-1 glass-cta px-3 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSharing ? "Sharing..." : "Share Profile"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowShareForm(false);
-                  setShareStatus(null);
-                  setShareErrorMessage('');
-                  reset();
-                }}
-                className="px-4 py-2 glass rounded-md border soft-divider text-text hover-glow-primary text-sm font-medium"
-              >
-                Cancel
-              </button>
-            </div>
-          </motion.form>
+            </form>
+          </motion.div>
         )}
       </AnimatePresence>
 
       {/* Notification */}
       {notification && (
-        <div className={`glass border soft-divider p-4 rounded-lg ${
-          notification.type === 'success' ? 'text-green-400' : 'text-red-400'
+        <div className={`p-3 rounded-lg text-xs font-medium border flex items-center gap-2 ${
+          notification.type === 'success' 
+            ? 'bg-green-500/10 text-green-600 border-green-500/20' 
+            : 'bg-red-500/10 text-red-600 border-red-500/20'
         }`}>
-          <div className="flex items-center gap-2">
-            {notification.type === 'success' ? (
-              <FaCheckCircle />
-            ) : (
-              <FaExclamationTriangle />
-            )}
-            <span className="text-text">{notification.message}</span>
-          </div>
+          {notification.type === 'success' ? <FaCheckCircle /> : <FaExclamationTriangle />}
+          {notification.message}
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="text-center py-8">
-          <FaExclamationTriangle className="text-red-500 text-3xl mb-3 mx-auto" />
-          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+        <div className="text-center py-6 bg-red-500/5 rounded-xl border border-red-500/10">
+          <p className="text-red-500 text-sm mb-2">{error}</p>
           <button 
             onClick={fetchSharedProfiles}
-            className="px-4 py-2 glass-cta rounded-lg transition-colors"
+            className="text-xs font-bold text-red-600 hover:underline"
           >
             Try Again
           </button>
@@ -269,88 +254,74 @@ const SharedDoctorsBlock = () => {
       )}
 
       {/* No Shared Profiles */}
-    {!error && sharedProfiles.length === 0 && (
-        <div className="text-center py-8">
-      <FaUserMd className="text-secondary text-4xl mb-4 mx-auto" />
-      <p className="text-secondary mb-2">No doctors have access to your profile yet</p>
-      <p className="text-sm text-secondary">Share your profile with doctors to see them here</p>
+    {!error && sharedProfiles.length === 0 && !showShareForm && (
+        <div className="text-center py-10 px-4">
+          <div className="w-12 h-12 bg-surface/50 rounded-full flex items-center justify-center mx-auto mb-3">
+            <FaUserMd className="text-secondary/50 text-xl" />
+          </div>
+          <p className="text-text font-medium text-sm mb-1">No doctors linked</p>
+          <p className="text-xs text-secondary mb-4">Share your profile to give doctors access</p>
+          <button
+            onClick={() => setShowShareForm(true)}
+            className="text-primary text-xs font-bold hover:underline"
+          >
+            Share Profile Now
+          </button>
         </div>
       )}
 
       {/* Shared Profiles List */}
   {!error && sharedProfiles.length > 0 && (
-    <div className="space-y-4 md:max-h-96 md:overflow-y-auto">
+    <div className="flex flex-col gap-2">
           {sharedProfiles.map((profile) => (
             <div 
               key={profile.id} 
-              className="p-4 glass rounded-lg border soft-divider hover-glow-primary"
+              className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl hover:bg-surface/50 transition-colors border border-transparent hover:border-primary/10"
             >
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <FaUserMd className="text-primary" />
-                    <div>
-                      <h3 className="font-semibold text-text">
-                        {profile.doctorName || 'Unknown Doctor'}
-                      </h3>
-                      <p className="text-sm text-secondary">
-                        ID: {profile.doctorIdCode}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-sm text-secondary">
-                    <FaCalendarAlt className="text-secondary" />
-                    <span>
-                      Shared on {profile.sharedAt?.toDate ? 
-                        profile.sharedAt.toDate().toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        }) : 
-                        'Unknown date'
-                      }
-                    </span>
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+                  <span className="font-bold text-sm">
+                    {profile.doctorName ? profile.doctorName.charAt(0).toUpperCase() : 'D'}
+                  </span>
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-text text-sm truncate">
+                    {profile.doctorName || 'Unknown Doctor'}
+                  </h3>
+                  <div className="flex items-center gap-2 text-[10px] text-secondary">
+                    <span className="font-mono bg-surface/50 px-1 rounded border soft-divider">{profile.doctorIdCode}</span>
+                    <span className="flex items-center gap-1"><FaCalendarAlt className="text-[8px]" /> {profile.sharedAt?.toDate ? profile.sharedAt.toDate().toLocaleDateString() : 'N/A'}</span>
                   </div>
                 </div>
-
-                {confirmPopover.doctorId === profile.doctorId ? (
-      <div className="sm:ml-4 w-full sm:w-auto flex flex-col sm:items-end gap-2">
-        <div className="p-3 glass rounded-lg border soft-divider w-full sm:w-auto">
-                      <p className="text-sm text-text mb-2">Are you sure you want to revoke <span className="font-bold">{profile.doctorName}</span>'s access?</p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={confirmRevoke}
-                          className="px-3 py-1 rounded-lg glass-cta font-semibold text-sm"
-                          disabled={revoking === profile.doctorId}
-                        >
-                          {revoking === profile.doctorId ? 'Revoking...' : 'Confirm'}
-                        </button>
-                        <button
-                          onClick={() => setConfirmPopover({ doctorId: null, doctorName: '' })}
-          className="px-3 py-1 rounded-lg glass border soft-divider text-text hover-glow-primary text-sm"
-                          disabled={revoking === profile.doctorId}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => handleRevokeAccess(profile.doctorId, profile.doctorName)}
-                    disabled={revoking === profile.doctorId}
-        className="sm:ml-4 w-full sm:w-auto justify-center sm:justify-start mt-2 sm:mt-0 flex items-center gap-2 px-3 py-2 glass rounded-lg border soft-divider text-red-400 hover-glow-primary transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
-                  >
-                    {revoking === profile.doctorId ? (
-                      <FaSpinner className="animate-spin" />
-                    ) : (
-                      <MdCancel />
-                    )}
-                    {revoking === profile.doctorId ? 'Revoking...' : 'Revoke Access'}
-                  </button>
-                )}
               </div>
+
+              {confirmPopover.doctorId === profile.doctorId ? (
+                <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-2 bg-red-500/5 p-1 rounded-lg border border-red-500/10">
+                  <span className="text-[10px] font-bold text-red-500 ml-1 hidden sm:inline">Revoke?</span>
+                  <button
+                    onClick={confirmRevoke}
+                    className="px-2 py-1 rounded bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition-colors"
+                    disabled={revoking === profile.doctorId}
+                  >
+                    {revoking === profile.doctorId ? <FaSpinner className="animate-spin" /> : 'Yes'}
+                  </button>
+                  <button
+                    onClick={() => setConfirmPopover({ doctorId: null, doctorName: '' })}
+                    className="px-2 py-1 rounded text-secondary text-xs hover:bg-black/5 dark:hover:bg-white/10"
+                    disabled={revoking === profile.doctorId}
+                  >
+                    No
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => handleRevokeAccess(profile.doctorId, profile.doctorName)}
+                  className="p-2 text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all self-end sm:self-auto"
+                  title="Revoke Access"
+                >
+                  <MdCancel />
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -358,9 +329,9 @@ const SharedDoctorsBlock = () => {
 
       {/* Footer */}
       {sharedProfiles.length > 0 && (
-        <div className="pt-4 border-t soft-divider">
-          <p className="text-xs text-secondary text-center">
-            Revoked access cannot be restored. The doctor will need a new invitation to access your profile again.
+        <div className="pt-2 border-t soft-divider text-center">
+          <p className="text-[10px] text-secondary">
+            Revoking access prevents the doctor from viewing your records immediately.
           </p>
         </div>
       )}

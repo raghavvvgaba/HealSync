@@ -53,11 +53,9 @@ function DoctorIdDisplay() {
                     url: window.location.origin,
                 });
             } else {
-                // Fallback to copy if Web Share API isn't available
                 await handleCopy();
             }
         } catch (e) {
-            // User canceled or share failed; fallback to copy to provide utility
             await handleCopy();
         }
     };

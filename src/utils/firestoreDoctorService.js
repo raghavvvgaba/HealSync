@@ -7,15 +7,9 @@ import {
   getDoc,
   addDoc,
   updateDoc,
-  serverTimestamp,
-  orderBy,
-  limit,
-  startAfter
+  serverTimestamp
 } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { importPublicKeyJwk } from "./webcrypto";
-import { encryptMedicalRecordPayload, decryptWithWrappedKey } from "./recordEncryptionService";
-import { ensureUserKeyMaterial, unlockPrivateKey } from "./keyManager";
 
 /**
  * Generates a human-readable doctor ID in the format: DR-XXXX-YYYY
@@ -256,7 +250,7 @@ export async function getPatientProfile(patientId) {
  * @param {Object} medicalData - The medical record data
  * @returns {Promise<Object>} - Success/error result
  */
-export async function addMedicalRecord(doctorId, patientId, medicalData, getPassphrase) {
+export async function addMedicalRecord(doctorId, patientId, medicalData) {
   try {
     // Step 1: Verify doctor has active access to patient's profile
     const shareId = `${doctorId}_${patientId}`;
@@ -323,52 +317,9 @@ export async function addMedicalRecord(doctorId, patientId, medicalData, getPass
       isActive: true
     };
     
-    // Step 4: Encrypt sensitive fields with per-record DEK and wrap for doctor+patient
-    // Fetch public keys for recipients
-    const doctorUserRef = doc(db, "users", doctorId);
-    const patientUserRef = doc(db, "users", patientId);
-    const [doctorUserSnap, patientUserSnap] = await Promise.all([getDoc(doctorUserRef), getDoc(patientUserRef)]);
-
-    // Ensure current doctor has encryption material (init if missing)
-    if (!doctorUserSnap.exists()) {
-      return { success: false, error: "Doctor user record missing." };
-    }
-    let doctorEnc = doctorUserSnap.data().enc;
-    if (!doctorEnc) {
-      await ensureUserKeyMaterial(doctorId, getPassphrase);
-      const refreshed = await getDoc(doctorUserRef);
-      doctorEnc = refreshed.data().enc;
-    }
-
-    if (!patientUserSnap.exists()) {
-      return { success: false, error: "Patient user record missing." };
-    }
-    const patientEnc = patientUserSnap.data().enc;
-
-    if (!patientEnc || !patientEnc.pub) {
-      return { success: false, error: "Patient has not initialized encryption yet." };
-    }
-
-    if (!doctorEnc || !doctorEnc.pub) {
-      return { success: false, error: "Doctor encryption initialization failed." };
-    }
-
-    const [doctorPubKey, patientPubKey] = await Promise.all([
-      importPublicKeyJwk(doctorEnc.pub),
-      importPublicKeyJwk(patientEnc.pub),
-    ]);
-
-    const encryptedPayload = await encryptMedicalRecordPayload(
-      recordData,
-      [
-        { id: patientId, publicKey: patientPubKey },
-        { id: doctorId, publicKey: doctorPubKey },
-      ]
-    );
-
-    // Step 5: Add the encrypted medical record
+    // Step 4: Add plaintext medical record
     const medicalRecordsRef = collection(db, "medicalRecords");
-    const docRef = await addDoc(medicalRecordsRef, encryptedPayload);
+    const docRef = await addDoc(medicalRecordsRef, recordData);
     
     return { 
       success: true, 
@@ -392,7 +343,7 @@ export async function addMedicalRecord(doctorId, patientId, medicalData, getPass
  * @param {Object} updateData - The data to update
  * @returns {Promise<Object>} - Success/error result
  */
-export async function updateMedicalRecord(recordId, doctorId, updateData, getPassphrase) {
+export async function updateMedicalRecord(recordId, doctorId, updateData) {
   try {
     const recordRef = doc(db, "medicalRecords", recordId);
     const recordDoc = await getDoc(recordRef);
@@ -448,65 +399,17 @@ export async function updateMedicalRecord(recordId, doctorId, updateData, getPas
       };
     }
 
-    // Prepare recipient public keys (doctor + patient)
-    const [doctorIdFromShare, patientId] = recordData.shareRecordId.split('_');
-
-    // Load doctor+patient enc materials
-    const doctorUserRef = doc(db, "users", doctorId);
-    const patientUserRef = doc(db, "users", patientId);
-    const [doctorUserSnap, patientUserSnap] = await Promise.all([getDoc(doctorUserRef), getDoc(patientUserRef)]);
-
-    if (!doctorUserSnap.exists() || !patientUserSnap.exists()) {
-      return { success: false, error: "Doctor or patient record missing." };
-    }
-
-    // Ensure doctor has enc material
-    let doctorEnc = doctorUserSnap.data().enc;
-    if (!doctorEnc) {
-      await ensureUserKeyMaterial(doctorId, getPassphrase);
-      const refreshed = await getDoc(doctorUserRef);
-      doctorEnc = refreshed.data().enc;
-    }
-
-    const patientEnc = patientUserSnap.data().enc;
-    if (!patientEnc || !patientEnc.pub || !doctorEnc || !doctorEnc.pub) {
-      return { success: false, error: "Encryption material not initialized for one of the users." };
-    }
-
-    const [doctorPubKey, patientPubKey] = await Promise.all([
-      importPublicKeyJwk(doctorEnc.pub),
-      importPublicKeyJwk(patientEnc.pub),
-    ]);
-
-    // Decrypt existing record if it has _enc, so we can preserve fields not being updated
-    let baseRecord = { ...recordData };
-    const wrappedForDoctor = recordData?._enc?.wrappedKeys?.[doctorId];
-    if (wrappedForDoctor) {
-      try {
-        const { privateKey } = await unlockPrivateKey(doctorId, getPassphrase);
-        baseRecord = await decryptWithWrappedKey(recordData, wrappedForDoctor, privateKey);
-      } catch (e) {
-        return { success: false, error: "Decryption failed: incorrect passphrase or missing key." };
-      }
-    }
-
-    // Merge updates into decrypted/plain base
-    const merged = {
-      ...baseRecord,
-      ...updateData,
+    const normalizedUpdate = {
+      visitDate: updateData.visitDate ?? recordData.visitDate,
+      diagnosis: typeof updateData.diagnosis === "string" ? updateData.diagnosis : (recordData.diagnosis || ''),
+      symptoms: Array.isArray(updateData.symptoms) ? updateData.symptoms : (recordData.symptoms || []),
+      medicines: Array.isArray(updateData.medicines) ? updateData.medicines : (recordData.medicines || []),
+      prescribedTests: Array.isArray(updateData.prescribedTests) ? updateData.prescribedTests : (recordData.prescribedTests || []),
+      followUpNotes: typeof updateData.followUpNotes === "string" ? updateData.followUpNotes : (recordData.followUpNotes || ''),
       lastModifiedAt: serverTimestamp(),
     };
 
-    // Re-encrypt sensitive fields with new DEK and wrap for both recipients
-    const reEncrypted = await encryptMedicalRecordPayload(
-      merged,
-      [
-        { id: patientId, publicKey: patientPubKey },
-        { id: doctorId, publicKey: doctorPubKey },
-      ]
-    );
-
-    await updateDoc(recordRef, reEncrypted);
+    await updateDoc(recordRef, normalizedUpdate);
 
     return { 
       success: true, 
@@ -515,6 +418,12 @@ export async function updateMedicalRecord(recordId, doctorId, updateData, getPas
 
   } catch (error) {
     console.error("Error updating medical record:", error);
+    if (error?.code === 'permission-denied') {
+      return {
+        success: false,
+        error: "You don't have permission to edit this record. It may belong to another doctor or access is no longer active."
+      };
+    }
     return { 
       success: false, 
       error: "Failed to update medical record." 
@@ -577,7 +486,7 @@ export async function deactivateMedicalRecord(recordId, doctorId) {
  * @param {number} pageSize - Number of records per page (default: 20)
  * @returns {Promise<Object>} - Success/error result with medical records and pagination info
  */
-export async function getDoctorPatientMedicalRecords(doctorId, patientId, lastDoc = null, pageSize = 20, getPassphrase) {
+export async function getDoctorPatientMedicalRecords(doctorId, patientId, lastDoc = null, pageSize = 20) {
   try {
     // Verify doctor has active access to patient's profile
     const shareId = `${doctorId}_${patientId}`;
@@ -618,39 +527,18 @@ export async function getDoctorPatientMedicalRecords(doctorId, patientId, lastDo
       return dateB - dateA;
     });
 
-    // Unlock doctor's private key for decryption
-    let privateKeyHandle = null;
-    try {
-      const { privateKey } = await unlockPrivateKey(doctorId, getPassphrase);
-      privateKeyHandle = privateKey;
-    } catch (e) {
-      return { success: false, error: "Decryption unavailable: passphrase required or incorrect." };
-    }
+    const normalizedRecords = activeRecords;
 
-    // Decrypt records where possible
-    const decryptedRecords = activeRecords.map((record) => {
-      const wrappedKey = record?._enc?.wrappedKeys?.[doctorId];
-      if (!wrappedKey) return record; // Possibly plaintext or not shared for doctor
-      try {
-        return decryptWithWrappedKey(record, wrappedKey, privateKeyHandle);
-      } catch (e) {
-        return record; // Fallback to raw if decryption fails
-      }
-    });
-
-    // Resolve all decryptions (some return promises)
-    const resolvedRecords = await Promise.all(decryptedRecords);
-
-    // Sort records by visitDate in descending order (newest first) after decryption
-    resolvedRecords.sort((a, b) => {
+    // Sort records by visitDate in descending order (newest first)
+    normalizedRecords.sort((a, b) => {
       const dateA = new Date(a.visitDate || a.createdAt?.toDate?.() || 0);
       const dateB = new Date(b.visitDate || b.createdAt?.toDate?.() || 0);
       return dateB - dateA;
     });
 
     // Apply pagination
-    const paginatedRecords = resolvedRecords.slice(0, pageSize);
-    const hasMore = resolvedRecords.length > pageSize;
+    const paginatedRecords = normalizedRecords.slice(0, pageSize);
+    const hasMore = normalizedRecords.length > pageSize;
     
     return { 
       success: true, 

@@ -25,6 +25,15 @@ export default {
         primary: 'var(--color-primary)',
         accent: 'var(--color-accent)',
       },
+      animation: {
+        'bounce-subtle': 'bounce-subtle 2s infinite',
+      },
+      keyframes: {
+        'bounce-subtle': {
+          '0%, 100%': { transform: 'translateY(-5%)', 'animation-timing-function': 'cubic-bezier(0.8, 0, 1, 1)' },
+          '50%': { transform: 'translateY(0)', 'animation-timing-function': 'cubic-bezier(0, 0, 0.2, 1)' },
+        }
+      },
       colors: {
         text: "rgb(var(--text-rgb) / <alpha-value>)",
         background: "rgb(var(--background-rgb) / <alpha-value>)",

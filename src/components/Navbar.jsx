@@ -70,9 +70,9 @@ const Navbar = () => {
             <img 
               src={HealSyncLogo} 
               alt="HealSync Logo" 
-              className="h-8 w-8 object-contain"
+              className="h-12 w-12 object-contain"
             />
-            <span className="text-xl font-bold text-heading hidden sm:block">
+            <span className="text-3xl font-bold text-heading hidden sm:block">
               HealSync
             </span>
           </motion.div>
