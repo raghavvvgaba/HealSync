@@ -47,11 +47,15 @@ const chronicConditionsOptions = [
 ];
 
 const allergiesOptions = [
-	'Penicillin','Sulfa Drugs','NSAIDs','Aspirin','Latex','Peanuts','Tree Nuts','Milk','Eggs','Wheat','Soy','Fish','Shellfish','Pollen','Dust Mites','Pet Dander','Mold','Bee Stings','Contrast Dye','Other'
+	'Penicillin','Sulfa Drugs','NSAIDs','Aspirin','Latex','Peanuts','Tree Nuts','Milk','Eggs','Wheat','Soy','Fish','Shellfish','Pollen','Dust Mites','Pet Dander','Mold','Bee Stings','Contrast Dye','Changing Weather','Other',
 ];
 
 const medicationsOptions = [
 	'Lisinopril','Atorvastatin','Levothyroxine','Metformin','Amlodipine','Metoprolol','Omeprazole','Simvastatin','Losartan','Albuterol','Gabapentin','Hydrochlorothiazide','Sertraline','Acetaminophen','Ibuprofen','Fluoxetine','Amoxicillin','Prednisone','Escitalopram','Tramadol','Furosemide','Antihypertensives','Antidiabetics','Statins','Anticoagulants','Beta Blockers','Antidepressants','Antibiotics','Pain Relievers','Anti-inflammatories','Antihistamines','Inhalers','Thyroid Medications','Vitamins & Supplements','Other'
+];
+
+const disabilitiesOptions = [
+	'Visual Impairment','Hearing Impairment','Speech Impairment','Physical Disability','Cognitive Disability','Learning Disability','Autism Spectrum Disorder','ADHD','Dyslexia','Mobility Impairment','Chronic Pain','Chronic Fatigue','Mental Health Condition','Memory Impairment','Other'
 ];
 
 // Shared UI helpers (consistent mobile-friendly + opaque backgrounds)
@@ -97,6 +101,7 @@ function Onboarding() {
 	const [currentStep, setCurrentStep] = useState(1);
 	const [loading, setLoading] = useState(false);
 	const [errors, setErrors] = useState({});
+	const [showSuccess, setShowSuccess] = useState(false);
 
 	const [formData, setFormData] = useState({
 		basic: {
@@ -105,8 +110,8 @@ function Onboarding() {
 			contactNumber: '', emergencyContact: { name: '', number: '', relation: '' }
 		},
 		medical: {
-			chronicConditions: [], allergies: [], currentMedications: [],
-			customChronicCondition: '', customAllergy: '', customMedication: '',
+			chronicConditions: [], allergies: [], currentMedications: [], disabilities: [],
+			customChronicCondition: '', customAllergy: '', customMedication: '', customDisability: '',
 			vision: { leftEye: '', rightEye: '', wearsGlasses: false }, hearingAids: false
 		},
 		lifestyle: { habits: [], preferences: [] },
@@ -115,10 +120,10 @@ function Onboarding() {
 
 	useEffect(() => {
 		// Only redirect if userProfile is loaded and onboarding is completed
-		if (userProfile && userProfile.onboardingCompleted === true) {
+		if (userProfile && userProfile.onboardingCompleted === true && !showSuccess) {
 			navigate('/user');
 		}
-	}, [userProfile, navigate]);
+	}, [userProfile, navigate, showSuccess]);
 
 	// Show loading while auth is loading
 	if (authLoading) {
@@ -129,6 +134,72 @@ function Onboarding() {
 				</div>
 			</div>
 		);
+	}
+
+	// Success Screen Component
+	const SuccessScreen = () => (
+		<div className="min-h-screen bg-background aurora-bg flex items-center justify-center px-3 sm:px-6 py-6">
+			<div className="max-w-md mx-auto text-center">
+				<div className="glass-elevated rounded-3xl p-8 border soft-divider">
+					{/* Success Animation */}
+					<div className="mb-6 relative">
+						<div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-r from-green-400 to-green-600 flex items-center justify-center shadow-xl">
+							<svg className="w-12 h-12 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+							</svg>
+						</div>
+						{/* Celebration sparkles */}
+						<div className="absolute -top-2 -right-2 text-yellow-400 text-2xl animate-bounce">*</div>
+						<div className="absolute -bottom-2 -left-2 text-yellow-400 text-xl animate-bounce" style={{ animationDelay: '0.5s' }}>*</div>
+						<div className="absolute top-4 -left-4 text-yellow-400 text-lg animate-bounce" style={{ animationDelay: '1s' }}>*</div>
+					</div>
+
+					{/* Success Message */}
+					<h1 className="text-3xl font-bold text-text mb-3">Welcome to HealSync!</h1>
+					<p className="text-secondary text-lg mb-6">
+						Your health profile has been created successfully. You're all set to start managing your health records securely.
+					</p>
+
+					{/* Features Preview */}
+					<div className="space-y-3 mb-8">
+						<div className="flex items-center gap-3 text-sm text-text">
+							<div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+								<span className="text-primary">✓</span>
+							</div>
+							<span>Health profile created</span>
+						</div>
+						<div className="flex items-center gap-3 text-sm text-text">
+							<div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+								<span className="text-primary">✓</span>
+							</div>
+							<span>Medical history saved</span>
+						</div>
+						<div className="flex items-center gap-3 text-sm text-text">
+							<div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+								<span className="text-primary">✓</span>
+							</div>
+							<span>Ready to share with doctors</span>
+						</div>
+					</div>
+
+					{/* Action Button */}
+					<button
+						onClick={() => {
+							setShowSuccess(false);
+							navigate('/user');
+						}}
+						className="glass-cta px-8 py-3 rounded-xl font-semibold w-full hover:scale-105 transition-transform duration-200"
+					>
+						Go to Dashboard
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+
+	// Show success screen if onboarding is completed
+	if (showSuccess) {
+		return <SuccessScreen />;
 	}
 
 	// Handlers
@@ -152,6 +223,26 @@ function Onboarding() {
 
 	const handleLifestyleChange = (field, value) => {
 		setFormData((prev) => ({ ...prev, lifestyle: { ...prev.lifestyle, [field]: value } }));
+	};
+
+	const handleVisionChange = (field, value) => {
+		setFormData((prev) => ({ 
+			...prev, 
+			medical: { 
+				...prev.medical, 
+				vision: { ...prev.medical.vision, [field]: value } 
+			} 
+		}));
+	};
+
+	const handleHearingAidsChange = (value) => {
+		setFormData((prev) => ({ 
+			...prev, 
+			medical: { 
+				...prev.medical, 
+				hearingAids: value 
+			} 
+		}));
 	};
 
 	// Validation
@@ -187,6 +278,11 @@ function Onboarding() {
 			newErrors.customMedication = 'Please specify your medication';
 		}
 		
+		// Check if "Other" is selected for disabilities but no custom input provided
+		if (medical.disabilities.includes('Other') && !medical.customDisability.trim()) {
+			newErrors.customDisability = 'Please specify your disability';
+		}
+		
 		setErrors(newErrors);
 		return Object.keys(newErrors).length === 0;
 	};
@@ -217,7 +313,10 @@ function Onboarding() {
 						: formData.medical.allergies.filter(a => a !== 'Other'),
 					currentMedications: formData.medical.customMedication
 						? [...formData.medical.currentMedications.filter(m => m !== 'Other'), formData.medical.customMedication]
-						: formData.medical.currentMedications.filter(m => m !== 'Other')
+						: formData.medical.currentMedications.filter(m => m !== 'Other'),
+					disabilities: formData.medical.customDisability
+						? [...formData.medical.disabilities.filter(d => d !== 'Other'), formData.medical.customDisability]
+						: formData.medical.disabilities.filter(d => d !== 'Other')
 				}
 			} :
 			currentStep === 3 ? { lifestyle: formData.lifestyle } : {};			if (user?.uid && Object.keys(profilePayload).length > 0) {
@@ -232,9 +331,10 @@ function Onboarding() {
 			}
 
 			if (currentStep === 3) { 
-				// Refresh user profile and then navigate
+				// Show success screen first
+				setShowSuccess(true);
+				// Refresh user profile in background
 				await refreshUserProfile();
-				navigate('/user');
 				return; 
 			}
 			setCurrentStep((prev) => prev + 1);
@@ -340,7 +440,7 @@ function Onboarding() {
 
 						<div className="flex justify-end pt-4">
 							<button type="button" onClick={handleNext} disabled={loading} className="glass-cta px-6 py-3 rounded-xl disabled:opacity-50">
-								{loading ? 'Saving...' : 'Next Step →'}
+								{loading ? 'Saving...' : 'Next Step'}
 							</button>
 						</div>
 					</div>
@@ -351,7 +451,7 @@ function Onboarding() {
 					<div className="space-y-8">
 						{/* Chronic Conditions */}
 						<div>
-							<label className="block text-lg font-bold text-text mb-3">🩺 Chronic Conditions</label>
+							<label className="block text-lg font-bold text-text mb-3">Chronic Conditions</label>
 							<Listbox value={formData.medical.chronicConditions} onChange={(selected) => handleArrayFieldChange('medical','chronicConditions', selected)} multiple>
 								<div className="relative">
 									<Listbox.Button className={selectClassName(false)}>
@@ -395,7 +495,7 @@ function Onboarding() {
 
 						{/* Allergies */}
 						<div>
-							<label className="block text-lg font-bold text-text mb-3">⚠️ Allergies</label>
+							<label className="block text-lg font-bold text-text mb-3">Allergies</label>
 							<Listbox value={formData.medical.allergies} onChange={(selected) => handleArrayFieldChange('medical','allergies', selected)} multiple>
 								<div className="relative">
 									<Listbox.Button className={selectClassName(false)}>
@@ -439,7 +539,7 @@ function Onboarding() {
 
 						{/* Medications */}
 						<div>
-							<label className="block text-lg font-bold text-text mb-3">💊 Current Medications</label>
+							<label className="block text-lg font-bold text-text mb-3">Current Medications</label>
 							<Listbox value={formData.medical.currentMedications} onChange={(selected) => handleArrayFieldChange('medical','currentMedications', selected)} multiple>
 								<div className="relative">
 									<Listbox.Button className={selectClassName(false)}>
@@ -481,11 +581,146 @@ function Onboarding() {
 							)}
 						</div>
 
+						{/* Disabilities */}
+						<div>
+							<label className="block text-lg font-bold text-text mb-3">Disabilities or Accessibility Needs</label>
+							<Listbox value={formData.medical.disabilities} onChange={(selected) => handleArrayFieldChange('medical','disabilities', selected)} multiple>
+								<div className="relative">
+									<Listbox.Button className={selectClassName(false)}>
+										<span className={formData.medical.disabilities.length ? 'text-text' : 'text-secondary'}>
+											{formData.medical.disabilities.length ? formData.medical.disabilities.join(', ') : 'Select disabilities or accessibility needs'}
+										</span>
+									</Listbox.Button>
+									<Listbox.Options className={listboxMenuClass}>
+										{disabilitiesOptions.map((item) => (
+											<Listbox.Option key={item} value={item} className={({ active, selected }) => listboxOptionClass(active, selected)}>
+												{item}
+											</Listbox.Option>
+										))}
+									</Listbox.Options>
+								</div>
+							</Listbox>
+							{formData.medical.disabilities.includes('Other') && (
+								<div className="mt-3">
+									<input 
+										type="text" 
+										placeholder="Please specify your disability or accessibility need" 
+										value={formData.medical.customDisability}
+										onChange={(e) => handleCustomInputChange('medical', 'customDisability', e.target.value)}
+										className={inputClassName(errors.customDisability)}
+									/>
+									{errors.customDisability && <p className="mt-2 text-sm text-red-500">{errors.customDisability}</p>}
+								</div>
+							)}
+							{formData.medical.disabilities.length > 0 && (
+								<div className="flex flex-wrap gap-2 mt-3">
+									{formData.medical.disabilities.map((disability, idx) => (
+										<span key={idx} className="px-3 py-1.5 rounded-lg text-xs glass border soft-divider">
+											{disability === 'Other' && formData.medical.customDisability 
+												? formData.medical.customDisability 
+												: disability}
+										</span>
+									))}
+								</div>
+							)}
+						</div>
+
+						{/* Vision & Hearing */}
+						<div>
+							<label className="block text-lg font-bold text-text mb-3">Vision & Hearing</label>
+							
+							{/* Glasses Section */}
+							<div className="space-y-4">
+								<div className="flex items-center gap-4">
+									<span className="text-sm font-medium text-text">Do you wear glasses?</span>
+									<div className="flex gap-3">
+										<button
+											type="button"
+											onClick={() => handleVisionChange('wearsGlasses', true)}
+											className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+												formData.medical.vision.wearsGlasses 
+													? 'bg-primary text-white shadow-md' 
+													: 'bg-white dark:bg-neutral-900 border border-gray-200 dark:border-white/10 text-text hover:border-primary/50'
+											}`}
+										>
+											Yes
+										</button>
+										<button
+											type="button"
+											onClick={() => handleVisionChange('wearsGlasses', false)}
+											className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+												!formData.medical.vision.wearsGlasses 
+													? 'bg-primary text-white shadow-md' 
+													: 'bg-white dark:bg-neutral-900 border border-gray-200 dark:border-white/10 text-text hover:border-primary/50'
+											}`}
+										>
+											No
+										</button>
+									</div>
+								</div>
+
+								{/* Eye Power Fields - Only show if wears glasses */}
+								{formData.medical.vision.wearsGlasses && (
+									<div className="grid grid-cols-2 gap-4">
+										<div>
+											<label className="block text-sm font-medium text-text mb-1">Left Eye Power</label>
+											<input
+												type="text"
+												placeholder="e.g., -2.5"
+												value={formData.medical.vision.leftEye}
+												onChange={(e) => handleVisionChange('leftEye', e.target.value)}
+												className={inputClassName(false)}
+											/>
+										</div>
+										<div>
+											<label className="block text-sm font-medium text-text mb-1">Right Eye Power</label>
+											<input
+												type="text"
+												placeholder="e.g., -1.5"
+												value={formData.medical.vision.rightEye}
+												onChange={(e) => handleVisionChange('rightEye', e.target.value)}
+												className={inputClassName(false)}
+											/>
+										</div>
+									</div>
+								)}
+
+								{/* Hearing Aids Section */}
+								<div className="flex items-center gap-4 pt-2">
+									<span className="text-sm font-medium text-text">Do you use hearing aids?</span>
+									<div className="flex gap-3">
+										<button
+											type="button"
+											onClick={() => handleHearingAidsChange(true)}
+											className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+												formData.medical.hearingAids 
+													? 'bg-primary text-white shadow-md' 
+													: 'bg-white dark:bg-neutral-900 border border-gray-200 dark:border-white/10 text-text hover:border-primary/50'
+											}`}
+										>
+											Yes
+										</button>
+										<button
+											type="button"
+											onClick={() => handleHearingAidsChange(false)}
+											className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+												!formData.medical.hearingAids 
+													? 'bg-primary text-white shadow-md' 
+													: 'bg-white dark:bg-neutral-900 border border-gray-200 dark:border-white/10 text-text hover:border-primary/50'
+											}`}
+										>
+											No
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+
 						{errors.submit && <div className="glass rounded-xl p-4 border border-red-500/40 text-sm text-red-500">{errors.submit}</div>}
 
 						<div className="flex justify-between pt-4">
-							<button type="button" onClick={() => setCurrentStep((s) => s - 1)} className="glass rounded-xl px-5 py-3 text-text border soft-divider">← Back</button>
-							<button type="button" onClick={handleNext} disabled={loading} className="glass-cta px-6 py-3 rounded-xl disabled:opacity-50">{loading ? 'Saving...' : 'Next Step →'}</button>
+							<button type="button" onClick={() => setCurrentStep((s) => s - 1)} className="glass rounded-xl px-5 py-3 text-text border soft-divider">Back</button>
+							<button type="button" onClick={handleNext} disabled={loading} className="glass-cta px-6 py-3 rounded-xl disabled:opacity-50">{loading ? 'Saving...' : 'Next Step'}</button>
 						</div>
 					</div>
 				);
@@ -494,7 +729,7 @@ function Onboarding() {
 				return (
 					<div className="space-y-8">
 						<div>
-							<label className="block text-lg font-bold text-text mb-3">🏃‍♂️ Your Habits</label>
+							<label className="block text-lg font-bold text-text mb-3">Your Habits</label>
 							<p className="text-sm text-secondary mb-4">Select all that apply</p>
 							<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
 								{habitOptions.map((habit) => {
@@ -512,7 +747,7 @@ function Onboarding() {
 						</div>
 
 						<div>
-							<label className="block text-lg font-bold text-text mb-3">🍽️ Dietary Preferences</label>
+							<label className="block text-lg font-bold text-text mb-3">Dietary Preferences</label>
 							<p className="text-sm text-secondary mb-4">Select your dietary preferences and restrictions</p>
 							<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
 								{preferenceOptions.map((pref) => {
@@ -532,8 +767,8 @@ function Onboarding() {
 						{errors.submit && <div className="glass rounded-xl p-4 border border-red-500/40 text-sm text-red-500">{errors.submit}</div>}
 
 						<div className="flex justify-between pt-4">
-							<button type="button" onClick={() => setCurrentStep((s) => s - 1)} className="glass rounded-xl px-5 py-3 text-text border soft-divider">← Back</button>
-							<button type="button" onClick={handleNext} disabled={loading} className="glass-cta px-6 py-3 rounded-xl disabled:opacity-50">{loading ? 'Saving...' : 'Finish →'}</button>
+							<button type="button" onClick={() => setCurrentStep((s) => s - 1)} className="glass rounded-xl px-5 py-3 text-text border soft-divider">Back</button>
+							<button type="button" onClick={handleNext} disabled={loading} className="glass-cta px-6 py-3 rounded-xl disabled:opacity-50">{loading ? 'Saving...' : 'Finish'}</button>
 						</div>
 					</div>
 				);
