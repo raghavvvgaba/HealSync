@@ -11,7 +11,7 @@ HealSync bridges the gap between patients and healthcare providers by creating a
 ### Core Problems We Solve
 
 - **� Fragmented Medical Records**: No more lost paperwork or incomplete medical histories
-- **🔒 Data Security Concerns**: Enterprise-grade security with role-based access controls
+- **🔒 Data Security Concerns**: Role-based access controls for secure data access
 - **⏰ Time-Consuming Consultations**: Quick access to complete patient history for doctors
 - **🤝 Poor Patient-Doctor Communication**: Streamlined sharing and collaboration tools
 - **❓ Health Information Gaps**: AI-powered assistance for general health queries
@@ -48,11 +48,9 @@ HealSync bridges the gap between patients and healthcare providers by creating a
 - **📝 Medical Record Management**
   - Add detailed visit notes, diagnoses, and prescriptions
   - Real-time updates visible to patients
-  - Secure audit trail for all modifications
 
 - **🔐 Secure Access Controls**
   - Role-based permissions and data access
-  - HIPAA-compliant security measures
   - Time-limited editing windows for data integrity
 
 ## 🛠 Technology Stack
@@ -88,12 +86,45 @@ HealSync bridges the gap between patients and healthcare providers by creating a
 
 ## � Security & Privacy
 
-- **🛡️ Enterprise-grade Security**: Firebase Authentication with multi-factor support
 - **🔒 Role-based Access**: Strict permissions based on user roles and sharing agreements
-- **📝 Audit Trails**: Complete logging of all data access and modifications
 - **🚫 Privacy-first AI**: No personal medical data sent to AI services
 - **⏰ Time-limited Access**: Automatic restrictions on data modification windows
-- **🔥 HIPAA Compliance**: Industry-standard security practices and data handling
+
+## 📖 Usage Guide
+
+### For Patients
+
+1. **Sign Up & Onboarding**
+   - Create account with email/password
+   - Complete health profile during onboarding
+   - Add medical history, medications, and emergency contacts
+
+2. **Share with Doctors**
+   - Get Doctor ID from your healthcare provider
+   - Use "Share with Doctor" button on your profile
+   - Manage access permissions as needed
+
+3. **Use AI Assistant**
+   - Click the AI chat button on your dashboard
+   - Ask general health questions
+   - Get explanations of medical terms
+
+### For Healthcare Providers
+
+1. **Doctor Registration**
+   - Sign up with doctor role
+   - Receive unique Doctor ID (DR-XXXX-1234)
+   - Share your Doctor ID with patients
+
+2. **Access Patient Profiles**
+   - View all shared patient profiles on dashboard
+   - Access complete medical history and current medications
+   - Review previous visit notes from other providers
+
+3. **Add Medical Records**
+   - Navigate to patient's profile
+   - Add visit notes, diagnoses, prescriptions
+   - Records are immediately visible to the patient
 
 ## 🚀 Getting Started
 
@@ -141,40 +172,3 @@ HealSync bridges the gap between patients and healthcare providers by creating a
 
 6. **Access the application**
    Open http://localhost:5173 in your browser
-
-## 📖 Usage Guide
-
-### For Patients
-
-1. **Sign Up & Onboarding**
-   - Create account with email/password
-   - Complete health profile during onboarding
-   - Add medical history, medications, and emergency contacts
-
-2. **Share with Doctors**
-   - Get Doctor ID from your healthcare provider
-   - Use "Share with Doctor" button on your profile
-   - Manage access permissions as needed
-
-3. **Use AI Assistant**
-   - Click the AI chat button on your dashboard
-   - Ask general health questions
-   - Get explanations of medical terms
-
-### For Healthcare Providers
-
-1. **Doctor Registration**
-   - Sign up with doctor role
-   - Receive unique Doctor ID (DR-XXXX-1234)
-   - Share your Doctor ID with patients
-
-2. **Access Patient Profiles**
-   - View all shared patient profiles on dashboard
-   - Access complete medical history and current medications
-   - Review previous visit notes from other providers
-
-3. **Add Medical Records**
-   - Navigate to patient's profile
-   - Add visit notes, diagnoses, prescriptions
-   - Records are immediately visible to the patient
-
