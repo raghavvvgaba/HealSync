@@ -31,7 +31,7 @@ export function Profile() {
   // Skeleton (unchanged) -----------------------------------------------------
   if (loading) {
     return (
-      <div className="min-h-screen bg-background aurora-bg px-4 sm:px-8 py-8">
+  <div className="min-h-screen bg-background aurora-bg aurora-subtle px-4 sm:px-8 py-8">
         <div className="max-w-7xl mx-auto animate-pulse space-y-8">
           <div className="h-10 w-56 glass rounded-xl" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -46,7 +46,7 @@ export function Profile() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background aurora-bg flex items-center justify-center px-4">
+  <div className="min-h-screen bg-background aurora-bg aurora-subtle flex items-center justify-center px-4">
         <div className="glass rounded-3xl p-10 border soft-divider max-w-md w-full text-center space-y-6">
           <h2 className="text-2xl font-bold text-text">Profile Error</h2>
           <p className="text-secondary text-sm">{error}</p>
@@ -58,7 +58,7 @@ export function Profile() {
 
   if (!profileData) {
     return (
-      <div className="min-h-screen bg-background aurora-bg flex items-center justify-center px-4">
+  <div className="min-h-screen bg-background aurora-bg aurora-subtle flex items-center justify-center px-4">
         <div className="glass rounded-3xl p-10 border soft-divider max-w-md w-full text-center space-y-6">
           <h2 className="text-2xl font-bold text-text">Profile Not Found</h2>
           <p className="text-secondary text-sm">We couldn't find your profile data.</p>
@@ -70,143 +70,176 @@ export function Profile() {
 
   const { basic = {}, medical = {}, lifestyle = {} } = profileData;
 
-  // Reusable components (compact styling like PatientProfilePage) ------------
+  // Reusable components (premium styling) -----------------------------------
   const Card = ({ title, icon: Icon, children, className = '' }) => (
-    <div className={`glass rounded-2xl p-5 border soft-divider hover-glow-primary transition-all ${className}`}>
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-9 h-9 rounded-lg bg-[rgba(var(--primary-rgb)/0.15)] text-primary flex items-center justify-center">
-          <Icon className="text-base" />
+    <div className={`glass-elevated rounded-2xl p-6 border soft-divider hover-glow-primary transition-all duration-300 group ${className}`}>
+      <div className="flex items-center gap-4 mb-5 pb-3 border-b soft-divider">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+          <Icon className="text-lg" />
         </div>
-        <h3 className="text-base sm:text-lg font-semibold text-text">{title}</h3>
+        <h3 className="text-base sm:text-lg font-bold text-text tracking-tight">{title}</h3>
       </div>
-      {children}
+      <div className="space-y-3">
+        {children}
+      </div>
     </div>
   );
 
   const Field = ({ label, value, icon: Icon }) => (
-    <div className="flex items-center justify-between p-3 rounded-lg border soft-divider glass">
-      <div className="flex items-center gap-2 min-w-0">
-        {Icon && <Icon className="text-primary text-sm shrink-0" />}
-        <span className="text-sm font-medium text-text truncate">{label}</span>
+    <div className="flex items-center justify-between p-3.5 rounded-xl bg-surface/30 border soft-divider group transition-colors hover:bg-surface/50">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center group-hover:text-primary transition-colors shadow-sm">
+          {Icon ? <Icon className="text-xs shrink-0" /> : <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />}
+        </div>
+        <span className="text-xs sm:text-sm font-semibold text-secondary truncate">{label}</span>
       </div>
-      <span className="text-sm text-secondary font-medium max-w-[60%] text-right truncate">{value || 'Not specified'}</span>
+      <span className="text-xs sm:text-sm text-text font-bold max-w-[55%] text-right truncate">
+        {value || <span className="text-secondary/50 font-normal italic">Not specified</span>}
+      </span>
     </div>
   );
 
-  const Chips = ({ items }) => (
+  const TagList = ({ items, colorClass = "text-primary bg-primary/5 border-primary/10" }) => (
     <div className="flex flex-wrap gap-2">
       {items && items.length > 0 ? (
         items.map((item, i) => (
-          <span key={i} className="px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary/90 dark:text-primary/80">
+          <span key={i} className={`px-3 py-1.5 rounded-xl text-xs font-bold border soft-divider glass transition-all hover:scale-105 cursor-default ${colorClass}`}>
             {item}
           </span>
         ))
       ) : (
-        <span className="text-sm text-secondary italic">None specified</span>
+        <div className="w-full p-4 rounded-xl border border-dashed soft-divider bg-surface/20 flex items-center justify-center">
+          <span className="text-xs text-secondary/60 italic font-medium">None specified</span>
+        </div>
       )}
     </div>
   );
 
   const yesNoPill = (val) => (
-    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${val ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/10 text-secondary'}`}>{val ? 'Yes' : 'No'}</span>
+    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${val ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]' : 'bg-white/5 text-secondary border soft-divider'}`}>{val ? 'Yes' : 'No'}</span>
   );
 
   // Layout -------------------------------------------------------------------
   return (
-    <div className="min-h-screen bg-background aurora-bg px-3 sm:px-6 py-6 sm:py-10">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <Link to="/user" className="glass rounded-xl border soft-divider px-4 py-2 flex items-center gap-2 text-sm font-medium hover-glow-primary">
-              <FaArrowLeft className="text-primary" />
-              <span>Back</span>
-            </Link>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-text leading-tight">Complete Profile</h1>
-              <p className="text-secondary text-sm">Overview of your health data</p>
-            </div>
-          </div>
-          <Link to="../edit-profile" className="glass-cta flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm shadow-lg hover:shadow-primary/30 transition-shadow">
+    <div className="min-h-screen bg-background aurora-bg aurora-faint px-3 sm:px-6 py-6 sm:py-10">
+      <div className="max-w-7xl mx-auto space-y-8">
+        
+        {/* Header - Back Navigation */}
+        <div className="flex items-center justify-between">
+          <Link to="/user" className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 text-sm text-secondary hover-glow-primary transition-all font-bold">
+            <FaArrowLeft />
+            <span>Dashboard</span>
+          </Link>
+          <Link to="../edit-profile" className="glass-cta flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm shadow-xl hover:scale-105 transition-transform">
             <FaEdit /> Edit Profile
           </Link>
         </div>
 
-        {/* Grid (reduced gaps & tighter cards) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          <Card title="Basic Information" icon={FaUserCircle}>
-            <div className="space-y-2.5">
-              <Field label="Full Name" value={basic.fullName} icon={FaUserCircle} />
-              <Field label="Gender" value={basic.gender} icon={FaTransgender} />
-              <Field label="Date of Birth" value={basic.dob ? new Date(basic.dob).toLocaleDateString() : null} icon={MdCalendarToday} />
-              <Field label="Contact Number" value={basic.contactNumber} icon={MdPhone} />
+        {/* Patient Header Card */}
+        <div className="glass-elevated rounded-3xl p-6 sm:p-8 border soft-divider relative overflow-hidden group">
+          <div className="absolute -right-20 -top-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-1000" />
+          
+          <div className="flex flex-col md:flex-row md:items-center gap-6 relative z-10">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl glass-cta text-white flex items-center justify-center shadow-2xl shrink-0 transform group-hover:rotate-6 transition-transform duration-700">
+              <FaUserCircle className="text-3xl sm:text-4xl" />
             </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <h1 className="text-2xl sm:text-3xl font-black text-text tracking-tight truncate">
+                  {basic.fullName || user?.displayName || 'My Profile'}
+                </h1>
+                <span className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
+                  Patient Profile
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-secondary font-bold">
+                <div className="flex items-center gap-2 group/info cursor-default">
+                  <div className="w-8 h-8 rounded-full bg-surface/50 flex items-center justify-center group-hover/info:bg-primary/10 group-hover/info:text-primary transition-all shadow-inner">
+                    <MdPhone className="text-xs" />
+                  </div>
+                  <span className="text-xs sm:text-sm">{basic.contactNumber || 'Contact not set'}</span>
+                </div>
+                <div className="flex items-center gap-2 group/info cursor-default">
+                  <div className="w-8 h-8 rounded-full bg-surface/50 flex items-center justify-center group-hover/info:bg-primary/10 group-hover/info:text-primary transition-all shadow-inner">
+                    <MdCalendarToday className="text-xs" />
+                  </div>
+                  <span className="text-xs sm:text-sm">{basic.dob ? `${new Date().getFullYear() - new Date(basic.dob).getFullYear()} years` : 'Age: N/A'}</span>
+                </div>
+                <div className="flex items-center gap-2 group/info cursor-default">
+                  <div className="w-8 h-8 rounded-full bg-surface/50 flex items-center justify-center group-hover/info:bg-primary/10 group-hover/info:text-primary transition-all shadow-inner">
+                    <MdBloodtype className="text-xs" />
+                  </div>
+                  <span className="text-xs sm:text-sm">Blood: {basic.bloodGroup || 'N/A'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Info Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Card title="Identification" icon={FaUserCircle}>
+            <Field label="Gender" value={basic.gender} icon={FaTransgender} />
+            <Field label="Date of Birth" value={basic.dob ? new Date(basic.dob).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : null} icon={MdCalendarToday} />
+            <Field label="User ID" value={user?.uid?.substring(0, 8).toUpperCase()} icon={FaUserCircle} />
           </Card>
 
-          <Card title="Physical Details" icon={GiBodyHeight}>
-            <div className="space-y-2.5">
-              <Field label="Height" value={basic?.height ? `${basic.height.value} ${basic.height.unit}` : null} icon={GiBodyHeight} />
-              <Field label="Weight" value={basic?.weight ? `${basic.weight.value} ${basic.weight.unit}` : null} icon={MdSick} />
-              <Field label="Blood Group" value={basic.bloodGroup} icon={MdBloodtype} />
-            </div>
+          <Card title="Physical Stats" icon={GiBodyHeight}>
+            <Field label="Height" value={basic?.height ? `${basic.height.value} ${basic.height.unit}` : null} icon={GiBodyHeight} />
+            <Field label="Weight" value={basic?.weight ? `${basic.weight.value} ${basic.weight.unit}` : null} icon={MdSick} />
+            <Field label="BMI" value={basic?.weight?.value && basic?.height?.value ? (basic.weight.value / Math.pow(basic.height.value/100, 2)).toFixed(1) : null} />
           </Card>
 
           <Card title="Emergency Contact" icon={MdPhone}>
-            <div className="space-y-2.5">
-              <Field label="Name" value={basic?.emergencyContact?.name} icon={FaUserCircle} />
-              <Field label="Phone" value={basic?.emergencyContact?.number} icon={MdPhone} />
-              <Field label="Relation" value={basic?.emergencyContact?.relation} />
-            </div>
+            <Field label="Full Name" value={basic?.emergencyContact?.name} icon={FaUserCircle} />
+            <Field label="Phone Number" value={basic?.emergencyContact?.number} icon={MdPhone} />
+            <Field label="Relationship" value={basic?.emergencyContact?.relation} />
           </Card>
 
-          <Card title="Chronic Conditions" icon={FaHeart}>
-            <Chips items={medical?.chronicConditions} />
+          <Card title="Medical History" icon={FaHeart}>
+            <TagList items={medical?.chronicConditions} colorClass="text-red-500 bg-red-500/5 border-red-500/10" />
           </Card>
 
           <Card title="Allergies" icon={AiOutlineWarning}>
-            <Chips items={medical?.allergies} />
+            <TagList items={medical?.allergies} colorClass="text-orange-500 bg-orange-500/5 border-orange-500/10" />
           </Card>
 
-          <Card title="Current Medications" icon={BsCapsulePill}>
-            <Chips items={medical?.currentMedications} />
+          <Card title="Current Meds" icon={BsCapsulePill}>
+            <TagList items={medical?.currentMedications} colorClass="text-purple-500 bg-purple-500/5 border-purple-500/10" />
           </Card>
 
-          <Card title="Disabilities" icon={MdAccessibility}>
-            <Chips items={medical?.disabilities} />
-          </Card>
-
-          <Card title="Vision & Hearing" icon={BsEyeFill}>
-            <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row gap-2.5">
-                <div className="flex-1 p-3 rounded-lg border soft-divider glass flex items-center justify-between gap-3">
-                  <span className="text-sm font-medium text-text flex items-center gap-2"><BsEyeFill className="text-primary" />Wears Glasses</span>
-                  {yesNoPill(medical?.vision?.wearsGlasses)}
-                </div>
-                <div className="flex-1 p-3 rounded-lg border soft-divider glass flex items-center justify-between gap-3">
-                  <span className="text-sm font-medium text-text flex items-center gap-2"><BsEarFill className="text-primary" />Hearing Aids</span>
-                  {yesNoPill(medical?.hearingAids)}
-                </div>
+          <Card title="Sensory & Mobility" icon={MdAccessibility}>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-surface/30 border soft-divider">
+                <span className="text-xs font-bold text-secondary uppercase flex items-center gap-2"><BsEyeFill className="text-primary" /> Wears Glasses</span>
+                {yesNoPill(medical?.vision?.wearsGlasses)}
               </div>
-              {medical?.vision?.wearsGlasses && (
-                <div className="grid grid-cols-2 gap-2.5">
-                  <Field label="Left Eye" value={medical?.vision?.leftEye} />
-                  <Field label="Right Eye" value={medical?.vision?.rightEye} />
-                </div>
-              )}
+              <div className="flex items-center justify-between p-4 rounded-xl bg-surface/30 border soft-divider">
+                <span className="text-xs font-bold text-secondary uppercase flex items-center gap-2"><BsEarFill className="text-primary" /> Hearing Aids</span>
+                {yesNoPill(medical?.hearingAids)}
+              </div>
+              <TagList items={medical?.disabilities} colorClass="text-blue-500 bg-blue-500/5 border-blue-500/10" />
             </div>
           </Card>
 
-          <Card title="Lifestyle Habits" icon={FaRunning}>
-            <Chips items={lifestyle?.habits} />
-          </Card>
-
-          <Card title="Dietary Preferences" icon={FaUtensils}>
-            <Chips items={lifestyle?.preferences} />
+          <Card title="Lifestyle" icon={FaRunning}>
+            <div className="space-y-4">
+              <div>
+                <span className="text-[10px] font-black uppercase text-secondary tracking-widest mb-2 block">HABITS</span>
+                <TagList items={lifestyle?.habits} colorClass="text-emerald-500 bg-emerald-500/5 border-emerald-500/10" />
+              </div>
+              <div>
+                <span className="text-[10px] font-black uppercase text-secondary tracking-widest mb-2 block">DIETARY</span>
+                <TagList items={lifestyle?.preferences} colorClass="text-amber-500 bg-amber-500/5 border-amber-500/10" />
+              </div>
+            </div>
           </Card>
         </div>
 
-        <div className="mt-10 text-center">
-          <p className="text-[11px] text-secondary tracking-wide uppercase">End of Profile • Keep your information up to date</p>
+        <div className="pt-10 pb-6 border-t soft-divider text-center">
+          <p className="text-[10px] text-secondary font-black uppercase tracking-[0.2em] animate-pulse">
+            Your secure digital health record
+          </p>
         </div>
       </div>
     </div>

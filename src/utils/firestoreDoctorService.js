@@ -7,10 +7,7 @@ import {
   getDoc,
   addDoc,
   updateDoc,
-  serverTimestamp,
-  orderBy,
-  limit,
-  startAfter
+  serverTimestamp
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 
@@ -320,7 +317,7 @@ export async function addMedicalRecord(doctorId, patientId, medicalData) {
       isActive: true
     };
     
-    // Step 4: Add the medical record
+    // Step 4: Add plaintext medical record
     const medicalRecordsRef = collection(db, "medicalRecords");
     const docRef = await addDoc(medicalRecordsRef, recordData);
     
@@ -402,13 +399,17 @@ export async function updateMedicalRecord(recordId, doctorId, updateData) {
       };
     }
 
-    // Update the record
-    const updatePayload = {
-      ...updateData,
-      lastModifiedAt: serverTimestamp()
+    const normalizedUpdate = {
+      visitDate: updateData.visitDate ?? recordData.visitDate,
+      diagnosis: typeof updateData.diagnosis === "string" ? updateData.diagnosis : (recordData.diagnosis || ''),
+      symptoms: Array.isArray(updateData.symptoms) ? updateData.symptoms : (recordData.symptoms || []),
+      medicines: Array.isArray(updateData.medicines) ? updateData.medicines : (recordData.medicines || []),
+      prescribedTests: Array.isArray(updateData.prescribedTests) ? updateData.prescribedTests : (recordData.prescribedTests || []),
+      followUpNotes: typeof updateData.followUpNotes === "string" ? updateData.followUpNotes : (recordData.followUpNotes || ''),
+      lastModifiedAt: serverTimestamp(),
     };
 
-    await updateDoc(recordRef, updatePayload);
+    await updateDoc(recordRef, normalizedUpdate);
 
     return { 
       success: true, 
@@ -417,6 +418,12 @@ export async function updateMedicalRecord(recordId, doctorId, updateData) {
 
   } catch (error) {
     console.error("Error updating medical record:", error);
+    if (error?.code === 'permission-denied') {
+      return {
+        success: false,
+        error: "You don't have permission to edit this record. It may belong to another doctor or access is no longer active."
+      };
+    }
     return { 
       success: false, 
       error: "Failed to update medical record." 
@@ -520,9 +527,18 @@ export async function getDoctorPatientMedicalRecords(doctorId, patientId, lastDo
       return dateB - dateA;
     });
 
+    const normalizedRecords = activeRecords;
+
+    // Sort records by visitDate in descending order (newest first)
+    normalizedRecords.sort((a, b) => {
+      const dateA = new Date(a.visitDate || a.createdAt?.toDate?.() || 0);
+      const dateB = new Date(b.visitDate || b.createdAt?.toDate?.() || 0);
+      return dateB - dateA;
+    });
+
     // Apply pagination
-    const paginatedRecords = activeRecords.slice(0, pageSize);
-    const hasMore = activeRecords.length > pageSize;
+    const paginatedRecords = normalizedRecords.slice(0, pageSize);
+    const hasMore = normalizedRecords.length > pageSize;
     
     return { 
       success: true, 

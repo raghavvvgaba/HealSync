@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { FiArrowLeft } from 'react-icons/fi';
+import { FiArrowLeft, FiCalendar, FiUser, FiActivity } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import { getPatientMedicalRecords } from '../utils/firestoreService';
-import { FaFileMedicalAlt, FaRedo, FaExclamationTriangle, FaSpinner, FaDownload, FaEye } from 'react-icons/fa';
+import { FaFileMedicalAlt, FaRedo, FaExclamationTriangle, FaSpinner, FaDownload, FaEye, FaChevronRight, FaStethoscope, FaPills, FaFlask, FaNotesMedical } from 'react-icons/fa';
 
 const MedicalHistoryPage = () => {
   const navigate = useNavigate();
@@ -16,28 +16,14 @@ const MedicalHistoryPage = () => {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // Aggressive scroll reset - multiple attempts to ensure it works
   useLayoutEffect(() => {
-    // Force scroll to top immediately
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    
-    // Also try after a minimal delay in case of async rendering
-    const timer = setTimeout(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    }, 0);
-    
-    return () => clearTimeout(timer);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   useEffect(() => {
     if (user?.uid) {
       fetchMedicalRecords(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchMedicalRecords = async (isInitial = false) => {
@@ -69,12 +55,10 @@ const MedicalHistoryPage = () => {
         setHasMore(Boolean(result.hasMore));
       } else {
         setError(result.error || 'Failed to fetch medical records');
-        if (isInitial) setMedicalRecords([]);
       }
     } catch (err) {
       console.error('Error fetching medical records:', err);
       setError('Failed to load medical records');
-      if (isInitial) setMedicalRecords([]);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -87,164 +71,225 @@ const MedicalHistoryPage = () => {
 
   const handleRefresh = () => {
     fetchMedicalRecords(true);
-    // Also reset scroll on refresh
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   };
 
-
-  const TagList = ({ items, colorClass }) => (
-    <div className="flex flex-wrap gap-2">
-      {items && items.length > 0 ? (
-        items.map((item, idx) => (
-          <span key={idx} className={`px-3 py-1 rounded-full text-xs font-medium ${colorClass}`}>
-            {item}
-          </span>
-        ))
-      ) : (
-        <span className="text-sm text-gray-500 italic">None specified</span>
-      )}
-    </div>
-  );
-
-  const RecordCard = ({ record }) => (
-    <div className="glass rounded-2xl p-5 sm:p-6 border soft-divider hover-glow-primary">
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
-        <div>
-          <h4 className="text-base sm:text-lg font-semibold text-text">{record.diagnosis || 'Medical Record'}</h4>
-          <p className="text-xs sm:text-sm text-secondary">
-            {record.visitDate ? new Date(record.visitDate).toLocaleDateString() : 'No date specified'}
-            {record.createdAt?.toDate ? ` at ${new Date(record.createdAt.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
-            {' '}• {record.doctorName || record.doctor?.name || 'Unknown Doctor'}
-          </p>
+  const TagList = ({ items, icon: Icon, label, colorClass }) => {
+    if (!items || items.length === 0) return null;
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-secondary">
+          <Icon className="text-xs" />
+          <span className="text-[10px] uppercase font-bold tracking-wider">{label}</span>
         </div>
-        {record.fileUrl && (
-          <div className="flex gap-2">
-            <a href={record.fileUrl} target="_blank" rel="noopener noreferrer" className="p-2 text-primary hover:bg-white/10 rounded-lg transition-colors" title="View file">
-              <FaEye className="text-sm" />
-            </a>
-            <a href={record.fileUrl} download className="p-2 text-primary hover:bg-white/10 rounded-lg transition-colors" title="Download file">
-              <FaDownload className="text-sm" />
-            </a>
-          </div>
-        )}
+        <div className="flex flex-wrap gap-1.5">
+          {items.map((item, idx) => (
+            <span key={idx} className={`px-2.5 py-1 rounded-lg text-xs font-medium border soft-divider glass ${colorClass}`}>
+              {item}
+            </span>
+          ))}
+        </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <p className="text-sm font-medium text-text mb-2">Symptoms</p>
-          <TagList items={record.symptoms} colorClass="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300" />
-        </div>
-        <div>
-          <p className="text-sm font-medium text-text mb-2">Medicines</p>
-          <TagList items={record.medicines} colorClass="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300" />
-        </div>
-        {record.prescribedTests && record.prescribedTests.length > 0 && (
-          <div className="md:col-span-2">
-            <p className="text-sm font-medium text-text mb-2">Prescribed Tests</p>
-            <TagList items={record.prescribedTests} colorClass="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300" />
-          </div>
+    );
+  };
+
+  const RecordCard = ({ record, isLast }) => {
+    const date = record.visitDate ? new Date(record.visitDate) : new Date();
+    const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+    const day = date.getDate();
+    const year = date.getFullYear();
+
+    return (
+      <div className="relative pl-8 sm:pl-12 pb-10 group">
+        {/* Timeline Line */}
+        {!isLast && (
+          <div className="absolute left-[11px] sm:left-[15px] top-8 bottom-0 w-0.5 bg-dashed border-l border-primary/20" />
         )}
-        {record.followUpNotes && (
-          <div className="md:col-span-2">
-            <p className="text-sm font-medium text-text mb-2">Follow-up Notes</p>
-            <p className="text-sm text-secondary glass p-3 rounded-lg border soft-divider">{record.followUpNotes}</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-background aurora-bg text-text px-3 sm:px-6 py-6">
-      {/* Add ref to container for scroll debugging */}
-      <div ref={(el) => {
-        if (el) {
-          // Debug: log scroll position when component renders
-          console.log('MedicalHistoryPage scroll position:', window.scrollY, document.documentElement.scrollTop);
-        }
-      }}>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 glass rounded-full px-3 py-1.5 text-sm text-secondary hover-glow-primary"
-        >
-          <FiArrowLeft size={18} />
-          <span className="font-medium">Back</span>
-        </button>
-        <button
-          onClick={handleRefresh}
-          disabled={loading}
-          className="glass rounded-lg border soft-divider px-4 py-2 text-sm text-text hover-glow-primary disabled:opacity-50"
-          title="Refresh records"
-        >
-          <span className="inline-flex items-center gap-2">
-            <FaRedo className={`${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </span>
-        </button>
-      </div>
-
-      <h1 className="text-xl sm:text-2xl font-bold text-text mb-4">Your Complete Medical History</h1>
-
-      {loading && (
-        <div className="text-center py-12">
-          <FaSpinner className="animate-spin text-4xl text-primary mx-auto mb-4" />
-          <p className="text-secondary">Loading your medical records...</p>
+        
+        {/* Timeline Marker */}
+        <div className="absolute left-0 top-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full glass border-2 border-primary flex items-center justify-center z-10 shadow-lg group-hover:scale-110 transition-transform bg-background">
+          <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-primary animate-pulse" />
         </div>
-      )}
 
-      {error && !loading && (
-        <div className="text-center py-12">
-          <FaExclamationTriangle className="text-red-400 text-5xl mb-4 mx-auto" />
-          <p className="text-red-500 mb-2 text-lg">Failed to load medical records</p>
-          <p className="text-sm text-secondary mb-6">{error}</p>
-          <button onClick={handleRefresh} className="glass-cta px-6 py-3">Try Again</button>
+        {/* Date Label (Floating side) */}
+        <div className="absolute -left-20 top-0 hidden xl:flex flex-col items-end w-16">
+          <span className="text-xs font-bold text-secondary uppercase">{month}</span>
+          <span className="text-2xl font-bold text-text leading-none">{day}</span>
+          <span className="text-[10px] text-secondary/60 mt-1">{year}</span>
         </div>
-      )}
 
-      {!loading && !error && (
-        <>
-          {medicalRecords.length > 0 ? (
-            <div className="space-y-4">
-              {medicalRecords.map((record) => (
-                <RecordCard key={record.id} record={record} />
-              ))}
-              {hasMore && (
-                <div className="text-center pt-2">
-                  <button
-                    onClick={handleLoadMore}
-                    disabled={loadingMore}
-                    className="px-6 py-2 glass rounded-lg border soft-divider text-text hover-glow-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loadingMore ? (
-                      <span className="inline-flex items-center gap-2">
-                        <FaSpinner className="animate-spin" />
-                        Loading...
-                      </span>
-                    ) : (
-                      'Load More Records'
-                    )}
-                  </button>
+        {/* Card Content */}
+        <div className="glass-elevated rounded-2xl border soft-divider p-5 sm:p-6 hover-glow-primary transition-all">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <span className="xl:hidden px-2 py-0.5 rounded-md glass border soft-divider text-[10px] font-bold text-primary">
+                  {day} {month} {year}
+                </span>
+                <h3 className="text-lg sm:text-xl font-bold text-text truncate">{record.diagnosis || 'General Checkup'}</h3>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-secondary">
+                <div className="flex items-center gap-1.5">
+                  <FiUser className="text-primary" />
+                  <span>{record.doctorName || record.doctor?.name || 'Unknown Doctor'}</span>
                 </div>
-              )}
-              <div className="text-center mt-4 pt-4 border-t soft-divider">
-                <p className="text-sm text-secondary">
-                  Showing {medicalRecords.length} medical records
-                  {!hasMore && medicalRecords.length > 0 && ' (all records loaded)'}
-                </p>
+                {record.visitDate && (
+                  <div className="flex items-center gap-1.5 border-l border-secondary/30 pl-3">
+                    <FiCalendar className="text-primary" />
+                    <span>{new Date(record.visitDate).toLocaleDateString()}</span>
+                  </div>
+                )}
               </div>
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <FaFileMedicalAlt className="text-secondary text-6xl mb-6 mx-auto" />
-              <h3 className="text-xl font-semibold text-text mb-2">No Medical Records Found</h3>
-              <p className="text-secondary mb-6">
-                Your medical history will appear here once doctors add records to your profile.
-              </p>
-              <button onClick={handleRefresh} className="glass-cta px-6 py-3">Check for New Records</button>
+
+            {record.fileUrl && (
+              <div className="flex gap-2 shrink-0">
+                <a 
+                  href={record.fileUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="p-2.5 rounded-xl glass border soft-divider text-primary hover:bg-primary/10 transition-colors shadow-sm"
+                  title="View Document"
+                >
+                  <FaEye size={16} />
+                </a>
+                <a 
+                  href={record.fileUrl} 
+                  download 
+                  className="p-2.5 rounded-xl glass border soft-divider text-primary hover:bg-primary/10 transition-colors shadow-sm"
+                  title="Download"
+                >
+                  <FaDownload size={16} />
+                </a>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <TagList 
+              items={record.symptoms} 
+              icon={FaExclamationTriangle} 
+              label="Symptoms" 
+              colorClass="text-red-500 bg-red-500/5 border-red-500/10" 
+            />
+            <TagList 
+              items={record.medicines} 
+              icon={FaPills} 
+              label="Medications" 
+              colorClass="text-green-500 bg-green-500/5 border-green-500/10" 
+            />
+            <TagList 
+              items={record.prescribedTests} 
+              icon={FaFlask} 
+              label="Prescribed Tests" 
+              colorClass="text-amber-500 bg-amber-500/5 border-amber-500/10" 
+            />
+            
+            {record.followUpNotes && (
+              <div className="md:col-span-2 space-y-2">
+                <div className="flex items-center gap-2 text-secondary">
+                  <FaNotesMedical className="text-xs" />
+                  <span className="text-[10px] uppercase font-bold tracking-wider">Follow-up Notes</span>
+                </div>
+                <div className="p-4 bg-surface/30 rounded-xl border border-dashed soft-divider">
+                  <p className="text-sm text-text leading-relaxed italic">"{record.followUpNotes}"</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-background aurora-bg aurora-subtle px-4 sm:px-8 py-8 sm:py-12">
+      <div className="max-w-4xl mx-auto">
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          <div>
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-2 px-4 py-2 glass rounded-xl text-sm font-semibold text-secondary hover:text-primary hover-glow-primary transition-all mb-4"
+            >
+              <FiArrowLeft size={18} /> Back to Dashboard
+            </button>
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-text tracking-tight">Medical History</h1>
+            <p className="text-secondary mt-2 font-medium">Chronological record of your health journey</p>
+          </div>
+          
+          <button
+            onClick={handleRefresh}
+            disabled={loading}
+            className="self-start md:self-auto glass-cta px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg disabled:opacity-50"
+          >
+            <FaRedo className={loading ? 'animate-spin' : ''} />
+            {loading ? 'Refreshing...' : 'Refresh Records'}
+          </button>
+        </div>
+
+        {/* Content States */}
+        {loading && medicalRecords.length === 0 ? (
+          <div className="py-20 text-center flex flex-col items-center gap-4">
+            <FaSpinner className="animate-spin text-4xl text-primary" />
+            <p className="text-secondary font-medium tracking-wide">Loading your medical journey...</p>
+          </div>
+        ) : error && medicalRecords.length === 0 ? (
+          <div className="py-16 text-center glass-elevated rounded-3xl border border-red-500/20 p-8">
+            <FaExclamationTriangle className="text-red-500 text-5xl mb-4 mx-auto" />
+            <h3 className="text-xl font-bold text-text mb-2">Oops! Something went wrong</h3>
+            <p className="text-secondary mb-6">{error}</p>
+            <button onClick={handleRefresh} className="glass-cta px-8 py-3 rounded-xl">Try Again</button>
+          </div>
+        ) : medicalRecords.length > 0 ? (
+          <div className="xl:ml-20"> {/* Offset for XL floating dates */}
+            <div className="flex flex-col">
+              {medicalRecords.map((record, index) => (
+                <RecordCard 
+                  key={record.id} 
+                  record={record} 
+                  isLast={index === medicalRecords.length - 1} 
+                />
+              ))}
             </div>
-          )}
-        </>
-      )}
+
+            {hasMore && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="px-8 py-3 glass rounded-xl border soft-divider text-text font-bold hover-glow-primary transition-all disabled:opacity-50"
+                >
+                  {loadingMore ? (
+                    <span className="flex items-center gap-2">
+                      <FaSpinner className="animate-spin" /> Loading more...
+                    </span>
+                  ) : (
+                    'Load Older Records'
+                  )}
+                </button>
+              </div>
+            )}
+            
+            <div className="mt-12 py-6 border-t soft-divider text-center">
+              <p className="text-xs font-bold text-secondary uppercase tracking-widest">
+                End of history • {medicalRecords.length} Records found
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="py-20 text-center glass-elevated rounded-3xl p-10">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary/20">
+              <FaFileMedicalAlt className="text-primary text-3xl" />
+            </div>
+            <h3 className="text-2xl font-bold text-text mb-3">No Medical Records Found</h3>
+            <p className="text-secondary mb-8 max-w-md mx-auto">
+              Your medical history will appear here chronologically once your doctors add records to your profile.
+            </p>
+            <button onClick={handleRefresh} className="glass-cta px-10 py-4 rounded-2xl font-bold shadow-xl">
+              Check for Updates
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

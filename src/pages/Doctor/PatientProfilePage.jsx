@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
 import { getSharedProfileRecord, getPatientBasicInfo, getPatientProfile, getDoctorPatientMedicalRecords, addMedicalRecord, updateMedicalRecord } from '../../utils/firestoreDoctorService';
-import { FaArrowLeft, FaUser, FaEnvelope, FaPhone, FaCalendar, FaMapMarkerAlt, FaSpinner, FaFileMedicalAlt, FaHeart, FaRunning, FaUtensils, FaPills, FaDownload, FaEye, FaPlus, FaTimes, FaSave, FaCheckCircle, FaExclamationCircle, FaEdit, FaTransgender } from 'react-icons/fa';
+import { FaArrowLeft, FaUser, FaEnvelope, FaPhone, FaCalendar, FaMapMarkerAlt, FaSpinner, FaFileMedicalAlt, FaHeart, FaRunning, FaUtensils, FaPills, FaDownload, FaEye, FaPlus, FaTimes, FaSave, FaCheckCircle, FaExclamationCircle, FaEdit, FaTransgender, FaChevronRight, FaStethoscope, FaFlask, FaNotesMedical, FaExclamationTriangle } from 'react-icons/fa';
 import { GiBodyHeight } from 'react-icons/gi';
 import { MdBloodtype, MdSick, MdAccessibility } from 'react-icons/md';
 import { BsCapsulePill, BsEyeFill, BsEarFill } from 'react-icons/bs';
@@ -349,12 +349,13 @@ function PatientProfilePage() {
     };
 
     const EditMedicalRecordModal = () => {
+        const toCSV = (v) => Array.isArray(v) ? v.join(', ') : (typeof v === 'string' ? v : '');
         const [formData, setFormData] = useState({
             visitDate: recordToEdit?.visitDate ? new Date(recordToEdit.visitDate).toISOString().split('T')[0] : '',
             diagnosis: recordToEdit?.diagnosis || '',
-            symptoms: recordToEdit?.symptoms?.join(', ') || '',
-            medicines: recordToEdit?.medicines?.join(', ') || '',
-            prescribedTests: recordToEdit?.prescribedTests?.join(', ') || '',
+            symptoms: toCSV(recordToEdit?.symptoms),
+            medicines: toCSV(recordToEdit?.medicines),
+            prescribedTests: toCSV(recordToEdit?.prescribedTests),
             followUpNotes: recordToEdit?.followUpNotes || ''
         });
 
@@ -363,9 +364,9 @@ function PatientProfilePage() {
                 setFormData({
                     visitDate: recordToEdit.visitDate ? new Date(recordToEdit.visitDate).toISOString().split('T')[0] : '',
                     diagnosis: recordToEdit.diagnosis || '',
-                    symptoms: recordToEdit.symptoms?.join(', ') || '',
-                    medicines: recordToEdit.medicines?.join(', ') || '',
-                    prescribedTests: recordToEdit.prescribedTests?.join(', ') || '',
+                    symptoms: toCSV(recordToEdit.symptoms),
+                    medicines: toCSV(recordToEdit.medicines),
+                    prescribedTests: toCSV(recordToEdit.prescribedTests),
                     followUpNotes: recordToEdit.followUpNotes || ''
                 });
             }
@@ -509,44 +510,58 @@ function PatientProfilePage() {
     };
 
     const InfoCard = ({ title, children, className = "", icon: Icon }) => (
-        <div className={`glass rounded-2xl p-5 sm:p-6 border soft-divider hover-glow-primary ${className}`}>
-            <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-lg bg-[rgba(var(--primary-rgb)/0.15)] text-primary flex items-center justify-center">
-                    {Icon && <Icon className="text-base" />}
+        <div className={`glass rounded-2xl p-5 sm:p-6 border soft-divider hover-glow-primary transition-all duration-300 ${className}`}>
+            <div className="flex items-center gap-3 mb-5 pb-3 border-b soft-divider">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-inner">
+                    {Icon && <Icon className="text-lg" />}
                 </div>
-                <h3 className="text-base sm:text-lg font-semibold text-text">{title}</h3>
+                <h3 className="text-base sm:text-lg font-bold text-text">{title}</h3>
             </div>
-            {children}
+            <div className="space-y-3">
+                {children}
+            </div>
         </div>
     );
 
     const DataField = ({ label, value, icon: Icon }) => (
-        <div className="flex items-center justify-between p-3 rounded-lg border soft-divider glass">
-            <div className="flex items-center gap-2 min-w-0">
-                {Icon && <Icon className="text-primary text-sm shrink-0" />}
-                <span className="text-sm font-medium text-text truncate">{label}</span>
+        <div className="flex items-center justify-between p-3.5 rounded-xl bg-surface/30 border soft-divider group transition-colors hover:bg-surface/50">
+            <div className="flex items-center gap-3 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center group-hover:text-primary transition-colors">
+                    {Icon ? <Icon className="text-sm shrink-0" /> : <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />}
+                </div>
+                <span className="text-xs sm:text-sm font-semibold text-secondary truncate">{label}</span>
             </div>
-            <span className="text-sm text-secondary font-medium max-w-[60%] text-right truncate">
-                {value || 'Not specified'}
+            <span className="text-xs sm:text-sm text-text font-bold max-w-[55%] text-right truncate">
+                {value || <span className="text-secondary/50 font-normal italic">Not specified</span>}
             </span>
         </div>
     );
 
-    const TagList = ({ items, colorClass = "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300" }) => (
-        <div className="flex flex-wrap gap-2">
-            {items && items.length > 0 ? (
-                items.map((item, index) => (
-                    <span key={index} className={`px-3 py-1 rounded-full text-xs font-medium ${colorClass}`}>
-                        {item}
-                    </span>
-                ))
-            ) : (
-                <span className="text-sm text-gray-500 italic">None specified</span>
+    const TagList = ({ items, icon: Icon, label, colorClass = "text-primary bg-primary/5 border-primary/10" }) => (
+        <div className="space-y-3">
+            {label && (
+                <div className="flex items-center gap-2 text-secondary">
+                    {Icon && <Icon className="text-xs" />}
+                    <span className="text-[10px] uppercase font-bold tracking-wider">{label}</span>
+                </div>
             )}
+            <div className="flex flex-wrap gap-2">
+                {Array.isArray(items) && items.length > 0 ? (
+                    items.map((item, index) => (
+                        <span key={index} className={`px-3 py-1.5 rounded-xl text-xs font-bold border soft-divider glass transition-transform hover:scale-105 cursor-default ${colorClass}`}>
+                            {typeof item === 'string' ? item : String(item)}
+                        </span>
+                    ))
+                ) : (
+                    <div className="w-full p-4 rounded-xl border border-dashed soft-divider bg-surface/20 flex items-center justify-center">
+                        <span className="text-xs text-secondary/60 italic font-medium">None specified</span>
+                    </div>
+                )}
+            </div>
         </div>
     );
 
-    const MedicalRecordCard = ({ record }) => {
+    const MedicalRecordCard = ({ record, isLast }) => {
         const isEditable = () => {
             if (!record.createdAt) return false;
             const recordDate = record.createdAt.toDate();
@@ -555,73 +570,116 @@ function PatientProfilePage() {
             return diffInMinutes < 30;
         };
 
+        const date = record.visitDate ? new Date(record.visitDate) : new Date();
+        const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+        const day = date.getDate();
+        const year = date.getFullYear();
+
         return (
-            <div className="glass rounded-2xl p-5 sm:p-6 border soft-divider hover-glow-primary">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
-                <div>
-                    <h4 className="text-base sm:text-lg font-semibold text-text">{record.diagnosis || 'Medical Record'}</h4>
-                    <p className="text-xs sm:text-sm text-secondary">
-                        {record.visitDate ? new Date(record.visitDate).toLocaleDateString() : 'No date specified'}
-                        {record.createdAt ? ` at ${new Date(record.createdAt.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
-                        {' '}
-                        • {record.doctorName || 'Unknown Doctor'}
-                    </p>
+            <div className="relative pl-8 sm:pl-12 pb-10 group">
+                {/* Timeline Line */}
+                {!isLast && (
+                    <div className="absolute left-[11px] sm:left-[15px] top-8 bottom-0 w-0.5 bg-dashed border-l border-primary/20" />
+                )}
+                
+                {/* Timeline Marker */}
+                <div className="absolute left-0 top-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full glass border-2 border-primary flex items-center justify-center z-10 shadow-lg group-hover:scale-110 transition-transform bg-background">
+                    <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-primary animate-pulse" />
                 </div>
-                <div className="flex items-center gap-2">
-                    {isEditable() && (
-                        <button 
-                            onClick={() => {
-                                setRecordToEdit(record);
-                                setShowEditRecordModal(true);
-                            }}
-                            className="p-2 text-primary hover:bg-white/10 rounded-lg transition-colors"
-                        >
-                            <FaEdit className="text-sm" />
-                        </button>
-                    )}
-                    {record.fileName && (
-                        <div className="flex gap-2">
-                            <button className="p-2 text-primary hover:bg-white/10 rounded-lg transition-colors">
-                                <FaEye className="text-sm" />
-                            </button>
-                            <button className="p-2 text-primary hover:bg-white/10 rounded-lg transition-colors">
-                                <FaDownload className="text-sm" />
-                            </button>
+
+                {/* Date Label (Floating side) */}
+                <div className="absolute -left-20 top-0 hidden xl:flex flex-col items-end w-16">
+                    <span className="text-xs font-bold text-secondary uppercase">{month}</span>
+                    <span className="text-2xl font-bold text-text leading-none">{day}</span>
+                    <span className="text-[10px] text-secondary/60 mt-1">{year}</span>
+                </div>
+
+                {/* Card Content */}
+                <div className="glass-elevated rounded-2xl border soft-divider p-5 sm:p-6 hover-glow-primary transition-all">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+                        <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                                <span className="xl:hidden px-2 py-0.5 rounded-md glass border soft-divider text-[10px] font-bold text-primary">
+                                    {day} {month} {year}
+                                </span>
+                                <h3 className="text-lg sm:text-xl font-bold text-text truncate">{record.diagnosis || 'Medical Record'}</h3>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm text-secondary">
+                                <div className="flex items-center gap-1.5">
+                                    <FaUser className="text-primary" />
+                                    <span>{record.doctorName || 'Unknown Doctor'}</span>
+                                </div>
+                                {record.createdAt && (
+                                    <div className="flex items-center gap-1.5 border-l border-secondary/30 pl-3">
+                                        <FaCalendar className="text-primary" />
+                                        <span>Added at {new Date(record.createdAt.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    )}
+
+                        <div className="flex items-center gap-2 shrink-0">
+                            {isEditable() && (
+                                <button 
+                                    onClick={() => {
+                                        setRecordToEdit(record);
+                                        setShowEditRecordModal(true);
+                                    }}
+                                    className="p-2.5 rounded-xl glass border soft-divider text-primary hover:bg-primary/10 transition-colors shadow-sm"
+                                    title="Edit Record"
+                                >
+                                    <FaEdit size={16} />
+                                </button>
+                            )}
+                            {record.fileName && (
+                                <div className="flex gap-2">
+                                    <button className="p-2.5 rounded-xl glass border soft-divider text-primary hover:bg-primary/10 transition-colors shadow-sm">
+                                        <FaEye size={16} />
+                                    </button>
+                                    <button className="p-2.5 rounded-xl glass border soft-divider text-primary hover:bg-primary/10 transition-colors shadow-sm">
+                                        <FaDownload size={16} />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <TagList 
+                            items={record.symptoms} 
+                            icon={FaExclamationTriangle} 
+                            label="Symptoms" 
+                            colorClass="text-red-500 bg-red-500/5 border-red-500/10" 
+                        />
+                        <TagList 
+                            items={record.medicines} 
+                            icon={FaPills} 
+                            label="Medications" 
+                            colorClass="text-green-500 bg-green-500/5 border-green-500/10" 
+                        />
+                        <TagList 
+                            items={record.prescribedTests} 
+                            icon={FaFlask} 
+                            label="Prescribed Tests" 
+                            colorClass="text-amber-500 bg-amber-500/5 border-amber-500/10" 
+                        />
+                        
+                        {record.followUpNotes && (
+                            <div className="md:col-span-2 space-y-2">
+                                <div className="flex items-center gap-2 text-secondary">
+                                    <FaNotesMedical className="text-xs" />
+                                    <span className="text-[10px] uppercase font-bold tracking-wider">Follow-up Notes</span>
+                                </div>
+                                <div className="p-4 bg-surface/30 rounded-xl border border-dashed soft-divider">
+                                    <p className="text-sm text-text leading-relaxed italic">"{record.followUpNotes}"</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <p className="text-sm font-medium text-text mb-2">Symptoms</p>
-                    <TagList items={record.symptoms} colorClass="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300" />
-                </div>
-                
-                <div>
-                    <p className="text-sm font-medium text-text mb-2">Medicines</p>
-                    <TagList items={record.medicines} colorClass="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300" />
-                </div>
-                
-                {record.prescribedTests && record.prescribedTests.length > 0 && (
-                    <div className="md:col-span-2">
-                        <p className="text-sm font-medium text-text mb-2">Prescribed Tests</p>
-                        <TagList items={record.prescribedTests} colorClass="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300" />
-                    </div>
-                )}
-                
-                {record.followUpNotes && (
-                    <div className="md:col-span-2">
-                        <p className="text-sm font-medium text-text mb-2">Follow-up Notes</p>
-                        <p className="text-sm text-secondary glass p-3 rounded-lg border soft-divider">
-                            {record.followUpNotes}
-                        </p>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-};
+        );
+    };
 
     if (loading) {
         return (
@@ -655,7 +713,7 @@ function PatientProfilePage() {
 
     return (
         <>
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 space-y-6 aurora-bg">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 space-y-6 aurora-bg aurora-faint">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <button
@@ -673,46 +731,64 @@ function PatientProfilePage() {
             </div>
 
             {/* Patient Header */}
-            <div className="glass-elevated rounded-3xl p-5 sm:p-6">
-                <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center shadow-lg">
-                        <FaUser className="text-xl sm:text-2xl" />
+            <div className="glass-elevated rounded-[2rem] p-6 sm:p-8 border soft-divider relative overflow-hidden group">
+                {/* Decorative background element */}
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-700" />
+                
+                <div className="flex flex-col md:flex-row md:items-center gap-6 relative z-10">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl glass-cta text-white flex items-center justify-center shadow-2xl shrink-0 transform group-hover:scale-105 transition-transform duration-500">
+                        <FaUser className="text-3xl sm:text-4xl" />
                     </div>
-                    <div className="min-w-0">
-                        <h1 className="text-xl sm:text-2xl font-bold text-text truncate">
-                            {patientInfo.name || 'Patient Name'}
-                        </h1>
-                        <p className="text-secondary flex items-center gap-2 text-sm truncate">
-                            <FaEnvelope className="text-xs" />
-                            <span className="truncate">{patientInfo.email || 'No email provided'}</span>
-                        </p>
+                    <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-3 mb-2">
+                            <h1 className="text-2xl sm:text-4xl font-black text-text tracking-tight truncate">
+                                {patientInfo.name || 'Patient Name'}
+                            </h1>
+                            <span className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
+                                Patient Profile
+                            </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-secondary">
+                            <div className="flex items-center gap-2 group/info">
+                                <div className="w-8 h-8 rounded-full bg-surface/50 flex items-center justify-center group-hover/info:bg-primary/10 group-hover/info:text-primary transition-colors">
+                                    <FaEnvelope className="text-xs" />
+                                </div>
+                                <span className="text-sm font-semibold truncate">{patientInfo.email || 'No email provided'}</span>
+                            </div>
+                            <div className="flex items-center gap-2 group/info">
+                                <div className="w-8 h-8 rounded-full bg-surface/50 flex items-center justify-center group-hover/info:bg-primary/10 group-hover/info:text-primary transition-colors">
+                                    <FaCalendar className="text-xs" />
+                                </div>
+                                <span className="text-sm font-semibold">Shared on {shareRecord?.sharedAt?.toDate?.()?.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) || 'Unknown'}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Tab Navigation */}
-        <div className="glass rounded-xl p-1 border soft-divider flex gap-1">
+            <div className="glass rounded-2xl p-1.5 border soft-divider flex gap-2 max-w-2xl mx-auto shadow-inner bg-surface/10">
                 <button
                     onClick={() => setActiveTab('profile')}
-            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-1.5 sm:py-2 px-2.5 sm:px-4 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
+                    className={`flex-1 flex items-center justify-center gap-2.5 py-3 px-6 rounded-xl font-black transition-all duration-300 text-xs sm:text-sm tracking-widest uppercase ${
                         activeTab === 'profile'
-                            ? 'bg-[rgba(var(--primary-rgb)/0.15)] text-primary'
-                            : 'text-secondary hover:text-text'
+                            ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]'
+                            : 'text-secondary hover:text-text hover:bg-surface/50'
                     }`}
                 >
-            <FaUser className="text-xs sm:text-sm" />
-                    Profile Information
+                    <FaUser className={activeTab === 'profile' ? 'animate-bounce-subtle' : ''} />
+                    Profile
                 </button>
                 <button
                     onClick={() => setActiveTab('medical-records')}
-            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-1.5 sm:py-2 px-2.5 sm:px-4 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
+                    className={`flex-1 flex items-center justify-center gap-2.5 py-3 px-6 rounded-xl font-black transition-all duration-300 text-xs sm:text-sm tracking-widest uppercase ${
                         activeTab === 'medical-records'
-                            ? 'bg-[rgba(var(--primary-rgb)/0.15)] text-primary'
-                            : 'text-secondary hover:text-text'
+                            ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]'
+                            : 'text-secondary hover:text-text hover:bg-surface/50'
                     }`}
                 >
-            <FaFileMedicalAlt className="text-xs sm:text-sm" />
-                    Medical Records
+                    <FaFileMedicalAlt className={activeTab === 'medical-records' ? 'animate-bounce-subtle' : ''} />
+                    Records
                 </button>
             </div>
 
@@ -856,10 +932,16 @@ function PatientProfilePage() {
                             <p className="text-gray-600 dark:text-gray-400">Loading medical records...</p>
                         </div>
                     ) : medicalRecords.length > 0 ? (
-                        <div className="space-y-4">
-                            {medicalRecords.map((record, index) => (
-                                <MedicalRecordCard key={record.id || index} record={record} />
-                            ))}
+                        <div className="xl:ml-20">
+                            <div className="flex flex-col">
+                                {medicalRecords.map((record, index) => (
+                                    <MedicalRecordCard 
+                                        key={record.id || index} 
+                                        record={record} 
+                                        isLast={index === medicalRecords.length - 1} 
+                                    />
+                                ))}
+                            </div>
                             
                             {/* Load More Button */}
                             {pagination.hasMore && (

@@ -58,9 +58,7 @@ const Navbar = () => {
     <nav className="w-full px-2 sm:px-4 text-text sticky top-3 z-50">
       <div className="max-w-7xl mx-auto">
         <div className="relative flex flex-row justify-between items-center gap-2 rounded-2xl 
-          bg-white/70 dark:bg-black/70 
-          supports-[backdrop-filter]:bg-white/50 dark:supports-[backdrop-filter]:bg-black/60 
-          backdrop-blur border border-primary shadow-xl overflow-visible px-3 sm:px-4 py-2">
+          glass px-3 sm:px-4 py-2">
         {/* Logo */}
         <Link to="/">
           <motion.div
@@ -72,9 +70,9 @@ const Navbar = () => {
             <img 
               src={HealSyncLogo} 
               alt="HealSync Logo" 
-              className="h-8 w-8 object-contain"
+              className="h-12 w-12 object-contain"
             />
-            <span className="text-xl font-bold text-primary hidden sm:block">
+            <span className="text-3xl font-bold text-heading hidden sm:block">
               HealSync
             </span>
           </motion.div>
@@ -95,7 +93,7 @@ const Navbar = () => {
                 onMouseEnter={() => setShowMenu(true)}
                 onMouseLeave={() => setShowMenu(false)}
               >
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-background font-bold text-lg cursor-pointer">
+                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-white font-bold text-lg cursor-pointer shadow-lg hover:scale-105 transition-transform">
                   {user?.displayName?.charAt(0).toUpperCase()}
                 </div>
 
@@ -106,19 +104,19 @@ const Navbar = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute right-0 mt-2 w-40 max-w-[80vw] sm:w-56 sm:max-w-xs rounded-xl shadow-2xl z-[100] p-2 sm:p-4 text-sm pointer-events-auto 
-                        bg-white dark:bg-black border border-secondary/60"
+                      className="absolute right-0 mt-2 w-40 max-w-[80vw] sm:w-56 sm:max-w-xs rounded-xl z-[100] p-2 sm:p-4 text-sm pointer-events-auto 
+                        glass-elevated"
                       style={{ minWidth: '140px' }}
                     >
                       <div className="font-semibold text-text mb-1 truncate">
                         {user?.displayName}
                       </div>
-                      <div className="text-xs text-gray-500 mb-3 capitalize truncate">
+                      <div className="text-xs text-secondary mb-3 capitalize truncate">
                         {userRole || "Loading..."}
                       </div>
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-3 py-2 rounded-md bg-accent text-background hover:opacity-90 transition"
+                        className="w-full text-left px-3 py-2 rounded-md bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors font-medium"
                       >
                         Logout
                       </button>
@@ -131,13 +129,13 @@ const Navbar = () => {
             <div className="flex flex-row items-center gap-2 w-auto">
               <Link
                 to="/signup"
-                className="text-xs sm:text-sm md:text-base px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-xl bg-primary text-white hover:scale-105 transition text-center min-w-[60px] sm:min-w-[80px]"
+                className="text-xs sm:text-sm md:text-base px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-xl glass-cta text-center min-w-[60px] sm:min-w-[80px]"
               >
                 Sign Up
               </Link>
               <Link
                 to="/login"
-                className="text-xs sm:text-sm md:text-base px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-xl bg-accent text-white hover:scale-105 transition text-center min-w-[60px] sm:min-w-[80px]"
+                className="text-xs sm:text-sm md:text-base px-3 sm:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-xl bg-transparent border border-primary text-primary hover:bg-primary/10 transition-colors text-center min-w-[60px] sm:min-w-[80px]"
               >
                 Login
               </Link>
@@ -147,10 +145,10 @@ const Navbar = () => {
           {/* Theme Toggle - Outside of conditional rendering */}
           <button
             onClick={toggleTheme}
-            className="p-2 sm:p-2 rounded-full border border-gray-300 dark:border-gray-600 hover:scale-110 transition"
+            className="p-2 sm:p-2 rounded-full border border-primary/20 hover:bg-primary/5 transition hover:scale-110"
             aria-label="Toggle Theme"
           >
-            {theme === "light" ? <FiSun /> : <FiMoon />}
+            {theme === "light" ? <FiSun className="text-amber-500" /> : <FiMoon className="text-blue-400" />}
           </button>
         </motion.div>
         </div>
